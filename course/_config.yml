@@ -1,0 +1,32 @@
+title: Course template
+author: Tunç Başar Köse
+logo: _static/sidebar_logo.png
+only_build_toc_files: true
+
+# Code execution settings
+execute:
+  execute_notebooks: force  # See https://jupyterbook.org/content/execute.html
+
+# File parsing settings
+parse:
+  myst_enable_extensions:
+    - amsmath       # For LaTeX math
+    - colon_fence   # Allow use of ::: for admonitions, instead of just ```
+    - substitution  # Define and use of markdown "variables"
+    - linkify       # Auto-detect HTML-like links and convert them to hyperlinks.
+    - dollarmath    # Allow $$ and $ syntax for math blocks
+
+# Define the name of the latex output file for PDF builds
+latex:
+  latex_documents:
+    targetname: book.tex
+
+# Information about where the book exists on the web
+repository:
+  url: https://github.com/gamma-opt/jb_course_template  # Online location of your book
+  branch: main                                          # Which branch of the repository should be used when creating links (optional)
+
+sphinx:
+  config:
+    html_theme: quantecon_book_theme
+    mathjax_path: https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js  # Enable MathJax 3

@@ -1,0 +1,9 @@
+.qe-toolbar__inner>ul>li.btn__qelogo  a {
+              display: block;
+              overflow: hidden;
+              height: 30px;
+              width: 105px;
+              background: url("toolbar_logo.png")
+                no-repeat left top !important;
+              background-size: 105px 30px !important;
+}

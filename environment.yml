@@ -1,0 +1,8 @@
+name: jb_course
+channels:
+  - conda-forge
+dependencies:
+  - jupyter-book
+  - pip
+  - pip:
+    - git+https://github.com/QuantEcon/quantecon-book-theme.git
