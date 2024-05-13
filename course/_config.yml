@@ -30,3 +30,7 @@ sphinx:
   config:
     html_theme: quantecon_book_theme
     mathjax_path: https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js  # Enable MathJax 3
+    mathjax3_config:
+      tex:
+        macros:
+          "reals": "\\mathbb{R}"
