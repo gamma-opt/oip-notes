@@ -8,10 +8,11 @@ on:
       - "course/**"
   workflow_dispatch: # allow manual triggering
 
-# needed to allow julia-actions/cache to delete old caches that it has created
+# For julia-actions/cache and creating pull requests
 permissions:
   actions: write
-  contents: read
+  contents: write
+  pull-requests: write
 
 jobs:
 
@@ -56,19 +57,14 @@ jobs:
         
       - name: Build PDF from LaTeX
         shell: bash -leo pipefail {0}  # Needed for mamba profile
-        run: |
-            jupyter-book build course --builder pdflatex -n
+        run: jupyter-book build course --builder pdflatex -n
 
-      - name: Upload PDF
-        run: |
-          mv course/_build/latex/book.pdf book.pdf
-          
-          # configure git
-          git config --global user.name "FabsOliveira"
-          git config --global user.email "fabricio.oliveira@aalto.fi"
-          
-          # add file and push
-          git checkout main
-          git add -f book.pdf
-          git commit -m "[GA] update book.pdf"
-          git push
+      - name: Move PDF
+        run: mv course/_build/latex/book.pdf book.pdf
+
+      - name: Create PR with Updated PDF
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: '[create-pull-request] update PDF'
+          delete-branch: true
+          title: Update PDF
