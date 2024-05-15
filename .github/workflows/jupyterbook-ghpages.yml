@@ -1,0 +1,68 @@
+name: GitHub Pages with jupyter-book
+
+on:
+  # Runs on pushes that change content
+  push:
+    branches: ["main"]
+    paths: ["course/**"]
+  # Allow manual triggering
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Following the example of Github Pages starter workflows
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python environment
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          environment-file: environment.yml
+          cache-environment: true
+      
+      - name: Install Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: '1.10'  # Should be the same as what MyST-md expects
+      
+      - name: Julia environment cache
+        uses: julia-actions/cache@v1
+
+      - name: Prepare Julia environment
+        run: |
+          using Pkg
+          Pkg.activate(".")
+          Pkg.instantiate()
+        shell: julia --color=yes {0}
+
+      - name: Build HTML
+        shell: bash -leo pipefail {0}  # Needed for mamba profile
+        run: jupyter-book build course -n
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "course/_build/html"
+  
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write
+      pages: write
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
