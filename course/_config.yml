@@ -31,6 +31,73 @@ sphinx:
     html_theme: quantecon_book_theme
     mathjax_path: https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js  # Enable MathJax 3
     mathjax3_config:
+      loader:
+        load: ["[tex]/textmacros"]  # For ~ to work as non-breaking space
       tex:
+        packages:
+          "[+]": ["textmacros"]     # For ~ to work as non-breaking space
+        # If you add something, you should probably add to latex_elements below as well
         macros:
           "reals": "\\mathbb{R}"
+          "integers": "\\mathbb{Z}"
+          "symm": "\\mathbb{S}"
+          "rank": "\\mathop{\\bf rank}"
+          "tr": "\\mathop{\\bf tr}"
+          "dim": "\\mathop{\\bf dim}"
+          "diag": "\\mathop{\\bf diag}"
+          "conv": "\\mathop{\\bf conv}"
+          "spans": "\\mathop{\\bf span}"
+          "nulls": "\\mathop{\\bf null}"
+          "clo": "\\mathop{\\bf clo}"
+          "det": "\\mathop{\\bf det}"
+          "proj": "\\mathop{\\bf proj}"
+          "argmin": "\\mathop{\\rm argmin}"
+          "argmax": "\\mathop{\\rm argmax}"
+          "epi": "\\mathop{\\bf epi}"
+          "dom": "\\mathop{\\bf dom}"
+          "intr": "\\mathop{\\bf int}"
+          "bou": "\\mathop{\\bf bou}"
+          "mini": "\\mathop{\\text{min.~}}"
+          "maxi": "\\mathop{\\text{max.~}}"
+          "minf": "\\mathop{\\text{minimize~}}"
+          "maxf": "\\mathop{\\text{maximize~}}"
+          "st": "\\mathop{\\text{s.t.:~}}"
+          "stf": "\\mathop{\\text{subject to:~}}"
+          "nth": "^\\text{th}"
+          "braces": ["\\left\\{ #1 \\right \\}", 1]
+          "brackets": ["\\left[ #1 \\right]", 1]
+          "floor": ["\\lfloor #1 \\rfloor", 1]
+          "ceil": ["\\lceil #1 \\rceil", 1]
+    latex_elements:
+      # Gets copied into the tex file before the document start
+      preamble: |
+        \newcommand{\reals}{\mathbb{R}}
+        \newcommand{\integers}{\mathbb{Z}}
+        \newcommand{\symm}{\mathbb{S}}  % symmetric matrices
+        \newcommand{\rank}{\mathop{\bf rank}}
+        \newcommand{\tr}{\mathop{\bf tr}}
+        \renewcommand{\dim}{\mathop{\bf dim}}
+        \newcommand{\diag}{\mathop{\bf diag}}
+        \newcommand{\conv}{\mathop{\bf conv}}
+        \newcommand{\spans}{\mathop{\bf span}}
+        \newcommand{\nulls}{\mathop{\bf null}}
+        \newcommand{\clo}{\mathop{\bf clo}}
+        \renewcommand{\det}{\mathop{\bf det}}
+        \renewcommand{\proj}{\mathop{\bf proj}}
+        \renewcommand{\argmin}{\mathop{\rm argmin}}
+        \renewcommand{\argmax}{\mathop{\rm argmax}}
+        \newcommand{\epi}{\mathop{\bf epi}} % epigraph
+        \newcommand{\dom}{\mathop{\bf dom}} % domain
+        \newcommand{\intr}{\mathop{\bf int}}
+        \newcommand{\bou}{\mathop{\bf bou}}
+        \newcommand{\mini}{\mathop{\text{min.~}}}
+        \newcommand{\maxi}{\mathop{\text{max.~}}}
+        \newcommand{\minf}{\mathop{\text{minimize~}}}
+        \newcommand{\maxf}{\mathop{\text{maximize~}}}
+        \newcommand{\st}{\mathop{\text{s.t.:~}}}
+        \newcommand{\stf}{\mathop{\text{subject to:~}}}
+        \newcommand{\nth}{^\text{th}}
+        \newcommand{\braces}[1]{\left\{ #1 \right \}}
+        \newcommand{\brackets}[1]{\left[ #1 \right]}
+        \newcommand{\floor}[1]{\lfloor #1 \rfloor}
+        \newcommand{\ceil}[1]{\lceil #1 \rceil}
