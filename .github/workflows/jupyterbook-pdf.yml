@@ -37,10 +37,12 @@ jobs:
         uses: julia-actions/cache@v1
 
       - name: Prepare Julia environment
+        # build IJulia again for cases when cache is used
         run: |
           using Pkg
           Pkg.activate(".")
           Pkg.instantiate()
+          Pkg.build("IJulia")
         shell: julia --color=yes {0}
         
       - name: Install latex dependencies
