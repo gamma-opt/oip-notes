@@ -63,10 +63,10 @@ jobs:
       - name: Push PDF to repo
         run: |
           mkdir pdf
-          mv course/_build/latex/book.pdf pdf/book.pdf
+          mv course/_build/latex/book.pdf pdf/${{ github.event.repository.name }}.pdf
 
           git config --global user.name "FabsOliveira"
           git config --global user.email "fabricio.oliveira@aalto.fi"
-          git add pdf/book.pdf
+          git add pdf/${{ github.event.repository.name }}.pdf
           git commit -m "[GA] update PDF"
           git push origin main
