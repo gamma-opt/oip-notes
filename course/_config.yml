@@ -29,6 +29,7 @@ repository:
 sphinx:
   config:
     html_theme: quantecon_book_theme
+    numfig_secnum_depth: 1  # https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-numfig_secnum_depth
     mathjax_path: https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js  # Enable MathJax 3
     mathjax3_config:
       loader:
