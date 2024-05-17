@@ -12,7 +12,6 @@ on:
 permissions:
   actions: write
   contents: write
-  pull-requests: write
 
 jobs:
 
@@ -61,12 +60,13 @@ jobs:
         shell: bash -leo pipefail {0}  # Needed for mamba profile
         run: jupyter-book build course --builder pdflatex -n
 
-      - name: Move PDF
-        run: mv course/_build/latex/book.pdf book.pdf
+      - name: Push PDF to repo
+        run: |
+          mkdir pdf
+          mv course/_build/latex/book.pdf pdf/book.pdf
 
-      - name: Create PR with Updated PDF
-        uses: peter-evans/create-pull-request@v6
-        with:
-          commit-message: '[create-pull-request] update PDF'
-          delete-branch: true
-          title: Update PDF
+          git config --global user.name "FabsOliveira"
+          git config --global user.email "fabricio.oliveira@aalto.fi"
+          git add pdf/book.pdf
+          git commit -m "[GA] update PDF"
+          git push origin main
