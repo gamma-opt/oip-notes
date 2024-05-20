@@ -27,9 +27,12 @@ repository:
   branch: main                                          # Which branch of the repository should be used when creating links (optional)
 
 sphinx:
+  extra_extensions:
+    - sphinx_proof
   config:
     html_theme: quantecon_book_theme
     numfig_secnum_depth: 1  # https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-numfig_secnum_depth
+    latex_domain_indices: false  # don't make proof index in PDF when using sphinx-proof
     mathjax_path: https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js  # Enable MathJax 3
     mathjax3_config:
       loader:

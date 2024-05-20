@@ -5,4 +5,5 @@ dependencies:
   - jupyter-book
   - pip
   - pip:
+    - sphinx-proof
     - git+https://github.com/QuantEcon/quantecon-book-theme.git
