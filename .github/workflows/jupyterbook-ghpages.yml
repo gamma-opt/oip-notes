@@ -19,6 +19,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      actions: write  # For julia cache deletion
     steps:
       - name: Checkout
         uses: actions/checkout@v4
