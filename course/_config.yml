@@ -7,6 +7,9 @@ only_build_toc_files: true
 execute:
   execute_notebooks: force  # See https://jupyterbook.org/content/execute.html
 
+bibtex_bibfiles:
+  - references.bib
+
 # File parsing settings
 parse:
   myst_enable_extensions:
