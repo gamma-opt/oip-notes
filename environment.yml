@@ -3,6 +3,10 @@ channels:
   - conda-forge
 dependencies:
   - jupyter-book
+
+  # Diagrams with Mermaid.js
+  - sphinxcontrib-mermaid
+
   - pip
   - pip:
     - sphinx-proof
