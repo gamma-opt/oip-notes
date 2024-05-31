@@ -7,6 +7,9 @@ dependencies:
   # Diagrams with Mermaid.js
   - sphinxcontrib-mermaid
 
+  # https://github.com/pydata/pydata-sphinx-theme/issues/1844
+  - pydata-sphinx-theme==0.15.2
+
   - pip
   - pip:
     - sphinx-proof
