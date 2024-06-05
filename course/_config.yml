@@ -77,8 +77,73 @@ sphinx:
           "floor": ["\\lfloor #1 \\rfloor", 1]
           "ceil": ["\\lceil #1 \\rceil", 1]
     latex_elements:
+      pointsize: '11pt'
+      
+      fontpkg: |
+        % Define commands for the Julia font (only works in xelatex)
+        \usepackage{fontspec}
+        \newfontfamily\juliafont{DejaVu Sans Mono}[NFSSFamily=julia]
+        % use one of the below (or something else)
+        \usepackage[default]{sourcesanspro}  % sans-serif font
+        %\usepackage{tgpagella}              % serif font
+      
+      fvset: |
+        % Use the Julia font in Verbatim environments (code-blocks)
+        \fvset{fontsize=\footnotesize, fontfamily=julia} % https://tug.org/texinfohtml/latex2e.html#Font-sizes
+
+      # Make sure these are comma-separated
+      sphinxsetup: |
+        % Code boxes etc
+        VerbatimColor={RGB}{248,248,248},
+        VerbatimBorderColor={RGB}{204,204,204},
+        verbatimborder=1pt,
+        %%%%%%%%%%%%%%%%%%%%%
+        TitleColor={RGB}{0,114,188},    % section titles
+        InnerLinkColor={HTML}{40C9A2},  % for within document, like citations
+        OuterLinkColor={HTML}{C1666B},  % for outside document, like urls
+        % Admonitions %
+        %% sphinxheavybox %%
+        div.attention_background-TeXcolor={HTML}{E1B7B8},
+        div.caution_background-TeXcolor={HTML}{DCA8AA},
+        div.warning_background-TeXcolor={HTML}{D69A9D},
+        div.danger_background-TeXcolor={HTML}{D08B8D},
+        div.error_background-TeXcolor={HTML}{CA7D7F},
+        %% sphinxlightbox %%
+        % these originally use sphinxlightbox, but customizing them changes them to sphinxheavybox
+        % to obtain the original effect of no side borders, one needs to set it manually
+        div.tip_background-TeXcolor={HTML}{70D7B9},
+        div.tip_border-left-width=0pt,
+        div.tip_border-right-width=0pt,
+        div.hint_background-TeXcolor={HTML}{60D2B2},
+        div.hint_border-left-width=0pt,
+        div.hint_border-right-width=0pt,
+        % sphinx-proof uses note, so this affects algorithms etc. as well
+        div.note_background-TeXcolor={RGB}{248,248,248},
+        div.note_border-left-width=0pt,
+        div.note_border-right-width=0pt,
+        div.important_background-TeXcolor={HTML}{50CEAA},
+        div.important_border-left-width=0pt,
+        div.important_border-right-width=0pt,
+
       # Gets copied into the tex file before the document start
       preamble: |
+        % colors
+        \usepackage{xcolor}
+        \definecolor{qe-gray}{RGB}{68,68,68}
+        \definecolor{qe-blue}{RGB}{0, 114, 188}
+
+        % Customize chapter titles with titlesec
+        %% Without this, default is fncychap - Bjarne
+        \titleformat
+        {\chapter} % command
+        [hang] % shape
+        {\Large} % format
+        {\thechapter.} % label
+        {1.5ex} % sep
+        {} % code to run before title
+        [\rule{\textwidth}{1pt}] % code to run after title
+
+        % Math commands
         \newcommand{\reals}{\mathbb{R}}
         \newcommand{\integers}{\mathbb{Z}}
         \newcommand{\symm}{\mathbb{S}}  % symmetric matrices
