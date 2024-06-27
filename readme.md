@@ -2,6 +2,6 @@
 [![jupyterbook-pdf](../../actions/workflows/jupyterbook-pdf.yml/badge.svg)](../../actions/workflows/jupyterbook-pdf.yml)
 
 
-# `jupyter-book` template for course notes/website
+# Lecture notes for the Optimisation in Practice course
 
-See [this repo](https://github.com/gamma-opt/jb_instructions) for instructions/explanations.
+WIP

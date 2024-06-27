@@ -1,4 +1,4 @@
-# Title
+# Optimisation in Practice
 
 ```{tableofcontents}
 ```

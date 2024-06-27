@@ -1,2 +1,29 @@
 format: jb-book
 root: intro
+parts:
+- caption: The Fundamentals of Mathematical Optimisation Modelling
+  numbered: true
+  chapters:
+  - file: part1/lecture01
+  - file: part1/lecture02
+  - file: part1/lecture03
+  - file: part1/lecture04
+  - file: part1/lecture05
+  - file: part1/lecture06
+  - file: part1/lecture07
+  - file: part1/lecture08
+  - file: part1/lecture09
+  - file: part1/lecture10
+- caption: Advanced Mathematical Optimisation Modelling
+  numbered: true
+  chapters:
+  - file: part2/lecture01
+  - file: part2/lecture02
+  - file: part2/lecture03
+  - file: part2/lecture04
+  - file: part2/lecture05
+  - file: part2/lecture06
+  - file: part2/lecture07
+  - file: part2/lecture08
+  - file: part2/lecture09
+  - file: part2/lecture10
