@@ -27,3 +27,7 @@ parts:
   - file: part2/lecture08
   - file: part2/lecture09
   - file: part2/lecture10
+- caption: "━━━━━━━━"
+  numbered: false
+  chapters:
+  - file: bibliography
