@@ -15,6 +15,7 @@ kernelspec:
 
 # Lecture 5
 
+(p1l5:transportation)=
 ## Transportation Problem
 
 This example is based on Section 7.1 of {cite}`winston2022operations` (The book cites a paper, should I cite that instead, or both?).
