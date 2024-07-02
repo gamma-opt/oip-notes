@@ -144,6 +144,8 @@ println("Objective value: ", objective_value(model))
 println("x: ", value.(x))
 ```
 
+Thus it is sufficient to build 2 fire stations, in cities 2 and 4.
+
 ## Travelling Salesperson Problem
 
 The travelling salesperson problem (TSP) is one of the most famous combinatorial optimisation problems, perhaps due to its interesting mix os simplicity while being computationally challenging.
@@ -158,24 +160,29 @@ Notice that this is equivalent to finding the minimal cost permutation of {math}
 An example collection of cities (or points) for which we'd like to find the minimum cost tour for.
 ```
 
+TODO: Add interactive visualization? or just solved graph at the end?
+
 To pose the problem as an integer programming model, let us define {math}`x_{ij}=1` if city {math}`j` is visited directly after city {math}`i`, and {math}`x_{ij}=0` otherwise.
 Let {math}`N=\{1,\dots,n\}` be the set of cities.
 We assume that {math}`x_{ii}` is not defined for {math}`i\in N`.
 A naive model for the travelling salesperson problem would be
 
 ```{math}
-\mini_{x} \sum_{i\in N}\sum_{j\in N} C_{ij}x_{ij}
+:nowrap:
 
-\st \sum_{j\in N\setminus\{i\}}x_{ij}=1,~\forall i\in N
-
-\sum_{i\in N\setminus\{j\}} x_{ij}=1,~\forall j\in N
-
-x_{ij}\in\{0,1\},~\forall i,\forall j\in N : i\neq j
+\begin{align*}
+\mini_{x} &\sum_{i\in N}\sum_{j\in N} C_{ij}x_{ij} \\
+\st &\sum_{j\in N\setminus\{i\}}x_{ij}=1,~\forall i\in N \\
+&\sum_{i\in N\setminus\{j\}} x_{ij}=1,~\forall j\in N \\
+&x_{ij}\in\{0,1\},~\forall i,\forall j\in N : i\neq j
+\end{align*}
 ```
 
 However, this formulation has an issue.
 Although it can guarantee that all cities are only visited once, it cannot enforce an important feature of the problem which is that the tour cannot present disconnections, i.e., contain sub-tours.
 In other words, the salesperson must physically visit from city to city in the tour, and cannot "teleport" from one city to another.
+
+TODO: Add illustration? From book or on the graph?
 
 In order to prevent sub-tours, we must include constraints that can enforce the full connectivity of the tour.
 There are mainly two types of such constraints.
