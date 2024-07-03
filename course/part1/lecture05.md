@@ -71,6 +71,8 @@ In order to determine the best way to meet the demands of these cities while min
 ### Solution
 
 ```{code-cell}
+:tags: [remove-output]
+
 using JuMP, HiGHS
 
 supply = [35, 50, 40]
@@ -212,6 +214,8 @@ Both the inventory and all the plans work with whole number units only.
 ### Solution
 
 ```{code-cell}
+:tags: [remove-output]
+
 # city x quarters
 demand = [40 60 75 25;
           95 20 45 85;
@@ -303,4 +307,108 @@ display(b)
 println("Inventory use")
 c = DataFrame(reshape(value.(i),1,4), ["Q$(i)" for i=1:4])  # this is a vector, so we convert it to matrix for DataFrame
 display(c)
+```
+
+## Combined Production-Transporation Problem
+
+In the transportation problem, we minimized the cost of transmiting electricity according to cities' demands with a set amount of supply.
+In the production problem, we minimized the cost of producing electricity enough to satisfy the demand for it, without worrying about transportation costs.
+Now we consider a problem where the objective is to minimize the cost, taking into account both the production and the transportation.
+
+Suppose that there are 3 power plants, 4 cities, and a battery where we can store electricity in between quarters.
+We need to consider the costs associated with electricity production (let's say it depends on the plant and the quarter), costs for transmission from plants to cities or to the battery, costs for transmission from the battery to the cities, and costs for storing in the battery.
+We would like to minimize the total costs, while ensuring that each city's electricity demand is satisfied.
+
+```{code-cell}
+:tags: [remove-output]
+
+# plant x quarter
+cost_production = [4 2 7 3;
+                   5 8 4 2;
+                   3 6 5 8]
+# plant x city
+cost_transmission_plant2city = [ 8  6 10 9;
+                                 9 12 13 7;
+                                14  9 15 5]
+cost_transmission_plant2battery = [6 4 8]
+
+cost_transmission_battery2city = [4 2 7 5]
+
+cost_storing = 1
+
+demand = [40 60 75 25;
+          95 20 45 85;
+          60 25 90 30;
+          55 40 40 50]
+
+model = Model(HiGHS.Optimizer)
+```
+
+% Remove the solver printed statement
+```{code-cell}
+:tags: [remove-cell]
+
+set_attribute(model, "output_flag", false)
+```
+
+```{code-cell}
+:tags: [remove-output]
+
+@variable(model, x[p in 1:3, q in 1:4] >= 0)              # production
+@variable(model, p2c[p in 1:3, c in 1:4, q in 1:4] >= 0)  # transmission from plants to cities
+@variable(model, p2b[p in 1:3, q in 1:4] >= 0)            # transmission from plants to battery
+@variable(model, battery[q in 1:4] >= 0)                  # stored in battery at the end of quarter
+@variable(model, b2c[c in 1:4, q in 1:4] >= 0)            # transmission from battery to cities (in q=1 should be 0)
+```
+
+```{code-cell}
+:tags: [remove-output]
+
+@objective(model, Min, 
+    sum(cost_production[p,q]*x[p,q] for p in 1:3, q in 1:4) +
+    sum(cost_transmission_plant2city[p,c]*sum(p2c[p,c,:]) for p in 1:3, c in 1:4) +
+    sum(cost_transmission_plant2battery[p]*sum(p2b[p,:]) for p in 1:3) +
+    sum(cost_transmission_battery2city[c]*sum(b2c[c,:]) for c in 1:4) +
+    cost_storing*sum(battery)
+)
+```
+
+```{code-cell}
+:tags: [remove-output]
+
+# city demands are satisfied
+@constraint(model, c_demand[c in 1:4, q in 1:4], sum(p2c[:,c,q]) + sum(b2c[c,q]) >= demand[c,q])
+
+# production continuity
+@constraint(model, c_prod_cont[p in 1:3, q in 1:4], sum(p2c[p,:,q])+p2b[p,q] == x[p,q])
+
+# battery continuity
+@constraint(model, c_battery_cont1, sum(p2b[:,1]) - sum(b2c[:,1]) == battery[1])
+@constraint(model, c_battery_cont[q in 2:4], battery[q-1] + sum(p2b[:,q]) - sum(b2c[:,q]) == battery[q])
+
+# ensure electricity is sent to the battery at the end of quarters
+# equivalently batteries don't use electricity sent in that quarter
+# they can only use what was there at the end of the last quarter
+@constraint(model, c_battery_rule[q in 2:4], sum(b2c[:,q]) <= battery[q-1])
+```
+
+```{code-cell}
+:tags: [hide-output]
+
+print(model)
+optimize!(model)
+```
+
+```{code-cell}
+if is_solved_and_feasible(model)
+    println("\nSolved!\n")
+    println("Objective value: ", objective_value(model))
+    println("x: ", value.(x))
+    println("p2c: ", value.(p2c))
+    println("p2b: ", value.(p2b))
+    println("battery: ", value.(battery))
+    println("b2c: ", value.(b2c))
+else
+    print("couldn't solve")
+end
 ```

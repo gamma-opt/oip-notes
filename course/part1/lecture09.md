@@ -86,6 +86,8 @@ Formulate an IP that will tell Kilroy where fire stations should be built.
 ### Solution
 
 ```{code-cell}
+:tags: [remove-output]
+
 using JuMP, HiGHS
 
 time = [ 0 10 20 30 30 20;
@@ -108,6 +110,8 @@ set_attribute(model, "output_flag", false)
 We start by defining the decision variables, which represent whether a fire station gets built in a given city.
 Note that since there are only two options, these are binary variables
 ```{code-cell}
+:tags: [remove-output]
+
 @variable(model, x[1:6], Bin)
 ```
 

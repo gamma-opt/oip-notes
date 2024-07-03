@@ -15,7 +15,7 @@ TODO: Copy the original model here? I'm not sure if it can be done programmatica
 
 In this small problem, we had 12 decision variables (one for each plant-city combination) as well as a non-negativity constraint for each of the variables, 3 constraints to ensure supply is not exceeded, and 4 constraints to ensure demand is met, for a total of 19 constraints.
 
-Now, consider a more generalized version of this problem where we have {math}`n` power plants and {math}`m` cities to deliver to.
+Now, consider a generalized version of this problem where we have {math}`n` power plants and {math}`m` cities to deliver to.
 Then, we can represent the supply of each plant as a vector {math}`s\in\reals^{n}` and the demand of each city as {math}`d\in\reals^{m}`.
 Finally, the costs and the decision variables become matrices {math}`c\in\reals^{n\times m}` and {math}`x\in\reals^{n\times m}`.
 With these at hand, we can formulate the general transportation problem as
