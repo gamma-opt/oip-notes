@@ -319,6 +319,7 @@ Suppose that there are 3 power plants, 4 cities, and a battery where we can stor
 We need to consider the costs associated with electricity production (let's say it depends on the plant and the quarter), costs for transmission from plants to cities or to the battery, costs for transmission from the battery to the cities, and costs for storing in the battery.
 We would like to minimize the total costs, while ensuring that each city's electricity demand is satisfied.
 
+Here are some example costs and demands for this problem.
 ```{code-cell}
 :tags: [remove-output]
 
@@ -351,6 +352,9 @@ model = Model(HiGHS.Optimizer)
 set_attribute(model, "output_flag", false)
 ```
 
+We need to decide on how much electricity each plant is producing in each quarter.
+Once we have that, we can _spend_ it on towards satisfying city demands or storing in the battery, which are represented here by {math}`p2c` and {math}`p2b`.
+By having a {math}`battery` variable, it is easier to keep track of how much electricity is added or used from storage, and finally {math}`b2c` tracks this used amount.
 ```{code-cell}
 :tags: [remove-output]
 
@@ -361,6 +365,7 @@ set_attribute(model, "output_flag", false)
 @variable(model, b2c[c in 1:4, q in 1:4] >= 0)            # transmission from battery to cities (in q=1 should be 0)
 ```
 
+Given the above variables, our objective is to minimize all costs, which comes from production, transmission, and storing in the battery.
 ```{code-cell}
 :tags: [remove-output]
 
@@ -373,6 +378,9 @@ set_attribute(model, "output_flag", false)
 )
 ```
 
+There are a few constraints we need to impose on the model.
+First is that city demands must be met.
+In addition, we need to ensure that our variables make sense, for example that we can only use as much electricity as we produce, and the stored amount of electricity in a quarter depends on how much there were before, how much is added, and how much is used.
 ```{code-cell}
 :tags: [remove-output]
 
@@ -385,19 +393,23 @@ set_attribute(model, "output_flag", false)
 # battery continuity
 @constraint(model, c_battery_cont1, sum(p2b[:,1]) - sum(b2c[:,1]) == battery[1])
 @constraint(model, c_battery_cont[q in 2:4], battery[q-1] + sum(p2b[:,q]) - sum(b2c[:,q]) == battery[q])
+```
 
-# ensure electricity is sent to the battery at the end of quarters
-# equivalently batteries don't use electricity sent in that quarter
-# they can only use what was there at the end of the last quarter
+Lastly, and optionally, we impose an additional constraint that batteries don't use electricity sent in that quarter, or equivalently, that batteries receive electricity at the end of the quarter.
+This may not be strictly necessary to do, but here it prevents electricity from being delivered to cities through plants in the same quarter, which bypasses the proper transmission costs.
+```{code-cell}
 @constraint(model, c_battery_rule[q in 2:4], sum(b2c[:,q]) <= battery[q-1])
 ```
 
+This model is relatively large, so we print it in a dropdown menu.
 ```{code-cell}
 :tags: [hide-output]
 
 print(model)
 optimize!(model)
 ```
+
+TODO: Display and discuss results nicely.
 
 ```{code-cell}
 if is_solved_and_feasible(model)
