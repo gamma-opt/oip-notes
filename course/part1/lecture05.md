@@ -281,7 +281,32 @@ This violates the constraint on the variables `i` we set up originally, so the d
 Having specified the model, we can ask `JuMP` to show it to us.
 
 ```{code-cell}
+:tags: [remove-output]
+
 print(model)
+```
+
+```{code-cell}
+:tags: [remove-input]
+
+io = IOBuffer()
+JuMP._print_latex(io, model)
+latex = String(take!(io))
+lines = split(latex, "\n")
+newlines = []
+push!(newlines, lines[1])
+push!(newlines, lines[2][begin:133] * "\\\\\n&" * lines[2][134:249] * "\\\\\n&" * lines[2][250:end])
+for i in 3:6
+    push!(newlines, lines[i])
+end
+for i in 27:length(lines)-1
+    left = lines[i-20][begin:end-2]
+    right = lines[i][begin+3:end]
+    push!(newlines, left*",\\quad "*right)
+end
+push!(newlines, lines[end])
+latex = join(newlines, "\n")
+display("text/latex", latex)
 ```
 
 And we solve it.
