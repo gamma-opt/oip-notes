@@ -186,7 +186,12 @@ However, this formulation has an issue.
 Although it can guarantee that all cities are only visited once, it cannot enforce an important feature of the problem which is that the tour cannot present disconnections, i.e., contain sub-tours.
 In other words, the salesperson must physically visit from city to city in the tour, and cannot "teleport" from one city to another.
 
-TODO: Add illustration? From book or on the graph?
+```{figure} ../figures/tsp_subtours.svg
+:name: subtours
+:align: center
+
+A feasible solution for the naive TSP model. Notice the two sub-tours formed.
+```
 
 In order to prevent sub-tours, we must include constraints that can enforce the full connectivity of the tour.
 There are mainly two types of such constraints.
@@ -212,3 +217,10 @@ A possible remedy to this consists of relying on delayed constraint generation.
 In this case, one can start from the naive formulation T SP and from the solution, observe whether there are any sub-tours formed.
 That being the case, only the constraints eliminating the observed sub-tours need to be generated, and the problem can be warm-started.
 This procedure typically terminates far earlier than having all of the possible cutset or sub-tour elimination constraints generated.
+
+```{figure} ../figures/tsp_feasible.svg
+:name: feasible
+:align: center
+
+A feasible solution without subtours.
+```
