@@ -118,6 +118,8 @@ Intuitively, this means that for sufficiently nearby inputs, a continuous functi
 
 An even stronger structure is that of differentiability.
 ````{prf:definition}
+:label: differentiability
+
 A function {math}`f:X\to \reals` is differentiable at {math}`a\in X\subseteq \reals` if the derivative
 ```{math}
 f'(a) = \lim_{h\to 0}\frac{f(a+h)-f(a)}{h}
@@ -128,7 +130,17 @@ exists.
 ````{admonition} Why is differentiability stronger?
 :class: seealso, dropdown
 
-Add quick implication
+Suppose {math}`f` is differentiable at {math}`a`. Then, the limit in {prf:ref}`differentiability` exists and so
+```{math}
+\lim_{h\to 0} f(a+h)-f(a) &= \lim_{h\to 0}(f(a+h)-f(a))\frac{h}{h} \\
+&=  \lim_{h\to 0}\frac{f(a+h)-f(a)}{h}h \\
+&= \bigg(\lim_{h\to 0}\frac{f(a+h)-f(a)}{h}\bigg) \bigg(\lim_{h\to 0} h\bigg) \\
+&= f'(a)\cdot 0 = 0.
+```
+This directly implies the definition of continuity {math}`\lim_{h\to 0} f(a+h)=\lim_{x\to a} f(x)=f(a)`.
+
+However, continuity does not imply differentiability.
+For example, the function {math}`|x|` is continuous at {math}`x=0` but not differentiable, since the one-sided limits don't match.
 ````
 
 The derivative {math}`f'(x)` tells us the instantaneous rate of change at a given point {math}`x`, it is equal to the slope of the tangent line going through the point {math}`f(x)`.
