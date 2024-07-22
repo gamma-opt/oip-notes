@@ -17,27 +17,29 @@ Examples include maximizing profits, utility, return on investment, or satisfact
 
 A factory cannot produce an infinite quantity of product, even if their goal is to maximize production, or a firm often cannot have 0 costs.
 Most if not all optimisation problems involve optimising an objective with respect to _constraints_, which specify the restrictions that must be obeyed.
-For example, a firm may need to meet the demands of their customers exactly, and would like to minimize costs while doing so.
-Similarly, a factory may want to maximize the quantity of blended products produced, using a set amount of available ingredients.
-
-Let us make these examples more specific.
-For the first one, suppose that the costs of the firm is equal to the amount of services rendered {math}`x` times unit cost {math}`c`.
-The firm must meet the total demand of services requested by their customers, which we call {math}`D`.
-We can write this problem as
-TODO: Replace with actual example
+For example, a company may have a storage depot, where they can store their product for their future stock.
+In an optimization problem formulated to obtain a production schedule for this company, this depot may be encoded as
 ```{math}
-\mini cx \\
-\st x=D
+:label: constraint_eq
+stored_{t-1} + added_t - removed_t = stored_t
+```
+where the number of products stored in time period {math}`i` is equal to what was stored in the previous period plus what is added minus what is removed.
+
+```{figure} ../figures/depot.drawio.svg
+Continuity in the depot imposed by Equation {eq}`constraint_eq`.
 ```
 
-In the second example, suppose the factory uses two ingredients, and have {math}`s_1` and {math}`s_2` stored, ready to be used.
-If the blended product uses both ingredients in equal quantity, we can write this problem as
+Suppose further that the company has a set amount of ingredients available at every time period to make their product, and they need to meet the demands of their customers.
+These restrictions could be modelled as
 ```{math}
-\maxi x_1+x_2 \\
-\st x_1\leq s_1 \\
-x_2\leq s_2
+used_{it}\leq available_i
+```
+and
+```{math}
+produced_{t} \geq demand_t
 ```
 
 Notice that in the above examples, we have used both _equality_ and _inequality_ constraints.
 Different constraints are appropriate for different situations, but they all act to restrict the _search space_ for the optimisation problem.
-In the blended product example, we cannot have a solution with {math}`x_1>s_1`, because that would violate the constraints, so it must be that {math}`x_1\leq s_1`.
+In this example, we cannot have {math}`used_{it}>available_i` because we cannot use an amount of ingredient larger than what is available to us.
+Similarly, if the equality {eq}`constraint_eq` is not satisfied, we may be making up additional products or forgetting some in storage.
