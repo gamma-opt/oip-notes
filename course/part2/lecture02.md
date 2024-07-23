@@ -58,6 +58,7 @@ This decision can be made dynamically at every step, using exact or inexact line
 Gradient descent is simple and straightforward, it be highly sensitive to the step size selection or the curvature of the objective function.
 However, it also provides a solid foundation for extensions.
 One ubiquitious example is _stochastic_ gradient descent, where the gradient is approximated by a random selection of partial derivatives, reducing the computational burden significantly.
+% Differentiate between SGD vs batch GD?
 
 Another variation is the _momentum method_, which modify the update step to incorporate information about previous iterations, imitating accelaration and deceleration caused for example by gravity on an object falling down a slope.
 If the slope remains the same, the object will gain speed, and if the slope direction changes, the object won't abandon its previous direction entirely.
@@ -74,7 +75,9 @@ If the slope remains the same, the object will gain speed, and if the slope dire
     5. {math}`k=k+1`
 3. **return** {math}`x_k`.
 ```
+Here, the momentum decay factor {math}`\beta` is between 0 and 1 and controls the momentum influence.
 
+Add RMSProp or directly go to Adam?
 
 Adapted from [Emilien Dupont's code](https://emiliendupont.github.io/2018/01/24/optimization-visualization/).
 
@@ -423,7 +426,10 @@ function draw_path(path_data, type, path_g) {
 </script>
 ```
 
-## Newton's Method
+## Second order methods
+
+The above gradient descent and its variants are all _first-order methods_, in that they use gradient information.
+In addition to the derivative, one can also use the second derivative (or the Hessian in multivariate contexts) to end up with _second-order methods_. 
 
 ```{raw} html
 <body>
