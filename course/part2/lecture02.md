@@ -41,17 +41,17 @@ The gradient provides a straightforward and greedy approach to doing so: calcula
 **Inputs** Objective {math}`f`, initial point {math}`x_0`, convergence criterion `converged`.
 1. {math}`k=0`
 2. **while** not `converged()`:
-    1. {math}`d=\frac{\nabla f(x_k) }{ \|\nabla f(x_k) \| }`
+    1. {math}`d=-\frac{\nabla f(x_k) }{ \|\nabla f(x_k) \| }`
     2. Determine step size / learning rate {math}`\lambda`
-    3. {math}`x_{k+1}=x_k-\lambda d`
+    3. {math}`x_{k+1}=x_k+\lambda d`
     4. {math}`k=k+1`
 3. **return** {math}`x_k`.
 ```
 
 There are a number of noteworthy aspects of {prf:ref}`alg:gd`.
-First is that it is specifically for gradient **descent**, since in line 2.3 the derivative term has a negative sign.
+First is that it is specifically for gradient **descent**, since in line 2.1 the derivative term has a negative sign.
 Gradient ascent is the same algorithm with the sign flipped.
-Second is that in line 2.1, the derivative is normalized with its norm.
+Second is that the derivative is normalized with its norm.
 This is due to the fact that we are only interested in the direction information from the derivative, and the magnitude is decided by the step size in line 2.2.
 This decision can be made dynamically at every step, using exact or inexact line search methods, or a set learning rate may be set as an algorithm parameter.
 
@@ -68,10 +68,10 @@ If the slope remains the same, the object will gain speed, and if the slope dire
 **Inputs** Objective {math}`f`, initial point {math}`x_0`, convergence criterion `converged`, momentum decay {math}`\beta`.
 1. {math}`k=0, m_0=0`
 2. **while** not `converged()`:
-    1. {math}`d=\frac{\nabla f(x_k) }{ \|\nabla f(x_k) \| }`
+    1. {math}`d=-\frac{\nabla f(x_k) }{ \|\nabla f(x_k) \| }`
     2. Determine step size / learning rate {math}`\lambda`
     3. {math}`m_{k+1} = \beta m_k + \lambda d`
-    4. {math}`x_{k+1}=x_k-m_{k+1}`
+    4. {math}`x_{k+1}=x_k+m_{k+1}`
     5. {math}`k=k+1`
 3. **return** {math}`x_k`.
 ```
@@ -429,7 +429,45 @@ function draw_path(path_data, type, path_g) {
 ## Second order methods
 
 The above gradient descent and its variants are all _first-order methods_, in that they use gradient information.
-In addition to the derivative, one can also use the second derivative (or the Hessian in multivariate contexts) to end up with _second-order methods_. 
+In addition to the derivative, one can also use the second derivative (or the Hessian in multivariate contexts) to end up with _second-order methods_.
+These methods can often produce better convergence properties, but at the expense of the extra computational burden incurred by calculating and manipulating Hessian matrices.
+
+The quintessential second-order method is Newton's method, the idea of which is the following.
+Consider the second-order approximation of {math}`f` at {math}`x_k`, which is given by
+```{math}
+q(x) = f(x_k) + \nabla f(x_k)^\top (x - x_k) + \frac{1}{2}(x - x_k)^\top H(x_k)(x - x_k)
+```
+
+The method uses as direction {math}`d` that of the extremum of the quadratic approximation at {math}`x_k`, which can be obtained from the first-order condition {math}`\nabla q(x) = 0`. 
+This renders
+```{math}
+:label: eq:newton_cond
+\nabla q(x) = \nabla f(x_k) + H(x_k)(x - x_k) = 0.
+```
+
+Assuming that {math}`H^{-1}(x_k)` exists, we can use {eq}`eq:newton_cond` to obtain the following update rule, which is known as the _Newton step_
+```{math}
+:label: eq:newton_method
+x_{k+1} = x_k - H^{-1}(x_k)\nabla f(x_k)
+```
+
+
+Notice that the "pure" Newton's method has embedded in the direction of the step, its length (i.e., the step size) as well. In practice, the method uses {math}`d = - H^{-1}(x_k)\nabla f(x_k)` as a direction combined with a line search to obtain optimal step sizes and prevent divergence (that is, converge to {math}`-\infty`) in cases where the second-order approximation might lead to divergence. Fixing {math}`\lambda = 1` renders the natural Newton's method, as derived in {eq}`eq:newton_method`. The Newton's method can also be seen as employing Newton-Raphson method to solve the system of equations that describe the first order conditions of the quadratic approximation at {math}`x_k`. 
+
+
+```{prf:algorithm} Newton's method
+:label: alg:newton
+**Inputs** Objective {math}`f`, initial point {math}`x_0`, convergence criterion `converged`.
+1. {math}`k=0`
+2. **while** not `converged()`:
+    1. {math}`d= -H^{-1}(x_k)\nabla f(x_k)`
+    2. Determine step size / learning rate {math}`\lambda`
+    3. {math}`x_{k+1}=x_k-\lambda d`
+    4. {math}`k=k+1`
+3. **return** {math}`x_k`.
+```
+
+Should we talk about DFP first before BFGS?
 
 ```{raw} html
 <body>
