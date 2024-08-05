@@ -76,7 +76,7 @@ fig
 
 ## Function domains
 
-- Describe the notion of for what values it makes sense to evaluate the function
+- Describe the notion of for what values it makes sense to evaluate the function (done)
 - Define domain formally
 - Define subdomains, i.e., subsets of the domain that are of interest
 - Discuss open and closed domains
@@ -163,3 +163,5 @@ A function {math}`f:\reals^n\to\reals^m` is differentiable at a point {math}`x\i
 \lim_{h\to 0}\frac{\|f(x+h)-f(x)-J(h)\|}{\|h\|} = 0.
 ```
 ````
+
+Additional content... 
