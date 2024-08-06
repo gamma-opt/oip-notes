@@ -63,7 +63,25 @@ To produce one table, the carpenter needs 3h of work and 7 units of wood. To pro
 
 Following our list of steps, we first must identify the problem's parameters. They are summarised in the table below:
 
-%TODO: Add table with parameters
+```{list-table} Problem parameters
+
+* - Income per table
+  - 1000\$
+* - Income per chair
+  - 500\$
+* - Time needed per table
+  - 3h
+* - Time needed per chair
+  - 5h
+* - Wood needed per table
+  - 7 units
+* - Wood needed per chair
+  - 4 units
+* - Available time (weekly)
+  - 40h
+* - Available wood (weekly)
+  - 60 units
+```
 
 Let $x_t$ be total of tables produced weekly and $x_c$ the total of chairs produced weekly. The total income of the carpenter as a function of $x_t$ and $x_c$ to be maximised is
 
