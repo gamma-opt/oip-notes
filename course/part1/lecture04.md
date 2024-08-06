@@ -108,8 +108,9 @@ The carpenter has raw material and labour availability constraints. These can be
 
 ```{math}
 \begin{align}
-\text{(total hours of labour used) } &3x_t + 5x_c \leq 40 \text{ (total hours of labour available)}\\
-\text{(total amount of wood used) } &4x_t + 7x_c \leq 60 \text{ (total amount of wood available)}\\
+\text{total amount used}&\hspace{0.7cm} \text{total amount available} \\
+3x_t + 5x_c& \leq 40 \text{ (labour)}\\
+4x_t + 7x_c& \leq 60 \text{ (wood)}  \\
 \end{align}
 ```
 
