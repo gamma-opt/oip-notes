@@ -1,10 +1,10 @@
 # Lecture 4
 
-In this lecture we will discuss the idea of using the notion of *functions* and their domains to represent problems in a form that it can expressed as a mathematical optimisation problems. In other words, we will develop a language such that we can pose real-world problems as the mathematical statement 
+In this lecture we will discuss the idea of using the notion of *functions* and their domains to represent problems in a form that it can expressed as a mathematical optimisation problems. In other words, we will develop a language such that we can pose real-world problems as the mathematical statement
 
 ```{math}
-label: eq-optimisation_problem
-\mini~f(x) \st x \in X.
+:label: eq-optimisation_problem
+\mini~f(x) ~\st x \in X.
 ```
 
 In the above, $x$ represents a $n$-component real-valued vector (i.e., $x \in \reals^n$), $\st$ stands for "such that" or "subject to", and $X$ represents the subset of the domain of $f(x)$ that is of our interest (that is, $X \subset \reals$). For the time being, we will focus on how to obtain a *mathematical representation* of the problem at hand that then can be *optimised*. In our context, to optimise a problem means finding a solution $x \in X$ at which $f(x)$ attains its minimum value. Later, we will touch upon how such representations can be used by specialised alogrithms to find optimal solutions.
@@ -14,34 +14,37 @@ We will assume *minimisation* as a reference, but clearly, maximisation can be u
 ```
 
 ## Optimisation modelling
+
 %- Explain how functions can represent real-world interactions between inputs and outputs
 
 The modelling of real-world problems as optimisation problems is, in general, using *mathematical programming*. Mathematical programming is in its core, a language to pose problems as {eq}`eq-optimisation_problem`, which in turn can be optimised taking into account properties that $f(x)$ and $X$ possess.
 
 A mathematical programming model comprises four key ingredients:
-    1. **Parameters**, which represent the input data and information that defines the problem statement. These are typically elements in the problem that are beyond our control, such as costs, revenues, efficiency rates, limits, and so forth.  
-    2. **Decision variables** ($x$), which represent the elements of the problem that we control. These can represent production amounts, flows in a network, dimensions of a structure, or any other element that is part of the decisions we wish to make.
-    3. **Objective function** ($f(x)$) represents a measure of performance associated with a candidate solution $x$. Examples include maximizing profits, utility, return on investment, or satisfaction, and minimize costs, redundancy, waste, or risk.
-    4. **Constraints** (X), which express the rules or conditions that a solution must satisfy for it to be considered a valid.
+
+1. **Parameters**, which represent the input data and information that defines the problem statement. These are typically elements in the problem that are beyond our control, such as costs, revenues, efficiency rates, limits, and so forth.  
+2. **Decision variables** ($x$), which represent the elements of the problem that we control. These can represent production amounts, flows in a network, dimensions of a structure, or any other element that is part of the decisions we wish to make.
+3. **Objective function** ($f(x)$) represents a measure of performance associated with a candidate solution $x$. Examples include maximizing profits, utility, return on investment, or satisfaction, and minimize costs, redundancy, waste, or risk.
+4. **Constraints** ($X$), which express the rules or conditions that a solution must satisfy for it to be considered a valid.
 
 Notice that these are presented in a deliberate order. As a rule of thumb, whenever we start the process of modelling a problem, we will follow this list in this particular order.
 
-As the name suggests, the objective function is the function that describes our objective, which is to maximise or minimise some quantity that represents a measurement of performance. Thus, in mathematical programming, objective functions always comprise an objective (maximise or minimise) and a function ($f(x)$). For the majority of our models, the function to be optimised will be defined as $f : X \subseteq \reals^n \go \reals$.
+As the name suggests, the objective function is the function that describes our objective, which is to maximise or minimise some quantity that represents a measurement of performance. Thus, in mathematical programming, objective functions always comprise an objective (maximise or minimise) and a function ($f(x)$). For the majority of our models, the function to be optimised will be defined as $f : X \subseteq \reals^n \to \reals$.
 
-## Definning domains by posing constraints
+## Defining domains by posing constraints
+
 %- Show that functions can be also be used to state logical relations of the problem we are modelling
 %- The relation can be =, >=, or <=
 %- Show that they generate a set that can be used as a subdomain
 
-One important concept in mathematical programming is how can we define sets ($X$) using functions. This is possible by relating functions with particular levels of its codomain by means of (in)equalities. In particular, suppose we are given a functions $g(x) : \reals^n \go \reals$ such that $g(x) \le 0 $ describes a relationship between decisions that make them feasibile to be implemented.  Then, we have that
+One important concept in mathematical programming is how can we define sets ($X$) using functions. This is possible by relating functions with particular levels of its codomain by means of (in)equalities. In particular, suppose we are given a functions $g(x) : \reals^n \to \reals$ such that $g(x) \le 0 $ describes a relationship between decisions that make them feasibile to be implemented.  Then, we have that
 
 ```{math}
     X = \braces{x \in \reals^n : g(x) \le 0},
 ```
 
-or $X$ is the set of all values for $x$ that satisfy $g(x) \le 0$. Notice that this idea allows us express the set of all possible (or feasible) solutions by means of posing functions that represent relationships between decision variables. 
+or $X$ is the set of all values for $x$ that satisfy $g(x) \le 0$. Notice that this idea allows us express the set of all possible (or feasible) solutions by means of posing functions that represent relationships between decision variables.
 
-A relationship between decision variables in the form of $g(x) \le 0 $ is called a *constraint*. Most if not all optimisation problems involve optimising an objective with respect to multiple _constraints_, which specify the restrictions that must a solution must obey to be considered feasible. To clarify this concept, let's use an example. Imagine a factory that produces a given product. Logically, the factory cannot produce an infinite quantity of product, even if their goal is to maximize production. Let us represent our production amount by $x$ and let's say that our factory's production capacity is a total of $C$ units. Then, the constraint $x \le C$ defines the set of feasible solutions. Notice that in this example $g(x) = x - C$ and, thus, $X = \braces{x \reals : x - C \le 0}$.
+A relationship between decision variables in the form of $g(x) \le 0 $ is called a *constraint*. Most if not all optimisation problems involve optimising an objective with respect to multiple *constraints*, which specify the restrictions that must a solution must obey to be considered feasible. To clarify this concept, let's use an example. Imagine a factory that produces a given product. Logically, the factory cannot produce an infinite quantity of product, even if their goal is to maximize production. Let us represent our production amount by $x$ and let's say that our factory's production capacity is a total of $C$ units. Then, the constraint $x \le C$ defines the set of feasible solutions. Notice that in this example $g(x) = x - C$ and, thus, $X = \braces{x \reals : x - C \le 0}$.
 
 Constraints can be posed either as equalities or inequalities, depending on the nature of the restriction one must impose. For example, suppose that our factory can produce two variants of the same product, say $x$ and $y$, and that the combined amount produced $x + y$ must meet the demand level $D$. This can be stated as the equality constraint $x + y = D$. Whether a constraint must be posed as an equality or inequality largely depends on the business rule being stated and modelling decisions, which we will discuss in more detail in a later lecture.
 
@@ -87,7 +90,6 @@ Finally, the mathematical programming model that maximises the income of the car
 &x_t, x_c \geq 0.
 \end{align}
 ```
-
 
 %TODO: put this in a JuMP cell
 <!-- using JuMP, HiGHS #JuMP is for writing the mathematical model; Clp is the solver (Simplex method). 
