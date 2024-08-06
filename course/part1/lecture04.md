@@ -1,3 +1,18 @@
+---
+jupytext:
+  cell_metadata_filter: -all
+  formats: md:myst
+  text_representation:
+    extension: .md
+    format_name: myst
+    format_version: 0.13
+    jupytext_version: 1.16.2
+kernelspec:
+  display_name: Julia 1.10.4
+  language: julia
+  name: julia-1.10
+---
+
 # Lecture 4
 
 In this lecture we will discuss the idea of using the notion of *functions* and their domains to represent problems in a form that can be expressed as mathematical optimisation problems. In other words, we will develop a language such that we can pose real-world problems as the mathematical statement
@@ -109,8 +124,14 @@ Finally, the mathematical programming model that maximises the income of the car
 \end{align}
 ```
 
-%TODO: put this in a JuMP cell
-<!-- using JuMP, HiGHS #JuMP is for writing the mathematical model; Clp is the solver (Simplex method). 
+```{admonition} Is this model correct?
+:class: dropdown, caution
+
+Attentive readers may have noticed something about the above model, namely that there is forcing $x_t$ and $x_c$ above to be integers. Does it make sense to have $x_t=3.5$? As we will see below, the optimal solution to this problem is has non-integer values. We will consider this problem more generally in later lectures.
+```
+
+```{code-cell}
+using JuMP, HiGHS #JuMP is for writing the mathematical model; HiGHS is the solver (Simplex method). 
 
 m = Model(HiGHS.Optimizer) # Creates a model and informs the solver to be used.
 
@@ -122,7 +143,8 @@ m = Model(HiGHS.Optimizer) # Creates a model and informs the solver to be used.
 @constraint(m, 3*x_t + 5*x_c <= 40) # Labour constraint
 @constraint(m, 7*x_t + 4*x_c <= 60) # Wood availability constraint
 
-println(m) # Prints the mathematical model
 optimize!(m) # Solve the model
 
-print("\nTotal of tables: ", value(x_t), "\nTotal of chairs: ", value(x_c), "\n") -->
+print("\nSOLUTION!!!\n")
+print("\nTotal of tables: ", value(x_t), "\nTotal of chairs: ", value(x_c), "\n")
+```
