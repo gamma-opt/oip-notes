@@ -68,6 +68,16 @@ These data are given in {numref}`table_powerco`.
 
 In order to determine the best way to meet the demands of these cities while minimizing costs, Powerco would like us to model this as an LP.
 
+Todo:
+- add explanation
+- make prettier
+- change city color when demand is fulfilled
+- keep track of lowest cost so far (when demand is fulfilled)
+
+```{raw} html
+:file: transport.html
+```
+
 ### Solution
 
 ```{code-cell}

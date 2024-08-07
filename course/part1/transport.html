@@ -1,0 +1,299 @@
+<body>
+    <input type="range" name="mySlider" id=mySlider value="0" min="0">
+    <div id="d3-transportation"></div>
+</body>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+    // CONFIGURABLES
+
+    const n_plant = 3;
+    const n_city = 4;
+
+    const costs = [[8, 6, 10, 9],
+    [9, 12, 13, 7],
+    [14, 9, 16, 5]];
+
+    const data = {
+        "nodes": [
+            {
+                "type": "plant",
+                "supply": 35
+            },
+            {
+                "type": "plant",
+                "supply": 50
+            },
+            {
+                "type": "plant",
+                "supply": 40
+            },
+            {
+                "type": "city",
+                "demand": 45
+            },
+            {
+                "type": "city",
+                "demand": 20
+            },
+            {
+                "type": "city",
+                "demand": 30
+            },
+            {
+                "type": "city",
+                "demand": 30
+            }
+        ],
+        "links": [
+            {
+                "source": 1,
+                "target": 4,
+            },
+            {
+                "source": 1,
+                "target": 5,
+            },
+            {
+                "source": 1,
+                "target": 6,
+            },
+            {
+                "source": 1,
+                "target": 7,
+            },
+            {
+                "source": 2,
+                "target": 4,
+            },
+            {
+                "source": 2,
+                "target": 5,
+            },
+            {
+                "source": 2,
+                "target": 6,
+            },
+            {
+                "source": 2,
+                "target": 7,
+            },
+            {
+                "source": 3,
+                "target": 4,
+            },
+            {
+                "source": 3,
+                "target": 5,
+            },
+            {
+                "source": 3,
+                "target": 6,
+            },
+            {
+                "source": 3,
+                "target": 7,
+            }
+        ]
+    };
+
+    const stroke = "#aaa";   // link color
+    const stroke_width = 10; // link width
+    const circle_color = "#69b3a2";
+    const circle_highlight_color = "orange";
+    const line_highlight_color = "red";
+    const opacity = 0.6;  // opacity of non-highlighted elements when something is highlighted
+
+
+    // CODE
+    const width = 800,
+        height = 500,
+        box_height = 100, // additional area to write total cost
+        rad = 50;
+
+    // precalculated addition info
+    data.nodes.forEach((n, idx) => {
+        n.id = idx + 1;  // data source/target is written with 1-based indexing, so add 1
+        n.link_ids = [];   // ids of associated links
+        if (n.type == "plant") n.loc = [rad, height / 3 * (idx + 0.5)];  // add 0.5 to center the circle
+        else n.loc = [width - rad, height / 4 * (idx - 3 + 0.5)];
+    })
+
+    data.links.forEach((n, idx) => {
+        n.id = idx;
+        n.source_loc = data.nodes[n.source - 1].loc  // data source/target is written with 1-based indexing, so subtract 1
+        n.target_loc = data.nodes[n.target - 1].loc
+        n.mid_loc = [0.5 * (n.source_loc[0] + n.target_loc[0]), 0.5 * (n.source_loc[1] + n.target_loc[1])]
+        data.nodes[n.source - 1].link_ids.push(idx);
+        data.nodes[n.target - 1].link_ids.push(idx);
+    })
+
+    // DRAWING THE SVG
+
+    const svg = d3.select("#d3-transportation")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height + box_height)
+        .on("click", event => {
+            const target = d3.select(event.target);
+
+            if (target.node().nodeName === "text") return;
+            if (target.classed("plant")) highlightCircle(target);
+            else if (event.target.tagName == "line") highlightLine(target);
+            else clearHighlight();
+        });
+
+
+    const link_g = svg.append("g");
+    const node_g = svg.append("g");
+
+    // Add links first, so nodes are drawn on top
+    const links = link_g.selectAll("line")
+        .data(data.links)
+        .join("line")
+        .attr("x1", d => d.source_loc[0])
+        .attr("y1", d => d.source_loc[1])
+        .attr("x2", d => d.target_loc[0])
+        .attr("y2", d => d.target_loc[1])
+        .attr("data-source", d => d.source)
+        .attr("data-target", d => d.target)
+        .attr("data-id", d => d.id)
+        .style("stroke", stroke)
+        .style("stroke-width", stroke_width);
+
+    const line_labels = link_g.selectAll("text")
+        .data(data.links)
+        .enter()
+        .append("text")
+        .text("0")
+        .attr("x", d => d.mid_loc[0])
+        .attr("y", d => d.mid_loc[1] + 5)
+        .attr("data-id", d => d.id);
+
+    const nodes = node_g.selectAll("circle")
+        .data(data.nodes)
+        .join("circle")
+        .attr("r", rad)
+        .attr("cx", d => d.loc[0])
+        .attr("cy", d => d.loc[1])
+        .attr("class", d => d.type)
+        .attr("data-id", d => d.id)
+        .style("fill", circle_color);
+
+    nodes.filter(".plant")
+        .attr("data-supply", d => d.supply);
+    nodes.filter(".city")
+        .attr("data-supply", d => d.demand);
+
+    const node_labels = node_g.selectAll("text")
+        .data(data.nodes)
+        .enter()
+        .append("text")
+        .text(d => "0/" + (d.demand ? d.demand : d.supply))
+        .attr("x", d => d.loc[0])
+        .attr("y", d => d.loc[1])
+        .attr("data-id", d => d.id)
+        .attr("class", d => d.type)
+
+    // Total cost display
+    svg.append("text")
+        .attr("x", 10)
+        .attr("y", height + box_height / 2)
+        .text("Cost:")
+    const cost_text = svg.append("text")
+        .attr("x", 50)
+        .attr("y", height + box_height / 2)
+        .text("0");
+
+    // STATE VARIABLES
+    let selected_line = null;
+
+    let transport_state = Array(n_plant).fill().map(() => Array(n_city).fill(0));
+
+    // UPDATE LOGIC
+
+    function clearHighlight() {
+        node_g.selectAll("circle").filter(".plant")
+            .style("opacity", 1)
+            .style("fill", circle_color);
+
+        link_g.selectAll("line")
+            .style("opacity", 1)
+            .style("stroke", stroke);
+
+        selected_line = null;
+    }
+
+    function highlightCircle(circle) {
+        nodes.filter(".plant")
+            .style("opacity", opacity)
+            .style("fill", circle_color);
+
+        circle.style("opacity", 1);
+        circle.style("fill", circle_highlight_color);
+
+        links.style("opacity", function () {
+            if (d3.select(this).attr("data-source") == circle.attr("data-id")) return 1;
+            return opacity;
+        })
+            .style("stroke", stroke);
+
+        selected_line = null;
+    }
+
+    function highlightLine(line) {
+        const source = nodes.filter(function () { return this.dataset.id == line.attr("data-source") });
+        highlightCircle(source);
+
+        line.style("stroke", line_highlight_color);
+        selected_line = line;
+
+        slider.attr("max", source.attr("data-supply"));
+    }
+
+    const slider = d3.select("#mySlider")
+        .on("change", function () {
+            if (selected_line === null) return;
+
+            const source = selected_line.attr("data-source");
+            const target = selected_line.attr("data-target");
+
+            // prevent exceeding supply
+            const prev_val = transport_state[source - 1][target - n_plant - 1];
+            const proposed_supply = transport_state[source - 1].reduce((acc, cur) => acc + cur) - prev_val + Number(this.value);
+            const diff = data.nodes[source - 1].supply - proposed_supply;
+            if (diff < 0) this.value = Number(this.value) + diff;
+
+            link_g.selectAll("text")
+                .filter(d => { return d.id == selected_line.attr("data-id"); })
+                .text(this.value);
+
+
+            transport_state[source - 1][target - n_plant - 1] = Number(this.value);
+            updateLabels(source, target);
+        });
+
+
+    function updateLabels(source, target) {
+        updateCircleLabel(source);
+        updateCircleLabel(target);
+        updateCost();
+    }
+
+    function updateCost() {
+        const sum = costs.reduce((acc_i, cur_i, idx_i) => acc_i
+            + cur_i.reduce((acc_j, cur_j, idx_j) => acc_j + cur_j * transport_state[idx_i][idx_j], 0)
+            , 0);
+        cost_text.text(sum);
+    }
+
+    function updateCircleLabel(circle_id) {
+
+        const sum = circle_id <= n_plant ?
+            transport_state[circle_id - 1].reduce((acc, cur) => acc + cur)
+            : transport_state.reduce((acc, cur) => acc + cur[circle_id - n_plant - 1], 0);
+
+        node_labels.filter(function () { return this.dataset.id == circle_id; })
+            .text(d => sum + "/" + (d.demand ? d.demand : d.supply));
+    }
+</script>
