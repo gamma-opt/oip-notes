@@ -101,6 +101,7 @@
     const stroke_width = 10; // link width
     const circle_color = "#69b3a2";
     const circle_highlight_color = "orange";
+    const demand_met_color = "green";
     const line_highlight_color = "red";
     const opacity = 0.6;  // opacity of non-highlighted elements when something is highlighted
 
@@ -183,7 +184,7 @@
     nodes.filter(".plant")
         .attr("data-supply", d => d.supply);
     nodes.filter(".city")
-        .attr("data-supply", d => d.demand);
+        .attr("data-demand", d => d.demand);
 
     const node_labels = node_g.selectAll("text")
         .data(data.nodes)
@@ -204,11 +205,21 @@
         .attr("x", 50)
         .attr("y", height + box_height / 2)
         .text("0");
+    
+    // best cost so far display
+    svg.append("text")
+        .attr("x", 130)
+        .attr("y", height + box_height / 2)
+        .text("Best cost so far:")
+    const best_text = svg.append("text")
+        .attr("x", 250)
+        .attr("y", height + box_height / 2)
+        .text(Infinity);
 
     // STATE VARIABLES
     let selected_line = null;
-
     let transport_state = Array(n_plant).fill().map(() => Array(n_city).fill(0));
+    let demand_met = Array(n_city).fill(0);
 
     // UPDATE LOGIC
 
@@ -278,6 +289,7 @@
         updateCircleLabel(source);
         updateCircleLabel(target);
         updateCost();
+        registerRecord();
     }
 
     function updateCost() {
@@ -295,5 +307,24 @@
 
         node_labels.filter(function () { return this.dataset.id == circle_id; })
             .text(d => sum + "/" + (d.demand ? d.demand : d.supply));
+        
+        const circle = nodes.filter(function () { return this.dataset.id == circle_id; });
+        if (circle.classed("city")){
+            if (circle.attr("data-demand") <= sum) {
+                circle.style("fill", demand_met_color);
+                demand_met[circle_id - n_plant - 1] = 1;
+            }
+            else {
+                circle.style("fill", circle_color);
+                demand_met[circle_id - n_plant - 1] = 0;
+            }
+        }
+    }
+
+    function registerRecord() {
+        if (demand_met.every(n => n == 1)) {
+            const curr_cost = Number(cost_text.text());
+            if (Number(best_text.text()) > curr_cost) best_text.text(curr_cost);
+        }
     }
 </script>
