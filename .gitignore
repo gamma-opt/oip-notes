@@ -1,0 +1,7 @@
+.micromamba
+.quarto
+.vscode
+_freeze
+_book
+.jupyter_cache
+/.quarto/

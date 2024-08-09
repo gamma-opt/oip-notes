@@ -1,0 +1,50 @@
+project:
+  type: book
+
+book:
+  title: "Optimisation in Practice"
+  author: 
+    name: "Fabricio Oliveira"
+    affiliation: Aalto University
+  date: last-modified
+  chapters:
+    - index.qmd
+    - part: Part 1
+      chapters:
+        - part1/lecture01.qmd
+        - part1/lecture02.qmd
+        - part1/lecture03.qmd
+        - part1/lecture04.qmd
+        - part1/lecture05.qmd
+        - part1/lecture06.qmd
+        - part1/lecture07.qmd
+        - part1/lecture08.qmd
+        - part1/lecture09.qmd
+        - part1/lecture10.qmd
+    - part: Part 2
+      chapters:
+        - part2/lecture01.qmd
+        - part2/lecture02.qmd
+        - part2/lecture03.qmd
+        - part2/lecture04.qmd
+        - part2/lecture05.qmd
+        - part2/lecture06.qmd
+        - part2/lecture07.qmd
+        - part2/lecture08.qmd
+        - part2/lecture09.qmd
+        - part2/lecture10.qmd
+    - references.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+  pdf:
+    documentclass: scrreprt
+    include-in-header: 
+      - _macros.tex
+
+execute:
+  cache: true
+  freeze: auto

@@ -1,0 +1,8 @@
+name: quarto
+channels:
+  - conda-forge
+dependencies:
+  - quarto
+  - jupyter
+  - jupyter-cache
+  - pandoc < 3.2.1  # this adds a Latex function \pandocbounded that seems to not be used properly by some template for now
