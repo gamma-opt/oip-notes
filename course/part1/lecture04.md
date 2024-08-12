@@ -128,7 +128,7 @@ Finally, the mathematical programming model that maximises the income of the car
 ```{admonition} Is this model correct?
 :class: dropdown, caution
 
-Attentive readers may have noticed something about the above model, namely that there is forcing $x_t$ and $x_c$ above to be integers. Does it make sense to have $x_t=3.5$? As we will see below, the optimal solution to this problem is has non-integer values. We will consider this problem more generally in later lectures.
+Attentive readers may have noticed something about the above model, namely that there is no constraint forcing $x_t$ and $x_c$ above to be integers. Does it make sense to have $x_t=3.5$? As we will see below, the optimal solution to this problem has non-integer values. We will consider this problem more generally in later lectures.
 ```
 
 ```{code-cell}
