@@ -125,7 +125,7 @@ Putting it all together, the optimisation model that provides the minimum cost p
   & x_{11} \ge 0, x_{12} \ge 0, ... x_{34} \ge 0.
 \end{align}
 ```
-
+(p1l5:production)=
 ## Production Planning
 
 %TODO: Tweak the problem so that we can obtain more interesting solutions?
@@ -273,7 +273,7 @@ Putting this all together, the optimisation model for the minimum cost electrici
     & s_1,\dots,s_4\geq 0 \\
     & s_0 = 50
 ```
-
+(p1l5:combined)=
 ## Combined Production-Transporation Problem
 
 In the transportation problem, we minimized the cost of transmiting electricity according to cities' demands with a set amount of supply.
