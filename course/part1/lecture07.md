@@ -21,7 +21,7 @@ Some text here.
 
 ### Transportation Problem
 
-Recall that in {ref}`p1l5:transportation`, we discussed an example of the transportation problem.
+Recall that in {numref}`p1l5:transportation`, we discussed an example of the transportation problem.
 In that example, Powerco was distributing electricity from 3 power plants to 4 cities.
 Each power plant produced a certain amount of supply that is used to meet the demands of the cities, but also different costs associated with transporting the electricity to a given city.
 The objective is to find a distribution plan that minimizes the total cost.
@@ -54,7 +54,7 @@ This amount cannot be negative, so we also add a nonnegativity constraint in the
 ```
 
 ```{note}
-This is equivalent to manually adding constrains $x_{11} \ge 0, x_{12} \ge 0, ... x_{34} \ge 0$ manually.
+This is equivalent to manually adding the constrains $x_{11} \ge 0, x_{12} \ge 0, ... x_{34} \ge 0$.
 ```
 
 
@@ -118,6 +118,9 @@ With these at hand, we can formulate the general transportation problem as
 ```
 
 ### Production Planning
+
+Now, we revisit the example in {numref}`p1l5:production`.
+Our goal is to make a quarterly electricity production plan over a period of a year, so that 3 power plants would produce enough electricity for the consumption of 4 cities.
 
 ```{code-cell}
 :tags: [remove-output]
@@ -241,6 +244,8 @@ display(c)
 ```
 
 ### Combined Problem
+
+Finally, we cover the combined production-transportation problem presented in {numref}`p1l5:combined`.
 
 ```{code-cell}
 :tags: [remove-output]
