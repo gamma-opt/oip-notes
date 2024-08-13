@@ -9,6 +9,15 @@ Right now only part 1 lectures 3 and 4 have content.
 3. Run `quarto render`
 4. Both the HTML files and the PDF should be in `_book` directory.
 
+## Slides
+
+Having one source file for both slides and regular website/pdf seems infeasible due to differing content/structure.
+
+As an example, I've added one quickly-converted-from-website presentation to `slides/part1/lecture03.qmd`.
+
+As far as I can tell, there is no way of having the presentations be built with `quarto render` without having them being displayed on the website.
+But they are individual files anyway, so one can do `quarto render slides/**/*.qmd`.
+
 ## Headaches
 
 - Currently, there is no good way to apply LaTeX definitions for HTML files, and thus we need to add

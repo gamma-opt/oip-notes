@@ -4,4 +4,6 @@
 _freeze
 _book
 .jupyter_cache
-/.quarto/
+.quarto/
+slides/*/*.html
+slides/*/*_files
