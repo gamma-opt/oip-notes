@@ -42,8 +42,6 @@ format:
     theme: cosmo
   pdf:
     documentclass: scrreprt
-    include-in-header: 
-      - _macros.tex
 
 execute:
   cache: true

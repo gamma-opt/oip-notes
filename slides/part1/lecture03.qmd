@@ -150,12 +150,12 @@ exists.
 
 Suppose $f$ is differentiable at $a$. Then, the limit in @def-differentiability exists and so
 
-\begin{align}
+\begin{align*}
 \lim_{h\to 0} f(a+h)-f(a) &= \lim_{h\to 0}(f(a+h)-f(a))\frac{h}{h} \\
 &=  \lim_{h\to 0}\frac{f(a+h)-f(a)}{h}h \\
 &= \bigg(\lim_{h\to 0}\frac{f(a+h)-f(a)}{h}\bigg) \bigg(\lim_{h\to 0} h\bigg) \\
 &= f'(a)\cdot 0 = 0.
-\end{align}
+\end{align*}
 
 This directly implies the definition of continuity $\lim_{h\to 0} f(a+h)=\lim_{x\to a} f(x)=f(a)$.
 

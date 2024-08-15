@@ -1,8 +1,8 @@
 # oip-notes in Quarto
 
-Right now only part 1 lectures 3 and 4 have content.
-
 ## Instructions to build
+
+May need to install `librsvg` for PDF builds, or figure out a way for SVG images to fallback to PNG or something.
 
 1. Create the conda environment in `environment.yml` and activate it
 2. Activate the Julia environment
@@ -22,13 +22,11 @@ But they are individual files anyway, so one can do `quarto render slides/**/*.q
 
 - Currently, there is no good way to apply LaTeX definitions for HTML files, and thus we need to add
 ```
-::: {.hidden}
-$$
 {{< include _macros.tex >}}
-$$
-:::
 ```
 at the start of every file (taking care of the relative path if needed).
     - For TeX files, including `_macrox.tex` via `include-in-header` in `_quarto.yml` works.
 
 - Needed to downgrade Pandoc because for PDF building `\pandocbounded` function which was added in a relatively recent version was causing problems.
+
+- Use this for algorithms? https://github.com/leovan/quarto-pseudocode

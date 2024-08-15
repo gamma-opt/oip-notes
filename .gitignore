@@ -7,3 +7,4 @@ _book
 .quarto/
 slides/*/*.html
 slides/*/*_files
+/.quarto/
