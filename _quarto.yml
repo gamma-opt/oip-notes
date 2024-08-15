@@ -34,6 +34,9 @@ book:
         - part2/lecture09.qmd
         - part2/lecture10.qmd
     - references.qmd
+  repo-url: https://github.com/gamma-opt/oip-notes
+  repo-actions: [source]
+  repo-branch: quarto
 
 bibliography: references.bib
 
