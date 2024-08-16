@@ -37,6 +37,8 @@ book:
   repo-url: https://github.com/gamma-opt/oip-notes
   repo-actions: [source]
   repo-branch: quarto
+  sidebar:
+    logo: resources/logo.svg
 
 bibliography: references.bib
 

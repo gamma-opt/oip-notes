@@ -2,7 +2,7 @@
 
 ## Gradient descent and variants
 
-We have seen in [](lecture01.md) that the gradient $\nabla f(x_0)$ describes the direction of steepest ascent at some point $x_0$.
+We have seen in @sec-p2l1 that the gradient $\nabla f(x_0)$ describes the direction of steepest ascent at some point $x_0$.
 A consequence of this is that the negative gradient $-\nabla f(x_0)$ corresponds to the direction of the steepest descent at $x_0$.
 
 ::: {.callout-note title="Why? Linearity of Differentiation" collapse=true}
