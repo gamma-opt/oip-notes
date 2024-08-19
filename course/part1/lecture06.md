@@ -62,7 +62,7 @@ Let's revisit our transportation problem and pose it as model written in symboli
 
 ### Indices and sets
 
-The transportation problem has two sets of entities: a set of plants $i ín I$ and a set of demand points (clients) $j \in J$.
+The transportation problem has two sets of entities: a set of plants $i \in I$ and a set of demand points (clients) $j \in J$.
 
 ### Parameters
 
@@ -70,11 +70,11 @@ There are three parameters:
 
 - plant capacities, represented by $C_i$, $i \in I$,
 - demand amounts at each client, represented by $D_j$, $j \in J$,
-- unit transportation cost between each plant $i$ and demand point $j$, represented by T_{ij}, $i \in I$, $j \in J$. 
+- unit transportation cost between each plant $i$ and demand point $j$, represented by $T_{ij}$, $i \in I$, $j \in J$. 
 
 ### Variables
 
-Our transportation model has only one type of decision variable: let $x_{ij}$ be the amount transported from plan $i$ to client $j \in J$. Naturally, we must enforce that
+Our transportation model has only one type of decision variable: let $x_{ij}$ be the amount transported from plan $i$ to client $j \in J$. Naturally, we must enforce that these amounts are not negative.
 
 ### Objective function
 
