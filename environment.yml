@@ -7,6 +7,8 @@ dependencies:
   # https://github.com/pydata/pydata-sphinx-theme/issues/1844
   - pydata-sphinx-theme==0.15.2
 
+  - manim
+
   - pip
   - pip:
     - sphinx-proof
