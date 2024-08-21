@@ -56,6 +56,7 @@ set_attribute(model, "output_flag", false)
 We start by defining a variable for each decision Powerco must make, that is how many units to produce in a given plant.
 These cannot be negative, and there is a cap beyond which production incurs additional costs, so we model before cap and after cap separately.
 Since demand must be met exactly, the number of units produced also controls how many of them must be stored, which also gets its own variable.
+
 ```{code-cell}
 :tags: ["remove-output"]
 
@@ -92,7 +93,6 @@ Having specified the model, we can ask `JuMP` to show it to us.
 
 ```{code-cell}
 :tags: [remove-output]
-
 print(model)
 ```
 
@@ -183,6 +183,7 @@ set_attribute(model, "output_flag", false)
 We need to decide on how much electricity each plant is producing in each quarter.
 Once we have that, we can _spend_ it on towards satisfying city demands or storing in the battery, which are represented here by {math}`p2c` and {math}`p2b`.
 By having a {math}`battery` variable, it is easier to keep track of how much electricity is added or used from storage, and finally {math}`b2c` tracks this used amount.
+
 ```{code-cell}
 :tags: [remove-output]
 
@@ -194,6 +195,7 @@ By having a {math}`battery` variable, it is easier to keep track of how much ele
 ```
 
 Given the above variables, our objective is to minimize all costs, which comes from production, transmission, and storing in the battery.
+
 ```{code-cell}
 :tags: [remove-output]
 
@@ -209,6 +211,7 @@ Given the above variables, our objective is to minimize all costs, which comes f
 There are a few constraints we need to impose on the model.
 First is that city demands must be met.
 In addition, we need to ensure that our variables make sense, for example that we can only use as much electricity as we produce, and the stored amount of electricity in a quarter depends on how much there were before, how much is added, and how much is used.
+
 ```{code-cell}
 :tags: [remove-output]
 
