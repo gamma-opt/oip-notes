@@ -13,6 +13,8 @@ kernelspec:
   name: julia-1.10
 ---
 
+%TODO: Identify a good reference material to build upon. 
+
 # Lecture 3
 
 ## What is a function?
@@ -23,25 +25,19 @@ kernelspec:
 
 _Maybe have a faster intro, "You may be familiar with the concept of functions, here we review the key parts of it" etc._
 
-Thinking of mathematics as a tool for explaining the world arounds us and expressing problems of interest, a need for relating one group of quantities to another quickly arises.
-For example, we may be interested in purchasing a certain number {math}`n` of items and wonder about the associated cost {math}`c`, or given a certain year {math}`t` we may be interested in the population {math}`p` of Finland at the start of that year.
+For using mathematics as a framework for explaining the world around us to express problems of our interest, the need for relating one group of quantities to another quickly arises. For example, we may be interested in purchasing a certain number {math}`n` of items and wonder about the associated cost {math}`c`, or given a certain year {math}`t` we may be interested in the population {math}`p` of Finland at the start of that year.
 
 There are multiple ways of thinking about functions, for example one may imagine an algebraic formula or a graph, but one general definition is the following (cite Stewart Calculus 9th ed):
 
 ```{prf:definition}
-:label: function
+:label: def-function
 
-A **function** {math}`f` is a rule that assigns each element {math}`x` in a set {math}`D` to exactly one element {math}`f(x)` in a set {math}`E`.
+A **function** {math}`f` is a rule that assigns each element {math}`x` in a set, say {math}`X`, to exactly one element {math}`f(x)` in another set, say {math}`Y`.
 ```
 
-{prf:ref}`function` is specific enough to satisy what we may expect from functions, for example with a formula {math}`f(x)=(x+2)^2` we cannot input the same value for {math}`x` and end up with different outputs {math}`f(x)`.
-Instead, for both the formula and our definition, every input has a unique output.
+{prf:ref}`def-function` is specific enough to satisfy what we may expect from functions, for example with a formula {math}`f(x)=(x+2)^2` we cannot input the same value for {math}`x` and end up with different outputs {math}`f(x)`. Instead, for both the formula and our definition, every input has a unique output.
 
-On the other hand, {prf:ref}`function` is also very general and flexible, making functions a powerful conceptual tool in mathematics.
-The formula example is a function, we know that.
-We can also have functions in multiple variables, such as {math}`f(x,y)=x+y`, as long as we don't violate the unique outputs rule. This would only require that every element of the set {math}`D` is an ordered pair {math}`(x,y)` instead of a single number.
-Alternatively, we can define functions that are difficult to describe as algebraic formulas.
-Recall the example with the population of Finland at year {math}`t`, we cannot write a formula for this for multiple reasons, one of which is that we don't yet know many of its values, for example at {math}`t=2100`.
+On the other hand, {prf:ref}`def-function` is also very general and flexible, making functions a powerful conceptual tool in mathematics. The formula {math}`f(x)=(x+2)^2` is clearly a function. We can also have functions in multiple variables, such as {math}`f(x,y)=x+y`, as long as we don't violate the unique outputs rule. This would only require that every element of the set {math}`X` is an ordered pair {math}`(x,y)` instead of a single number. Alternatively, we can define functions that are difficult to describe as algebraic formulas. Recall the example with the population of Finland at year {math}`t`, we cannot write a formula for this for multiple reasons, one of which is that we don't yet know many of its values, for example at {math}`t=2100`.
 
 % TODO not sure why this doesn't seem to work https://mystmd.org/guide/reuse-jupyter-outputs#label-a-notebook-cell
 ```{code-cell} julia
@@ -76,16 +72,15 @@ fig
 
 ## Function domains
 
-- Describe the notion of for what values it makes sense to evaluate the function
+- Describe the notion of for what values it makes sense to evaluate the function (done)
 - Define domain formally
 - Define subdomains, i.e., subsets of the domain that are of interest
 - Discuss open and closed domains
 
 Going back to the population of Finland example, we may not know some values of the function, since the year 2100 has not happened yet.
 However, if we were to limit our years of interest to the range 1990-2024, then we could get all the data from [Statistics Finland](https://stat.fi) and have a fully defined function.
-This illustrates the importance of the set of input values, called the **domain**, of a function {math}`f`, or the set {math}`D` in {prf:ref}`function`.
-Similarly, the set {math}`E`, called the **codomain**, represents where the outputs {math}`f(x)` are located.
-With these two sets, a function can be described as {math}`f:X\to Y`. (Maybe ignore domain and just talk about range, or maybe not even that).
+This illustrates the importance of the set of input values, called the **domain**, of a function {math}`f`, or the set {math}`X` in {prf:ref}`def-function`.
+Similarly, the set {math}`Y`, called the **codomain**, represents where the outputs {math}`f(x)` are located. With these two sets, a function can be formally described as {math}`f: X \to Y`.
 
 ## Analysing a function
 
@@ -163,3 +158,5 @@ A function {math}`f:\reals^n\to\reals^m` is differentiable at a point {math}`x\i
 \lim_{h\to 0}\frac{\|f(x+h)-f(x)-J(h)\|}{\|h\|} = 0.
 ```
 ````
+
+Additional content... 
