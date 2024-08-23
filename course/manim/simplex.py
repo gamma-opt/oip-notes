@@ -13,6 +13,10 @@ Script:
 8. Simplex?
 ...
 Profit
+
+Ideas:
+- Change the title at certain points/fade it out
+- label constraints with color (either the text or add small marker), and the lines accordingly as well
 """
 
 class SimplexGiapetto(MovingCameraScene):
@@ -25,12 +29,13 @@ class SimplexGiapetto(MovingCameraScene):
         self.play(Write(text))
         return text
 
-    def replace_text(self, text_mobj, str, wait=1):
+    def replace_text(self, text_mobj, str, *, wait=1, t2c=None):
         """
         Transforms text_mobj to one with str, with some hardcoded settings
         """
-        tmp = Text(str, font_size=28).to_corner(DL)
+        tmp = Text(str, font_size=28, t2c=t2c).to_corner(DL)
         self.play(Transform(text_mobj, tmp))
+        self.remove(tmp)
         self.wait(wait)
 
     def construct(self):
@@ -122,6 +127,7 @@ class SimplexGiapetto(MovingCameraScene):
                 plane
             )
         )
+        self.remove(dummy_plane)
         #self.wait()
 
         ###
@@ -143,6 +149,7 @@ class SimplexGiapetto(MovingCameraScene):
             Restore(text_opt),
             FadeOut(text)
             )
+        self.remove(text)
         #self.wait()
 
         ###
@@ -194,6 +201,7 @@ class SimplexGiapetto(MovingCameraScene):
         )
         # not sure how to make this smoother
         self.play(Transform(area, temp))
+        self.remove(temp)
         #self.wait()
 
         ###
@@ -203,7 +211,7 @@ class SimplexGiapetto(MovingCameraScene):
         #self.wait()
 
         ###
-        # Highlight 2nd constraint
+        # Highlight 1st constraint
         ###
         self.play(FadeToColor(text_opt[0][14:24], color=YELLOW))
 
@@ -223,6 +231,7 @@ class SimplexGiapetto(MovingCameraScene):
         )
         # not sure how to make this smoother
         self.play(Transform(area, temp))
+        self.remove(temp)
         
 
         ###
@@ -234,6 +243,7 @@ class SimplexGiapetto(MovingCameraScene):
         ###
         ###
         self.play(FadeOut(text))
+        self.remove(text)
         self.wait()
         text = self.create_text("There are 5 vertices that are possibly the optimum.")
 
@@ -264,8 +274,8 @@ class SimplexGiapetto(MovingCameraScene):
         ###
         graph = VGroup(plane, c1, c2, c3, area, *dots)
         graph.save_state()
-        text_opt.save_state()
         self.play(FadeOut(graph), FadeOut(text))
+        self.remove(text)
         self.wait()
 
         ###
@@ -301,11 +311,12 @@ class SimplexGiapetto(MovingCameraScene):
                 ), color=RED)
         )
         self.wait(2)
-        tmp.restore()
+        self.play(tmp.animate.restore())
         self.play(
             text_opt2.animate.move_to(text_opt),
             FadeOut(text_opt, arrow)
         )
+        self.remove(text_opt)
 
         ###
         # Rewrite: nonnegativity
@@ -317,17 +328,271 @@ class SimplexGiapetto(MovingCameraScene):
         # Rewrite: free variables
         ###
         self.replace_text(text, "We will also rewrite the constraints so that the slack variables are left alone.")
-        text_opt3 = MathTex(r"""
-                       \max~&3x_1+2x_2 \\
-                       \mathop{\text{s.t.~}}&x_3= 100-2x_1-x_2 \\
-                       &x_4 = 80-x_1-x_2 \\
-                       &x_5 = 40-x_1 \\
-                       &x_1,\dots,x_5\geq 0
-                       """)
-        tmp = VGroup(text_opt2, arrow, text_opt3).arrange()
+        text_opt3 = MathTex(
+                       r"\max~&3x_1+2x_2 \\",
+                       r"\mathop{\text{s.t.~}}",r"&x_3= 100-2x_1-x_2 \\",
+                       r"&x_4 = 80-x_1-x_2 \\",
+                       r"&x_5 = 40-x_1 \\",
+                       r"&x_1,\dots,x_5\geq 0"
+                       )
+        text_opt3.save_state()
+        tmp = VGroup(text_opt2, arrow, text_opt3).arrange().save_state()
         self.play(
             FadeIn(arrow, text_opt3)
             )
+
+        self.play(
+            FadeToColor(Group(
+                text_opt2[0][21:23],
+                text_opt2[0][33:35],
+                text_opt2[0][41:43],
+                text_opt3[2][0:2],
+                text_opt3[3][0:2],
+                text_opt3[4][0:2]
+                ), color=RED)
+        )
+        self.wait()
+        self.play(
+            text_opt3.animate.center(),
+            FadeOut(text_opt2, arrow, text)
+        )
+        self.remove(text_opt2, arrow, text)
+        text_opt = text_opt3
+
+        ###
+        # Dictionary
+        ###
+        text = self.create_text('The variables on the left make up our "dictionary".').save_state()
+        self.play(FadeToColor(Group(
+            text[30:-1]
+        ), color=RED))
+        self.replace_text(text, "We will rewrite the objective variables in terms of those in the dictionary.", t2c={"dictionary":RED})
+        self.play(FadeToColor(Group(
+            text[16:34],
+            text_opt[0][4:6],
+            text_opt[0][8:10]
+        ), color=YELLOW))
+        self.wait()
+
+        self.play(
+            text_opt.animate.restore(),
+        )
+        self.replace_text(text, "In doing so, we will make all variables in the objective function have a negative sign.")
+        self.replace_text(text, "Since these variables have negative signs and are nonegative, maximisation is achieved when they are zero.")
+        self.play(FadeOut(text))
+        self.remove(text)
+
+        ###
+        # Go back to graph
+        ###
+        self.play(
+            FadeIn(graph),
+            text_opt.animate.to_edge(RIGHT)
+        )
+
+        ###
+        # Pick x_1 to rewrite with x_5
+        ###
+        text = self.create_text("We need to pick which variable to rewrite.")
+        self.replace_text(text, "And also which constraint to rewrite with.")
+        self.replace_text(text, "Suppose we pick this pair.")
+        self.play(
+            FadeToColor(text_opt[0][4:6], color=YELLOW),
+            FadeToColor(text_opt[4][0:2], color=RED)
+            )
+        
+        # rewrite constraint
+        tmp = MathTex(r"\max~&3{{x_1}}+2x_2 \\",
+                      r"\mathop{\text{s.t.~}}",
+                      r"&x_3= 100-2x_1-x_2 \\",
+                      r"&x_4 = 80-x_1-x_2 \\",
+                      r"&x_1 = 40-x_5 \\",
+                      r"&x_1,\dots,x_5\geq 0"
+                       ).move_to(text_opt)
+        self.play(TransformMatchingShapes(text_opt, tmp))
+        self.remove(text_opt)
+        text_opt = tmp
+
+        # Swap constraints
+        height = text_opt[4].get_y() - text_opt[5].get_y()
+        self.play(
+            text_opt[4].animate.shift(height*DOWN),
+            text_opt[5].animate.shift(height*DOWN),
+            text_opt[6].animate.shift(2*height*UP)
+        )
+
+        # Substitute
+        target = MathTex(r"\max~&", r"3{{(40-x_5)}}+2x_2 \\",
+                         r"\mathop{\text{s.t.~}}",
+                         r"&x_1 = 40-x_5 \\",
+                         r"&x_3= 100-2{{x_1}}-x_2 \\",
+                         r"&x_4 = 80-{{x_1}}-x_2 \\",
+                         r"&x_1,\dots,x_5\geq 0").move_to(text_opt)
+        moving = MathTex("{{(40-x_5)}}").move_to(text_opt[6], RIGHT)
+        self.play(TransformMatchingTex(VGroup(text_opt, moving), target))
+        self.remove(text_opt, moving)
+        text_opt = target
+
+        # Expand
+        tmp = MathTex(r"120+2x_2-3x_5 \\").move_to(text_opt[3], UR)
+        self.play(Transform(Group(*text_opt[1:4]), tmp))
+        self.remove(tmp)
+
+        self.replace_text(text, "Since the new variable has a negative sign, we want to set it to zero.")
+        self.replace_text(text, "Doing so means that x1 is equal to 40.")
+        self.replace_text(text, "So we have moved from this point ...")
+        self.play(Flash(dots[0]))
+        self.replace_text(text, "... to this point.")
+        self.play(Flash(dots[1]))
+
+        # Substitute
+        ## Awkward animation here
+        self.replace_text(text, "We substitute the remaining x1s here...")
+        target = MathTex(r"\max~&120+2x_2-3x_5 \\",
+                         r"\mathop{\text{s.t.~}}",
+                         r"&x_1 = 40-x_5 \\",
+                         r"&x_3 =", r"100-2{{(40-x_5)}}-x_2 \\",
+                         r"&x_4 =", r"80-{{(40-x_5)}}-x_2 \\",
+                         r"&x_1,\dots,x_5\geq 0").to_edge(RIGHT)
+        self.play(text_opt.animate.align_to(target, UL))
+        moving = MathTex("{{(40-x_5)}}").move_to(text_opt[5], RIGHT)
+        self.play(TransformMatchingTex(VGroup(text_opt, moving), target))
+        self.remove(text_opt, moving)
+        text_opt = target
+
+        # Expand
+        tmp1 = MathTex(r"20-x_2+2x_5 \\").align_to(text_opt[4], UL)
+        tmp2 = MathTex(r"40-x_2+x_5 \\").align_to(text_opt[8], UL)
+        self.play(
+            Transform(Group(*text_opt[4:7]), tmp1),
+            Transform(Group(*text_opt[8:11]), tmp2)
+            )
+        self.remove(tmp1, tmp2)
+        self.play(text_opt.animate.to_edge(RIGHT))
+
+        ###
+        # Pick x_2 to rewrite with x_1
+        ###
+        self.replace_text(text, "The objective still contains variables without a negative sign.")
+        self.replace_text(text, "So we continue similarly.")
+        self.replace_text(text, "Let's pick these two.")
+        self.play(
+            FadeToColor(text_opt[0][8:10], color=YELLOW),
+            FadeToColor(text_opt[3][0:2], color=RED)
+            )
+        
+        # Rewrite constraint
+        ## Awkward
+        tmp = MathTex(r"&x_2 = 20-x_3+2x_5 \\").move_to(text_opt[3], LEFT)
+        self.play(Transform(Group(*text_opt[3:7]), tmp))
+        self.wait()
+
+        # Substitute
+        target = MathTex(r"\max~&", "120+2", "{{(20-x_3+2x_5)}}", r"-3x_5 \\",
+                         r"\mathop{\text{s.t.~}}",
+                         r"&x_1 = 40-x_5 \\",
+                         r"&x_2 = 20-x_3+2x_5 \\",
+                         r"&x_4 = 40-{{x_2}}+x_5 \\",
+                         r"&x_1,\dots,x_5\geq 0").to_edge(RIGHT)
+        self.play(text_opt.animate.align_to(target, UL))
+        moving = MathTex("{{(20-x_3+2x_5)}}").move_to(text_opt[5], RIGHT)
+        self.play(TransformMatchingTex(VGroup(text_opt, moving), target))
+        text_opt = target
+        self.wait()
+
+        # Expand
+        tmp = MathTex(r"160-2x_3+x_5 \\").move_to(text_opt[1], UL)
+        self.play(Transform(Group(*text_opt[1:4]), tmp))
+        self.play(text_opt.animate.to_edge(RIGHT))
+
+        self.replace_text(text, "Doing so, we move from here ...")
+        self.play(Flash(dots[1]))
+        self.replace_text(text, "... to here.")
+        self.play(Flash(dots[2]))
+
+        # Substitute
+        ## Awkward animation here
+        self.replace_text(text, "We substitute the remaining x2 ...")
+        target = MathTex(r"\max~&160-2x_3+{{x_5}} \\",
+                         r"\mathop{\text{s.t.~}}",
+                         r"&x_1 = 40-x_5 \\",
+                         r"&x_2 = 20-x_3+2x_5 \\",
+                         r"&x_4 =", r"40-{{(20-x_3+2x_5)}}+x_5 \\",
+                         r"&x_1,\dots,x_5\geq 0").to_edge(RIGHT)
+        self.play(text_opt.animate.align_to(target, UL))
+        moving = MathTex("{{(20-x_3+2x_5)}}").move_to(text_opt[6], RIGHT)
+        self.play(TransformMatchingTex(VGroup(text_opt, moving), target))
+        text_opt = target
+
+        # Expand
+        tmp = MathTex(r"20+x_3-x_5 \\").align_to(text_opt[7], UL)
+        self.play(Transform(Group(*text_opt[7:10]), tmp))
+        self.play(text_opt.animate.to_edge(RIGHT))
+
+        ###
+        # Pick x_5 to rewrite with x_4
+        ###
+        self.replace_text(text, "Now, these two.")
+        self.play(
+            FadeToColor(text_opt[1][0:2], color=YELLOW),
+            FadeToColor(text_opt[6][0:2], color=RED)
+            )
+        
+        # Rewrite constraint
+        ## Awkward
+        tmp = MathTex(r"&x_5 = 20+x_3-x_4 \\").move_to(text_opt[6], LEFT)
+        self.play(Transform(VGroup(*text_opt[6:10]), tmp))
+        self.wait()
+
+        # Substitute
+        target = MathTex(r"\max~&{{160-2x_3+}}{{(20+x_3-x_4)}} \\",
+                         r"\mathop{\text{s.t.~}}",
+                         r"&x_1 = 40-x_5 \\",
+                         r"&x_2 = 20-x_3+2{{x_5}} \\",
+                         r"&x_5 = 20+x_3-x_4 \\",
+                         r"&x_1,\dots,x_5\geq 0").to_edge(RIGHT)
+        self.play(text_opt.animate.align_to(target, UL))
+        moving = MathTex("{{(20+x_3-x_4)}}").move_to(text_opt[7], RIGHT)
+        self.play(TransformMatchingTex(VGroup(text_opt, moving), target))
+        text_opt = target
+        self.wait()
+
+        # Expand
+        tmp = MathTex(r"180-x_3-x_4 \\").move_to(text_opt[1], UL)
+        self.play(Transform(Group(*text_opt[1:4]), tmp))
+        self.play(text_opt.animate.to_edge(RIGHT))
+
+        # Substitute
+        self.replace_text(text, "Substitute the remaining x5 ...")
+        target = MathTex(r"\max~&180-x_3-x_4 \\",
+                         r"\mathop{\text{s.t.~}}",
+                         r"&x_1 = 40-x_5 \\",
+                         r"&x_2 = {{20-x_3+2}}{{(20+x_3-x_4)}} \\",
+                         r"&x_5 = 20+x_3-x_4 \\",
+                         r"&x_1,\dots,x_5\geq 0").to_edge(RIGHT)
+        self.play(text_opt.animate.align_to(target, UL))
+        moving = MathTex("{{(20+x_3-x_4)}}").move_to(text_opt[5], RIGHT)
+        self.play(TransformMatchingTex(VGroup(text_opt, moving), target))
+        text_opt = target
+
+        # Expand
+        tmp = MathTex(r"60+x_3-2x_4 \\").align_to(text_opt[4], UL)
+        self.play(Transform(Group(*text_opt[4:7]), tmp))
+        self.play(text_opt.animate.to_edge(RIGHT))
+
+        self.replace_text(text, "Now, the objective contains only negative signs.")
+        self.replace_text(text, "So we can infer that the maximum value is 180.")
+        self.replace_text(text, "Setting th objective variables to zero, we see that x1=40.")
+        text_opt.save_state()
+        self.play(FadeToColor(text_opt[2], color=YELLOW))
+        self.play(Restore(text_opt))
+        self.replace_text(text, "And x2=60.")
+        self.play(FadeToColor(Group(text_opt[3:5]), color=YELLOW))
+        self.play(Restore(text_opt))
+        self.replace_text(text, "We move from here ...")
+        self.play(Flash(dots[2]))
+        self.replace_text(text, "... to here.")
+        self.play(Flash(dots[3]))
 
 
         self.wait(5)
