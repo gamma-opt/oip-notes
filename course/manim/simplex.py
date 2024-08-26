@@ -2,22 +2,12 @@ import numpy as np
 from manim import *
 
 """
-Script:
-1. Have a 2d plane
-2. write opt problem on side
-3. Display current feasible region (everywhere)
-4. highlight nonnegativity constraints and zoom in to first quadrant
-5. one by one, highlight remaining constraints and constrict feasible region
-6. Talk about why we care about vertices?
-7. Mark all vertices
-8. Simplex?
-...
-Profit
-
 Ideas:
 - Change the title at certain points/fade it out
 - label constraints with color (either the text or add small marker), and the lines accordingly as well
 """
+
+TEXT_FONT_SIZE = 32
 
 class SimplexGiapetto(MovingCameraScene):
 
@@ -25,7 +15,7 @@ class SimplexGiapetto(MovingCameraScene):
         """
         Creates the text at the bottom left corner
         """
-        text = Text(str, font_size=28).to_corner(DL)
+        text = Tex(str, font_size=TEXT_FONT_SIZE).to_corner(DL)
         self.play(Write(text))
         return text
 
@@ -33,7 +23,13 @@ class SimplexGiapetto(MovingCameraScene):
         """
         Transforms text_mobj to one with str, with some hardcoded settings
         """
-        tmp = Text(str, font_size=28, t2c=t2c).to_corner(DL)
+        if type(str) == tuple:
+            tmp = Tex(*str, font_size=TEXT_FONT_SIZE).to_corner(DL)
+        else:    
+            tmp = Tex(str, font_size=TEXT_FONT_SIZE).to_corner(DL)
+        if t2c:
+            for k,v in t2c.items():
+                tmp.set_color_by_tex(k, v)
         self.play(Transform(text_mobj, tmp))
         self.remove(tmp)
         self.wait(wait)
@@ -68,6 +64,7 @@ class SimplexGiapetto(MovingCameraScene):
         )
         dummy_plane = VGroup(dummy_ax, dummy_labs)
         self.play(FadeIn(dummy_plane))
+        self.wait()
 
         self.play(
             dummy_plane.animate.next_to(title, DOWN).shift(1.8*RIGHT)
@@ -89,7 +86,7 @@ class SimplexGiapetto(MovingCameraScene):
         ###
         ###
         self.replace_text(text, "What is the feasible region for this problem?")
-        self.replace_text(text, "We can start by considering the nonnegativity constraints.")
+        self.replace_text(text, "We can start by considering the nonnegativity constraints.", wait=0)
 
         ###
         # Highlight nonnegativity constraints
@@ -97,7 +94,6 @@ class SimplexGiapetto(MovingCameraScene):
         # Can do this with a framebox or color
         self.play(FadeToColor(text[31:-1], color=YELLOW))
         self.play(FadeToColor(text_opt[0][37:], color=YELLOW))
-        self.wait()
 
         ###
         ###
@@ -128,7 +124,6 @@ class SimplexGiapetto(MovingCameraScene):
             )
         )
         self.remove(dummy_plane)
-        #self.wait()
 
         ###
         # Highlight first quadrant
@@ -140,7 +135,6 @@ class SimplexGiapetto(MovingCameraScene):
             opacity=0.5
         )
         self.play(DrawBorderThenFill(area))
-        #self.wait()
 
         ###
         # Remove constraint highlight
@@ -150,7 +144,6 @@ class SimplexGiapetto(MovingCameraScene):
             FadeOut(text)
             )
         self.remove(text)
-        #self.wait()
 
         ###
         ###
@@ -172,13 +165,11 @@ class SimplexGiapetto(MovingCameraScene):
         self.play(Create(c3))
         new_width = np.abs(np.subtract(*ax.c2p([[0,0],[40,0]])[:,0]))  # calculate the actual distance between points 0 and 40 on the x-axis
         self.play(area.animate.stretch_to_fit_width(new_width).align_to(c3, RIGHT))
-        #self.wait()
         
         ###
         # Remove constraint highlight
         ###
         self.play(Restore(text_opt))
-        #self.wait()
 
         ###
         # Highlight 2nd constraint
@@ -202,13 +193,11 @@ class SimplexGiapetto(MovingCameraScene):
         # not sure how to make this smoother
         self.play(Transform(area, temp))
         self.remove(temp)
-        #self.wait()
 
         ###
         # Remove constraint highlight
         ###
         self.play(Restore(text_opt))
-        #self.wait()
 
         ###
         # Highlight 1st constraint
@@ -238,7 +227,6 @@ class SimplexGiapetto(MovingCameraScene):
         # Remove constraint highlight
         ###
         self.play(Restore(text_opt))
-        #self.wait()
 
         ###
         ###
@@ -259,7 +247,9 @@ class SimplexGiapetto(MovingCameraScene):
             [0,  80]
         ]
         dots = [Dot(c, color=RED) for c in ax.c2p(vertex_coords)]
-        self.play(Create(VGroup(*dots)))
+        for dot in dots:
+            self.play(Create(dot), Flash(dot))
+        #self.play(Create(VGroup(*dots)), *[Flash(dot) for dot in dots])
         self.wait()
 
         ###
@@ -267,7 +257,7 @@ class SimplexGiapetto(MovingCameraScene):
         self.replace_text(text, "With only 5 points, one could try bruteforcing.")
         self.replace_text(text, "But that is not feasible in larger problems.")
         self.replace_text(text, "We need a smarter solution.")
-        self.replace_text(text, "The simplex algorithm offers a smart way of iterating through the vertices.")
+        self.replace_text(text, "The simplex algorithm offers a smart way of iterating through the vertices.", wait=1.5)
 
         ###
         # Save before Simplex explanation
@@ -362,13 +352,13 @@ class SimplexGiapetto(MovingCameraScene):
         ###
         # Dictionary
         ###
-        text = self.create_text('The variables on the left make up our "dictionary".').save_state()
+        text = self.create_text('The variables on the left make up our "dictionary".')
         self.play(FadeToColor(Group(
-            text[30:-1]
+            text[0][30:-1]
         ), color=RED))
-        self.replace_text(text, "We will rewrite the objective variables in terms of those in the dictionary.", t2c={"dictionary":RED})
+        self.replace_text(text, ("We will rewrite the objective variables in terms of those in the ", "dictionary."), t2c={"dictionary":RED})
         self.play(FadeToColor(Group(
-            text[16:34],
+            text[0][16:34],
             text_opt[0][4:6],
             text_opt[0][8:10]
         ), color=YELLOW))
@@ -377,8 +367,8 @@ class SimplexGiapetto(MovingCameraScene):
         self.play(
             text_opt.animate.restore(),
         )
-        self.replace_text(text, "In doing so, we will make all variables in the objective function have a negative sign.")
-        self.replace_text(text, "Since these variables have negative signs and are nonegative, maximisation is achieved when they are zero.")
+        self.replace_text(text, "In doing so, we will make all variables in the objective function have a negative sign.", wait=1.5)
+        self.replace_text(text, "Since these variables have negative signs and are nonegative, maximisation is achieved when they are zero.", wait=1.5)
         self.play(FadeOut(text))
         self.remove(text)
 
@@ -395,11 +385,12 @@ class SimplexGiapetto(MovingCameraScene):
         ###
         text = self.create_text("We need to pick which variable to rewrite.")
         self.replace_text(text, "And also which constraint to rewrite with.")
-        self.replace_text(text, "Suppose we pick this pair.")
+        self.replace_text(text, "Suppose we pick this pair.", wait=0.5)
         self.play(
             FadeToColor(text_opt[0][4:6], color=YELLOW),
             FadeToColor(text_opt[4][0:2], color=RED)
             )
+        self.wait()
         
         # rewrite constraint
         tmp = MathTex(r"\max~&3{{x_1}}+2x_2 \\",
@@ -432,6 +423,7 @@ class SimplexGiapetto(MovingCameraScene):
         self.play(TransformMatchingTex(VGroup(text_opt, moving), target))
         self.remove(text_opt, moving)
         text_opt = target
+        self.wait(1)
 
         # Expand
         tmp = MathTex(r"120+2x_2-3x_5 \\").move_to(text_opt[3], UR)
@@ -439,7 +431,7 @@ class SimplexGiapetto(MovingCameraScene):
         self.remove(tmp)
 
         self.replace_text(text, "Since the new variable has a negative sign, we want to set it to zero.")
-        self.replace_text(text, "Doing so means that x1 is equal to 40.")
+        self.replace_text(text, "Doing so means that $x_1$ is equal to 40.")
         self.replace_text(text, "So we have moved from this point ...")
         self.play(Flash(dots[0]))
         self.replace_text(text, "... to this point.")
@@ -447,7 +439,7 @@ class SimplexGiapetto(MovingCameraScene):
 
         # Substitute
         ## Awkward animation here
-        self.replace_text(text, "We substitute the remaining x1s here...")
+        self.replace_text(text, "We substitute the remaining $x_1$s here...")
         target = MathTex(r"\max~&120+2x_2-3x_5 \\",
                          r"\mathop{\text{s.t.~}}",
                          r"&x_1 = 40-x_5 \\",
@@ -459,6 +451,7 @@ class SimplexGiapetto(MovingCameraScene):
         self.play(TransformMatchingTex(VGroup(text_opt, moving), target))
         self.remove(text_opt, moving)
         text_opt = target
+        self.wait()
 
         # Expand
         tmp1 = MathTex(r"20-x_2+2x_5 \\").align_to(text_opt[4], UL)
@@ -512,7 +505,7 @@ class SimplexGiapetto(MovingCameraScene):
 
         # Substitute
         ## Awkward animation here
-        self.replace_text(text, "We substitute the remaining x2 ...")
+        self.replace_text(text, "We substitute the remaining $x_2$ ...")
         target = MathTex(r"\max~&160-2x_3+{{x_5}} \\",
                          r"\mathop{\text{s.t.~}}",
                          r"&x_1 = 40-x_5 \\",
@@ -523,6 +516,7 @@ class SimplexGiapetto(MovingCameraScene):
         moving = MathTex("{{(20-x_3+2x_5)}}").move_to(text_opt[6], RIGHT)
         self.play(TransformMatchingTex(VGroup(text_opt, moving), target))
         text_opt = target
+        self.wait()
 
         # Expand
         tmp = MathTex(r"20+x_3-x_5 \\").align_to(text_opt[7], UL)
@@ -563,7 +557,7 @@ class SimplexGiapetto(MovingCameraScene):
         self.play(text_opt.animate.to_edge(RIGHT))
 
         # Substitute
-        self.replace_text(text, "Substitute the remaining x5 ...")
+        self.replace_text(text, "Substitute the remaining $x_5$ ...")
         target = MathTex(r"\max~&180-x_3-x_4 \\",
                          r"\mathop{\text{s.t.~}}",
                          r"&x_1 = 40-x_5 \\",
@@ -574,6 +568,7 @@ class SimplexGiapetto(MovingCameraScene):
         moving = MathTex("{{(20+x_3-x_4)}}").move_to(text_opt[5], RIGHT)
         self.play(TransformMatchingTex(VGroup(text_opt, moving), target))
         text_opt = target
+        self.wait()
 
         # Expand
         tmp = MathTex(r"60+x_3-2x_4 \\").align_to(text_opt[4], UL)
@@ -582,11 +577,11 @@ class SimplexGiapetto(MovingCameraScene):
 
         self.replace_text(text, "Now, the objective contains only negative signs.")
         self.replace_text(text, "So we can infer that the maximum value is 180.")
-        self.replace_text(text, "Setting th objective variables to zero, we see that x1=40.")
+        self.replace_text(text, "Setting the objective variables to zero, we see that $x_1=40$.")
         text_opt.save_state()
         self.play(FadeToColor(text_opt[2], color=YELLOW))
         self.play(Restore(text_opt))
-        self.replace_text(text, "And x2=60.")
+        self.replace_text(text, "And $x_2=60$.")
         self.play(FadeToColor(Group(text_opt[3:5]), color=YELLOW))
         self.play(Restore(text_opt))
         self.replace_text(text, "We move from here ...")
