@@ -70,6 +70,7 @@ It is perfectly fine to write $X = \braces{[x,y]\in \reals^2 : x \le C, x + y = 
 
 ```
 
+(p1l4:first-model)=
 ## Our first mathematical programming model
 
 Let us consider a first example. A carpenter wants to plan his production of tables and chairs such that his income is maximised. Every table produced is sold for 1000\$ and every chair produced is sold for 500\$.
