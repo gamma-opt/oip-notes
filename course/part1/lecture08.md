@@ -59,3 +59,34 @@ print("\nTotal of tables: ", value(x_t), "\nTotal of chairs: ", value(x_c), "\n"
 
 ## Modelling true/false statements using binary variables
 
+Another tool we will need in our modelling toolkit are _binary variables_, which allow us to formulate "yes or no" decisions among other uses.
+
+
+## Logical conditionals: Big $M$
+
+Sometimes, one may want to model conditions of the form "if A, then B".
+For example, consider a problem where a firm is considering opening factories at different locations $i$, in order to maximize the total amount of production $\sum x_i$.
+Here, we need $x_i=0$ if location $i$ is not selected as for a facility, but $x_i\geq 0$ otherwise.
+Say $y_i$ is a binary variable that indicates if the location is selected or not, then we can write the above as the logical statement
+
+```{math}
+(y_i \land x_i\geq 0) \lor (\neg y_i \land x_i=0)
+```
+
+To write this in a way an optimization solver will understand, we can reformulate it to the following:
+
+```{math}
+x_i &\leq M y_i \\
+x_i &\geq 0 \\
+y_i &\in \{0,1\}
+```
+
+where $M$ is a sufficiently big number, hence the name "Big $M$".
+What exactly is happening here?
+Suppose $y_i=0$.
+This means that there won't be a factory at this location, and thus there cannot be any production.
+The constraint $x_i\leq M y_i$ enforces that by becoming $x_i\leq 0$ (in conjunction with $x_i\geq 0$).
+
+Now suppose $y_i=1$.
+Here, production should be permissible.
+For $M$ that is big enough, such as an inherently unrealistic amount of production, then the constraint functionally becomes $x_i\leq \infty$, becoming irrelevant for the determination of the optimal value of $x_i$.
