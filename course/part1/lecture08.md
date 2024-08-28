@@ -1,3 +1,18 @@
+---
+jupytext:
+  cell_metadata_filter: -all
+  formats: md:myst
+  text_representation:
+    extension: .md
+    format_name: myst
+    format_version: 0.13
+    jupytext_version: 1.16.2
+kernelspec:
+  display_name: Julia 1.10.4
+  language: julia
+  name: julia-1.10
+---
+
 # Lecture 8 - modelling integer decisions
 
 Next, we focus on extending the types of variables we can consider in our optimisation models. An important type of variable that allows us to more realistic model problems is to consider them as *integer* valued. Essentially, we are constraining such variables to only take values from the set of integer numbers, typically represented by $\mathbb{Z}$.
@@ -22,7 +37,25 @@ $x \in \mathbb{Z}_+$ means that $x$ is non-negative and integer valuated. Some r
 
 Similarly, modelling this require a simple adaptation in the code.
 
-#TODO: Add the carpenters problem with integer variables.
+```{code-cell}
+using JuMP, HiGHS
+
+m = Model(HiGHS.Optimizer)
+
+@variable(m, x_t >= 0, Int)
+@variable(m, x_c >= 0, Int)
+
+@objective(m, Max, 1000*x_t + 500*x_c)
+
+@constraint(m, 3*x_t + 5*x_c <= 40)
+@constraint(m, 7*x_t + 4*x_c <= 60)
+
+optimize!(m)
+
+print("\nSOLUTION!!!\n")
+print("\nTotal of tables: ", value(x_t), "\nTotal of chairs: ", value(x_c), "\n")
+```
+
 
 ## Modelling true/false statements using binary variables
 
