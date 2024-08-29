@@ -59,7 +59,27 @@ print("\nTotal of tables: ", value(x_t), "\nTotal of chairs: ", value(x_c), "\n"
 
 ## Modelling true/false statements using binary variables
 
-Another tool we will need in our modelling toolkit are _binary variables_, which allow us to formulate "yes or no" decisions among other uses.
+Currently based on {cite}`williams_model_2013{Chapter 9.2}`.
+
+Another tool we will need in our modelling toolkit are _binary variables_ (also referred to as _0-1 variables_).
+Binary variables, among other uses, allow us to formulate "yes or no" decisions or indicate whether some condition is satisfied or not.
+Binary variables are well-suited to the expression of logical statements.
+Some examples are:
+- If we manufacture product A, we must also manufacture product B or at least one of products C and D.
+- No more than five of the ingredients in this class may be included in the blend.
+- Either operation A must be finished before operation B starts or vice versa.
+
+These statements can be formulated in propositional logic using _connectives_, such as $\land, \lor, \implies$ and $\neg$.
+We can formulate these expressions into constraint equations as follows.
+Suppose $X_i$ stands for the proposition $\delta_i=1$, where $\delta_i$ are binary variables.
+Then
+```{math}
+X_1\lor X_2 &\text{ is equivalent to } \delta_1+\delta_2\geq 1, \\
+X_1\land X_2 &\text{ is equivalent to } \delta_1=1,\delta_2=1, \\
+\neg X_1 &\text{ is equivalent to } \delta_1=0, \\
+X_1\implies X_2 &\text{ is equivalent to } \delta_1-\delta_2\leq 0.
+```
+
 
 
 ## Logical conditionals: Big $M$
