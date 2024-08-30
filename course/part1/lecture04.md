@@ -111,7 +111,7 @@ The carpenter has raw material and labour availability constraints. These can be
 \begin{align}
 \text{total amount used}&\hspace{0.7cm} \text{total amount available} \\
 3x_t + 5x_c& \leq 40 \text{ (labour)}\\
-4x_t + 7x_c& \leq 60 \text{ (wood)}  \\
+7x_t + 4x_c& \leq 60 \text{ (wood)}  \\
 \end{align}
 ```
 
@@ -121,7 +121,7 @@ Finally, the mathematical programming model that maximises the income of the car
 \begin{align}
 \text{maximise}_{x_t,x_c} \ &1000x_t + 500x_c \\
 \text{subject to: } &3x_t + 5x_c \leq 40\\
-&4x_t + 7x_c \leq 60\\
+&7x_t + 4x_c \leq 60\\
 &x_t, x_c \geq 0.
 \end{align}
 ```
