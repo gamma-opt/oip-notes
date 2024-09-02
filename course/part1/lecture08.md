@@ -61,6 +61,23 @@ print("\nTotal of tables: ", value(x_t), "\nTotal of chairs: ", value(x_c), "\n"
 
 One particular type of integer decision variables considerably augment our modelling capabilites. Specifically, binary variables, i.e., $x \in \{0,1\}$ are useful for modelling on/off or true/false decisions, which often play central roles in modelling real-world problems.
 
+More generally, binary variables are well-suited to the expression of logical statements.
+Some examples are:
+- If we manufacture product A, we must also manufacture product B or at least one of products C and D.
+- No more than five of the ingredients in this class may be included in the blend.
+- Either operation A must be finished before operation B starts or vice versa.
+
+These statements can be formulated in propositional logic using _connectives_, such as $\land, \lor, \implies$ and $\neg$.
+We can formulate these expressions into constraint equations as follows.
+Suppose $X_i$ stands for the proposition $\delta_i=1$, where $\delta_i$ are binary variables.
+Then
+```{math}
+X_1\lor X_2 &\text{ is equivalent to } \delta_1+\delta_2\geq 1, \\
+X_1\land X_2 &\text{ is equivalent to } \delta_1=1,\delta_2=1, \\
+\neg X_1 &\text{ is equivalent to } \delta_1=0, \\
+X_1\implies X_2 &\text{ is equivalent to } \delta_1-\delta_2\leq 0.
+```
+
 Let us give a couple of examples of some modelling capabilities possible because of binary variables.
 
 ### Modelling fixed costs using big-M constraints
