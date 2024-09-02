@@ -65,27 +65,28 @@ Let us give a couple of examples of some modelling capabilities possible because
 
 ### Modelling fixed costs using big-M constraints
 
-Let $p$ and $F$ be scalars. Assume that our cost function $f(x)$ is composed not only by a variable cost, say $px$, and also a fixed cost $F$ that must be incurred only if $x > 0$. More precisely:
+Let $p$ and $F$ be scalars. Assume that our cost function $f(x)$ is composed not only of a variable cost, say $px$, but also a fixed cost $F$ that must be incurred only if $x > 0$. More precisely:
 
 ```{math}
-f(x) = \begin{cases} p^\top x + F, \text{ if } x > 0 \\ 0, if $x = 0.$\end{cases}
+f(x) = \begin{cases} p^\top x + F, \text{ if } x > 0 \\ 0, \text{ if } x = 0.\end{cases}
 ```
 
-If we want to minimise $f(x)$ such that $x \in X$. In other to represent its behaviour correctly we require an additional binary variable. Let $y \in \braces{0,1}$ be this variable. Then, minimising $f(x)$ is equivalent to minimising the following optimisation problem:
+We want to minimise $f(x)$ such that $x \in X$. In order to represent its behaviour correctly we require an additional binary variable. Let $y \in \braces{0,1}$ be this variable. Then, minimising $f(x)$ is equivalent to minimising the following optimisation problem:
 
 ```{math}
 \mini_{x,y} & px  + Fy \\
 \st & x \le My \\
-x \in X \\
-y \in \{0,1\},
+& x \in X \\
+& y \in \{0,1\},
 ```
-where $M$ is sufficiently large constant, often referred to as a *big M*. Notice how the constraint plays a role in guaranteeing that the objective function behaves as we expect. If $x=0$, the minimisation naturally *pushes* $y$ to be zero, as it would otherwise be suboptimal to pay $F$ (by setting $y=1$) but have $x = 0$. Analogously, for any $x > 0 $, $y$ must be set to $1$, which automatically incurs the cost $F$ in the objective function. 
+where $M$ is sufficiently large constant, often referred to as a *big M*. Notice how the constraint plays a role in guaranteeing that the objective function behaves as we expect. If $x=0$, the minimisation naturally *pushes* $y$ to be zero, as it would otherwise be suboptimal to pay $F$ (by setting $y=1$). Analogously, for any $x > 0 $, $y$ must be set to $1$, which automatically incurs the cost $F$ in the objective function. 
 
-```{note} Beware of big M constants
+```{admonition} Beware of big M constants
+:class: warning
 Big M constants must have their value carefully set. Set too small, they may artificially constraint the problem; set too large, they may compromise computational performance.
 ```
 
-Let's revisit the carpenter's problem from {ref}`p1l4:first-model`as an example. Assume that in other to start producing tables and chairs, the carpenter must invest in acquiring tools. The tools required for making tables cost $100$ and those for making chairs cost $200$. How can we modify the original model to consider these new requirements?
+Let's revisit the carpenter's problem from {numref}`p1l4:first-model` as an example. Assume that in other to start producing tables and chairs, the carpenter must invest in acquiring tools. The tools required for making tables cost $100$ and those for making chairs cost $200$. How can we modify the original model to consider these new requirements?
 
 For that, we must define two additional binary variables, namely $y_t$ and $y_c$ that assume value 1 if the tools for making chairs and tables are acquired. Then, original model can be modified as follows
 
@@ -110,8 +111,10 @@ Another useful modelling capability that binary variables allows it to model *di
 
 Suppose we have two constraints , say $a_1^\top x \le b_1$ and $a_2^\top x \le b_2$ such that only one of them must hold, but not both simultaneously. To model that, we once again need a binary variable $y \in \{0,1\}$ that will take value $y=1$ if one of the constraints, say $a_1^\top x \le b_1$, is enforced and 0 if the other is enforced. Notice that this implies that they are related by an exclusive or (XOR) condition. This can be modelled by the following set of constraints
 
+% \top doesn't render well without a line above
 ```{math}
-a_1^\top x \le b_1 + M(1 - y)
+\\
+a_1^\top x \le b_1 + M(1 - y) \\
 a_2^\top x \le b_2 + My,
 ```
 
@@ -159,8 +162,8 @@ The updated carpenter's model becomes
 Notice that in this case we used two variables, $y_t^1$ and $y_t^2$, instead of only one. Clearly, they are equivalent, but the latter require us to explicitly state $y_t^1 + y_t^2 = 1$ since it requires and exclusive or conditions. This is indeed how we would generalise this idea to consider multiple disjunctive constraints. More formally, if we have an arbitrary number of disjunctions $a_i^\top x \le b_i$ with $i \in [N]$, we can model then as
 
 ```{math}
-  \begin{align}
-  & a_i^\top x \le b_i + M(1-y_i) \\ 
-  & \sum_{i \in [N]} y_i = 1. 
-  \end{align}
+\begin{align}
+& a_i^\top x \le b_i + M(1-y_i) \\ 
+& \sum_{i \in [N]} y_i = 1. 
+\end{align}
 ```
