@@ -103,13 +103,13 @@ where $M$ is sufficiently large constant, often referred to as a *big M*. Notice
 Big M constants must have their value carefully set. Set too small, they may artificially constraint the problem; set too large, they may compromise computational performance.
 ```
 
-Let's revisit the carpenter's problem from {numref}`p1l4:first-model` as an example. Assume that in other to start producing tables and chairs, the carpenter must invest in acquiring tools. The tools required for making tables cost $100$ and those for making chairs cost $200$. How can we modify the original model to consider these new requirements?
+Let's revisit the carpenter's problem from {numref}`p1l4:first-model` as an example. Assume that in other to start producing tables and chairs, the carpenter must invest in acquiring tools. The tools required for making tables cost $5000$ and those for making chairs cost $600$. How can we modify the original model to consider these new requirements?
 
 For that, we must define two additional binary variables, namely $y_t$ and $y_c$ that assume value 1 if the tools for making chairs and tables are acquired. Then, original model can be modified as follows
 
 ```{math}
 \begin{align}
-  \text{maximise}_{x_t,x_c} \ &1000x_t + 500x_c + 100y_t + 200y_c\\
+  \text{maximise}_{x_t,x_c} \ &1000x_t + 500x_c - 5000y_t - 600y_c\\
   \text{subject to: } 
   &3x_t + 5x_c \leq 40\\
   &7x_t + 4x_c \leq 60\\
@@ -120,7 +120,33 @@ For that, we must define two additional binary variables, namely $y_t$ and $y_c$
 \end{align}
 ```
 
-%TODO: Add code for this and solution. Play with the fixed costs so it gives up producing tables or chairs.
+We can implement this similarly as before.
+
+```{code-cell}
+m = Model(HiGHS.Optimizer)
+
+M = 100
+
+@variable(m, x_t >= 0, Int)
+@variable(m, x_c >= 0, Int)
+@variable(m, y_t, Bin)
+@variable(m, y_c, Bin)
+
+@objective(m, Max, 1000*x_t + 500*x_c - 5000*y_t - 600*y_c)
+
+@constraint(m, 3*x_t + 5*x_c <= 40)
+@constraint(m, 7*x_t + 4*x_c <= 60)
+@constraint(m, x_t <= M*y_t)
+@constraint(m, x_c <= M*y_c)
+
+optimize!(m)
+
+print("\nSOLUTION!!!\n")
+print("\nTotal of tables: ", value(x_t), "\nTotal of chairs: ", value(x_c), "\n")
+```
+
+Previously, the optimal solution produced as many tables as possible and made a single chair with leftover materials.
+Here, we observe that the high startup costs for table production is sufficient to make the same strategy suboptimal, leading to a focus on chairs instead.
 
 ### Modelling disjunctions
 
@@ -142,9 +168,9 @@ Returning to the carpenter's example, let us assume that we have two options of 
 ```{list-table} Additional problem parameters
 :name: 
 * - Cost of table tool 1
-  - 100\$
+  - 5000\$
 * - Cost of table tool 2
-  - 150\$
+  - 7000\$
 * - Time needed per table using tool 1
   - 3h
 * - Time needed per table using tool 2
@@ -159,24 +185,53 @@ The updated carpenter's model becomes
 
 ```{math}
 \begin{align}
-\text{maximise}_{x_t,x_c} \ &1000x_t + 500x_c + 100y_t^1 + 15y_t^2 + 200y_c\\
+\text{maximise}_{x_t,x_c} \ &1000x_t + 500x_c - 5000y_t^1 - 7000y_t^2 - 600y_c\\
 \text{subject to: } 
 &3x_t + 5x_c \leq 40 + M(1 - y_t^1)\\
 &7x_t + 4x_c \leq 60 + M(1 - y_t^1)\\
 &2x_t + 5x_c \leq 40 + M(1 - y_t^2)\\
 &5x_t + 4x_c \leq 60 + M(1 - y_t^2)\\
 &y_t^1 + y_t^2 = 1 \\
-& x_t \le My_t^1 \\
-& x_t \le My_t^2 \\
+& x_t \le M(y_t^1 + y_t^2)\\
 & x_c \le My_c \\
 &x_t, x_c \geq 0 \\
-&y_t, y_c \in \{0,1\}.
+&y_t^1, y_t^2, y_c \in \{0,1\}.
 \end{align}
 ```
 
-% TODO: implementation. Again we may want to play with the values to make sure the solution is different
+```{code-cell}
+m = Model(HiGHS.Optimizer)
 
-Notice that in this case we used two variables, $y_t^1$ and $y_t^2$, instead of only one. Clearly, they are equivalent, but the latter require us to explicitly state $y_t^1 + y_t^2 = 1$ since it requires and exclusive or conditions. This is indeed how we would generalise this idea to consider multiple disjunctive constraints. More formally, if we have an arbitrary number of disjunctions $a_i^\top x \le b_i$ with $i \in [N]$, we can model then as
+M = 100
+
+@variable(m, x_t >= 0, Int)
+@variable(m, x_c >= 0, Int)
+@variable(m, y_t1, Bin)
+@variable(m, y_t2, Bin)
+@variable(m, y_c, Bin)
+
+@objective(m, Max, 1000*x_t + 500*x_c - 5000*y_t1 - 7000*y_t2 - 600*y_c)
+
+@constraint(m, 3*x_t + 5*x_c <= 40 + M*(1-y_t1))
+@constraint(m, 7*x_t + 4*x_c <= 60 + M*(1-y_t1))
+@constraint(m, 2*x_t + 5*x_c <= 40 + M*(1-y_t2))
+@constraint(m, 5*x_t + 4*x_c <= 60 + M*(1-y_t2))
+@constraint(m, x_t <= M*(y_t1+y_t2))
+@constraint(m, x_c <= M*y_c)
+@constraint(m, y_t1 + y_t2 == 1)
+
+optimize!(m)
+
+print("\nSOLUTION!!!\n")
+print("\nTotal of tables: ", value(x_t), "\nTotal of chairs: ", value(x_c), "\n")
+print("Debug", value(y_t1), value(y_t2), value(y_c))
+```
+
+% Current formulation always buys a table tool, even when not making tables
+
+With the improved table tool, more tables can be produced, which shifts the scales back to a table-focused production.
+
+Notice that in this case we used two variables, $y_t^1$ and $y_t^2$, instead of only one. Clearly, they are equivalent, but the latter require us to explicitly state $y_t^1 + y_t^2 = 1$ since it requires an exclusive or condition. This is indeed how we would generalise this idea to consider multiple disjunctive constraints. More formally, if we have an arbitrary number of disjunctions $a_i^\top x \le b_i$ with $i \in [N]$, we can model then as
 
 ```{math}
 \begin{align}
