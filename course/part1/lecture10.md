@@ -1,44 +1,86 @@
 # Lecture 10
 
-So far in the previous lectures, we have discussed optimisation of a single objective, whether it was maximizing profit, minimizing costs or something else.
-In many situations, one needs to make a decision about multiple considerations and identify a good tradeoff.
-For example, a machine may be designed to maximize performance while minimizing fuel costs.
+So far in the previous lectures, we have discussed optimisation of a single objective, whether it was maximizing profit, minimizing costs or some other goal.
+In many situations, one needs to make a decision about multiple conflicting considerations and identify a good tradeoff.
+For example, instead of maximizing profits given some constraints of costs, one can maximize profits while minimizing costs simultaneously.
 
 ## Dominance and Pareto optimality
 
 For a single objective, it is easy to determine if one solution is better than the other, one can just compare the objective values.
 For multi-objective optimisation, this is more difficult: one solution can beat the other for one of the objectives while the reverse is true for the remaining objectives.
 
+% Add illustration: a pareto frontier for some decision like range vs cost of electric vehicle. maybe add a dominated point as well
+
 The concept of _dominance_ is integral to the assesment of solutions in multi-objective problems.
 
+Let $f_1(\mathbf{x}), \dots, f_n(\mathbf{x})$ be our objectives of interest.
 ```{prf:definition}
 :label: dominance
 
 A solution {math}`\mathbf{x}` _dominates_ solution {math}`\mathbf{x'}` if
-- {math}`\mathbf{x}` is no worse than {math}`\mathbf{x'}` for all objectives, and
-- {math}`\mathbf{x}` is strictly better than {math}`\mathbf{x'}` in at least one objective.
+- {math}`\mathbf{x}` is no worse than {math}`\mathbf{x'}` for all objectives, i.e. $f_i(\mathbf{x})\leq f_i(\mathbf{x'})\text{ for all } i$, and
+- {math}`\mathbf{x}` is strictly better than {math}`\mathbf{x'}` in at least one objective, i.e. $f_i(\mathbf{x})< f_i(\mathbf{x'})\text{ for some } i$.
 
 {math}`\mathbf{x'}` is _dominated by_ {math}`\mathbf{x}` if and only if {math}`\mathbf{x}` dominates {math}`\mathbf{x'}`.
 ```
 
-If we have a solution dominating another, we can discard the latter from our consideration.
+If we have a solution dominating another, we can discard the latter from our consideration, since the former is either not-worse or better in terms of our objectives.
+Since dominated solution can be ignored, we are interested in _non-dominated_ solution.
 
 ```{prf:definition}
 :label: pareto_opt
 
-A solution {math}`\mathbf{x}` is called _Pareto optimal_ if there is no other solution that dominates it.
-The set of Pareto optimal points if claled the _Pareto frontier_.
+A solution {math}`\mathbf{x}` is called _Pareto-optimal_, or _non-dominated_, if there is no other solution that dominates it.
+In other words, a point is Pareto-optimal if no other point improves at least one objective (without harming the remaining objectives).
+
+A solution is called _weakly Pareto-optimal_ if no other solution improves all of the objectives.
+
+The set of Pareto-optimal points is called the _Pareto frontier_.
 ```
+
+% Add pareto frontier illustration
 
 The Pareto frontier represents the collection of best solutions for different tradeoff decisions.
 Thus, if one does not know their preferences with respect to the different objectives, the Pareto frontier can be helpful in evaluating the alternatives.
-For a known set of preferences however, this may not always be necessary and one may optimize for that preference specifically, as in [](#p1l10:weight).
+It thus becomes important to identify the Pareto frontier, or at the very least find as many Pareto-optimal solutions as possible, in order to enable more informed decision-making.
 
-## Constraint Method
+The question then becomes how to generate Pareto frontiers efficiently
+The two classical methods of doing so are the weighted and the $\epsilon$-constraint methods.
 
-In the constraint method, one of the objective functions is optimized while the rest are constrained.
-For feasible constraints, this results in a (weakly?) Pareto optimal solution.
-This can then be repeated for different constraints to generate a Pareto frontier.
+## Weighted Method
 
-(p1l10:weight)=
-## Weight Method
+The _weighted_ method, also known as the _weighted-sum_ method, uses a vector of weights $\lambda$ to turn the multi-objective problem into a single-objective one.
+
+```{math}
+\mini_{x\in\mathcal{X}} \sum^n_{i=1}\lambda_if_i(\mathbf{x})
+```
+
+The weights should be nonnegative and sum to one, and they can be interpreted as costs or preferences associated with different objectives.
+Thus, every weight specification represents a trade-off, and the corresponding optimization problem can be solved to obtain a Pareto-optimal solution.
+Then, the weights can be varied to generate a Pareto frontier.
+
+% Add (interactive) illustration about decision space and talk about how non-convex ones may not have all points recovered.
+
+% Talk about disadvantages of weighted method to motivate the next one
+
+## $\epsilon$-Constraint Method
+
+In the constraint method, one of the objective functions is optimized while the rest are constrained within user-specified values.
+For example, we may have the instance
+```{math}
+:label: constraint_prob
+\mini &f_1(\mathbf{x}) \\
+\st &f_2(\mathbf{x})\leq \epsilon_2 \\
+&f_3(\mathbf{x})\leq \epsilon_3 \\
+&\dots \\
+&f_n(\mathbf{x})\leq \epsilon_n \\
+&x \in \mathcal{X}
+```
+where $\epsilon_i$ are the user-specified constraints and $\mathcal{X}$ is the feasible space of the multiobjective problem.
+
+It can be shown that for every $\lambda$ and a problem like {eq}`constraint_prob`, the solution to the problem gives a weakly Pareto-optimal solution to the multiobjective problem.
+However, if the problem {eq}`constraint_prob` has a unique solution, then it is a Pareto-optimal solution for the multiobjective problem.
+The Pareto frontier can be generated by changing $\lambda$ and repeatedly solving the resulting problems.
+
+
+% Add note about how both methods above turn the problem into single objective, but other methods exist that don't do that (like EA)?
