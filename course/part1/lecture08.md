@@ -13,7 +13,7 @@ kernelspec:
   name: julia-1.10
 ---
 
-# Lecture 8 - modelling integer decisions
+# Lecture 8 - Modelling integer decisions
 
 Next, we focus on extending the types of variables we can consider in our optimisation models. An important type of variable that allows us to more realistic model problems is to consider them as *integer* valued. Essentially, we are constraining such variables to only take values from the set of integer numbers, typically represented by $\mathbb{Z}$.
 
@@ -54,6 +54,7 @@ optimize!(m)
 
 print("\nSOLUTION!!!\n")
 print("\nTotal of tables: ", value(x_t), "\nTotal of chairs: ", value(x_c), "\n")
+print("Profit: ", objective_value(m))
 ```
 
 
@@ -143,6 +144,7 @@ optimize!(m)
 
 print("\nSOLUTION!!!\n")
 print("\nTotal of tables: ", value(x_t), "\nTotal of chairs: ", value(x_c), "\n")
+print("Profit: ", objective_value(m))
 ```
 
 Previously, the optimal solution produced as many tables as possible and made a single chair with leftover materials.
@@ -170,7 +172,7 @@ Returning to the carpenter's example, let us assume that we have two options of 
 * - Cost of table tool 1
   - 5000\$
 * - Cost of table tool 2
-  - 7000\$
+  - 8700\$
 * - Time needed per table using tool 1
   - 3h
 * - Time needed per table using tool 2
@@ -185,7 +187,7 @@ The updated carpenter's model becomes
 
 ```{math}
 \begin{align}
-\text{maximise}_{x_t,x_c} \ &1000x_t + 500x_c - 5000y_t^1 - 7000y_t^2 - 600y_c\\
+\text{maximise}_{x_t,x_c} \ &1000x_t + 500x_c - 5000y_t^1 - 8700y_t^2 - 600y_c\\
 \text{subject to: } 
 &3x_t + 5x_c \leq 40 + M(1 - y_t^1)\\
 &7x_t + 4x_c \leq 60 + M(1 - y_t^1)\\
@@ -210,7 +212,7 @@ M = 100
 @variable(m, y_t2, Bin)
 @variable(m, y_c, Bin)
 
-@objective(m, Max, 1000*x_t + 500*x_c - 5000*y_t1 - 7000*y_t2 - 600*y_c)
+@objective(m, Max, 1000*x_t + 500*x_c - 5000*y_t1 - 8700*y_t2 - 600*y_c)
 
 @constraint(m, 3*x_t + 5*x_c <= 40 + M*(1-y_t1))
 @constraint(m, 7*x_t + 4*x_c <= 60 + M*(1-y_t1))
@@ -224,10 +226,8 @@ optimize!(m)
 
 print("\nSOLUTION!!!\n")
 print("\nTotal of tables: ", value(x_t), "\nTotal of chairs: ", value(x_c), "\n")
-print("Debug", value(y_t1), value(y_t2), value(y_c))
+print("Profit: ", objective_value(m))
 ```
-
-% Current formulation always buys a table tool, even when not making tables
 
 With the improved table tool, more tables can be produced, which shifts the scales back to a table-focused production.
 
@@ -236,6 +236,114 @@ Notice that in this case we used two variables, $y_t^1$ and $y_t^2$, instead of 
 ```{math}
 \begin{align}
 & a_i^\top x \le b_i + M(1-y_i) \\ 
-& \sum_{i \in [N]} y_i = 1. 
+& \sum_{i \in [N]} y_i = 1.
 \end{align}
 ```
+
+```{margin}
+What is described here is logically a NAND (_not-AND_) function: the output is 1 except when both inputs are 1.
+```
+
+However, is the above model appropriate for our problem?
+The XOR constraint ensures that only one of the table tools is purchased, but it also asserts that one table tool must be purchased.
+This rules out the case for focusing on chairs only, which is a feasible solution that our model should not rule out.
+We need to relax our constraint to allow for three states: purchasing either one of the table tools, or purchasing neither.
+
+This can be done by changing the equality constraint
+```{math}
+y_t^1 + y_t^2 = 1
+```
+into the inequality constraint
+```{math}
+y_t^1 + y_t^2 \leq 1.
+```
+Now, both $y_t^i$ are allowed to be zero.
+However, this alone is not sufficient.
+To see why, suppose that both $y_t^i$ are zero and consider any one of the constraints we had before, such as this one:
+```{math}
+3x_t + 5x_c \leq 40 + M(1 - y_t^1).
+```
+Since both $y_t^i$ are zero, the constraint $x_t <= M*(y_t^1+y_t^2)$ means that so will be $x_t$, thus the above constraint is equivalent to $5x_c\leq 40+M$.
+But this is problematic, $M$ is not supposed to increase the bound on the chair constraints.
+Previously, this was not a problem, one of $y_t^i$ having to be 1 meant that one set of constraints were always "active", but here we ended up with both sets being "inactive", with all of them increasing the bound on the chair resources by $M$.
+
+To fix this problem, we need to ensure that chairs remain appropriately constrainted when both $y_t^i$ are zero.
+One way of doing so would be to change the existing constraints, such as 
+```{math}
+3x_t + 5x_c \leq 40 + M(1 - y_t^1)(y_t^1+y_t^2).
+```
+However, this constraint is not linear, which means not all solvers will accept it.
+Instead, we can add additional constraints
+```{math}
+5*x_c \leq 40 + M(y_t1+y_t2) \\
+4*x_c \leq 60 + M(y_t1+y_t2).
+```
+These take effect only when both $y_t^i$ are zero and are "inactive" otherwise, at which point we know the rest of the model works.
+
+The updated and corrected carpenter's model becomes
+
+```{math}
+\begin{align}
+\text{maximise}_{x_t,x_c} \ &1000x_t + 500x_c - 5000y_t^1 - 8700y_t^2 - 600y_c\\
+\text{subject to: } 
+&3x_t + 5x_c \leq 40 + M(1 - y_t^1)(y_t^1+y_t^2)\\
+&7x_t + 4x_c \leq 60 + M(1 - y_t^1)(y_t^1+y_t^2)\\
+&2x_t + 5x_c \leq 40 + M(1 - y_t^2)(y_t^1+y_t^2)\\
+&5x_t + 4x_c \leq 60 + M(1 - y_t^2)(y_t^1+y_t^2)\\
+&5*x_c \leq 40 + M*(y_t1+y_t2)\\
+&4*x_c \leq 60 + M*(y_t1+y_t2)\\
+&y_t^1 + y_t^2 \leq 1 \\
+& x_t \le M(y_t^1 + y_t^2)\\
+& x_c \le My_c \\
+&x_t, x_c \geq 0 \\
+&y_t^1, y_t^2, y_c \in \{0,1\}.
+\end{align}
+```
+
+and the solution we get is
+
+```{code-cell}
+m = Model(HiGHS.Optimizer)
+
+M = 100
+
+@variable(m, x_t >= 0, Int)
+@variable(m, x_c >= 0, Int)
+@variable(m, y_t1, Bin)
+@variable(m, y_t2, Bin)
+@variable(m, y_c, Bin)
+
+@objective(m, Max, 1000*x_t + 500*x_c - 5000*y_t1 - 8700*y_t2 - 600*y_c)
+
+@constraint(m, 3*x_t + 5*x_c <= 40 + M*(1-y_t1))
+@constraint(m, 7*x_t + 4*x_c <= 60 + M*(1-y_t1))
+@constraint(m, 2*x_t + 5*x_c <= 40 + M*(1-y_t2))
+@constraint(m, 5*x_t + 4*x_c <= 60 + M*(1-y_t2))
+@constraint(m, 5*x_c <= 40 + M*(y_t1+y_t2))
+@constraint(m, 4*x_c <= 60 + M*(y_t1+y_t2))
+@constraint(m, x_t <= M*(y_t1+y_t2))
+@constraint(m, x_c <= M*y_c)
+@constraint(m, y_t1 + y_t2 <= 1)
+
+optimize!(m)
+
+print("\nSOLUTION!!!\n")
+print("\nTotal of tables: ", value(x_t), "\nTotal of chairs: ", value(x_c), "\n")
+print("Profit: ", objective_value(m))
+```
+
+Turns out we were accidentally ruling out the optimal solution without the correction, focusing on chairs is still more profitable.
+This highlights the importance of being careful with modifying your model, even a small change to an individual constraint may have implications beyond itself.
+
+````{note}
+The above XOR and NAND constraints can be generalized to accept a certain number of values.
+For example, to pick $c$ states out of $N$ could be modeled with
+```{math}
+\sum_{i \in [N]} y_i = c.
+```
+Similarly, picking up to $c$ states would be
+```{math}
+\sum_{i \in [N]} y_i \leq c.
+```
+In either case however, one must be careful and ensure that these relaxations do not interfere with the rest of the model like what we discussed above.
+````
