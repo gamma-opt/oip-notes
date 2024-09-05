@@ -309,6 +309,7 @@ This is our Solution A again, so both methods agree it is on the Pareto frontier
 In fact, let's plot all the solutions we just obtained.
 
 ```{code-cell}
+:tags: ["remove-input"]
 N_res = result_count(m)
 
 f = Figure()
