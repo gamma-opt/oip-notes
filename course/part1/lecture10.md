@@ -239,8 +239,8 @@ axislegend(position = :rt)
 f
 ```
 
-We can see that solutions 1 and 3 don't dominate each other.
-In fact, Solution C doesn't even dominate Solution B, if we cared only about profits and not about desirability ratings, Solution B would be a better choice than 3.
+We can see that solutions A and C don't dominate each other.
+In fact, Solution C doesn't even dominate Solution B, if we cared only about profits and not about desirability ratings, Solution B would be a better choice than C.
 However, Solution C shines over the other two when we start giving more weight to ratings, which is exactly what we did when obtaining it via the weighted method.
 
 One can continue using the weighted method with different weightings and attempt to recover more of the Pareto frontier.
