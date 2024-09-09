@@ -245,9 +245,14 @@ However, Solution C shines over the other two when we start giving more weight t
 
 One can continue using the weighted method with different weightings and attempt to recover more of the Pareto frontier.
 
-% Add (interactive) illustration about decision space and talk about how non-convex ones may not have all points recovered.
+While very simple conceptually, the weighted method has a number of downsides.
+First is the problem of picking weights, how should one decide their values?
+A well-defined preference information may not always be available, especially when the problem is over many objectives.
+A related problem is one of representation.
+In most cases, we would hope to obtain various non-dominated solutions across the Pareto frontier that represents the possible trade-off decisions well.
+However, the mapping between weights to the solution space is not uniform: there is no guarantee that wildly different weights won't end up with the same solutions, and similarly almost identical weights may result in very different solutions.
 
-% Talk about disadvantages of weighted method to motivate the next one
+% Add point/illustration about not being able to recover solutions on non-convex Pareto fronts
 
 ## $\epsilon$-Constraint Method
 
