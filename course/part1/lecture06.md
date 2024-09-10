@@ -71,51 +71,98 @@ The above can be equivalently represent by the single constraint statement
 
 Again, notice how much more compact is this set of constraints. Again, with a single statement we can represent sets of constraints at once, in a far more compact notation. Let us explore these ideas a bit further returning to our transportation problem.
 
-## Example - transportation problem
+## Example - Food manufacture
 
-Let's revisit our transportation problem and pose it as model written in symbolic formulation.
+Let's revisit our food manufacture problem and pose it as model written in symbolic formulation.
 
 ### Indices and sets
 
-The transportation problem has two sets of entities: a set of plants $i \in I$ and a set of demand points (clients) $j \in J$.
+The transportation problem has two sets of entities: a set of oils $i \in I$ and a set of time periods (months) $j \in J$.
+In this case, we have some order to these sets, so (for months) we may refer to the first and last items as $J_1$ and $J_m$.
 
 ### Parameters
 
-There are three parameters: 
+There are nine (groups of) parameters: 
 
-- plant capacities, represented by $C_i$, $i \in I$,
-- demand amounts at each client, represented by $D_j$, $j \in J$,
-- unit transportation cost between each plant $i$ and demand point $j$, represented by $T_{ij}$, $i \in I$, $j \in J$. 
+- Oil prices for different months, represented by $C_{ij}$, $i \in I$, $j\in J$,
+- Oil hardnesses, represented by $H_i$, $i \in I$,
+- Hardness upper and lower limits, represented by $H_u$ and $H_d$,
+- Blended product price, represented by $C_P$,
+- Montly processing limits, represented by $L_1$ for vegetable oils and $L_2$ for non-vegetable oils,
+- Montly storage limit per oil, represented by $S$,
+- Initial oil inventory, represented by $B$,
+- Target oil inventory, represented by $T$, and
+- Store cost per ton per month, represented by $C_S$.
 
 ### Variables
 
-Our transportation model has only one type of decision variable: let $x_{ij}$ be the amount transported from plan $i$ to client $j \in J$. Naturally, we must enforce that these amounts are not negative.
+Our blending model has four types of decision variables:
+- $b_{ij}$ - amount of oil $i$ purchased in month $j$,
+- $u_{ij}$ - amount of oil $i$ used for blending in month $j$,
+- $s_{ij}$ - amount of oil $i$ stored in month $j$, and
+- $p_j$ - amount of product produced in month $j$.
+
+Naturally, we must enforce that these amounts are not negative.
 
 ### Objective function
 
-Our objective is to minimise the aggregated transportation cost, which is defined as
+Our objective is to maximize profit, which is defined as
 
 ```{math}
 :label: p1l6:obj
-\mini_x \sum_{i \in I} \sum_{j \in J} T_{ij}x_{ij}.
+\maxi \sum_{j \in J} C_Pp_j - \sum_{i \in I} \sum_{j \in J} C_{ij}b_{ij} - \sum_{i \in I} \sum_{j\in J}C_S s_{ij}.
 ```
 
 Notice how we need a double summation since we have two indices to sum over.
 
 ### Constraints
 
-There are two main constraint sets in the transportation problem: 
+There are five main constraint sets in the transportation problem: 
 
-- **Supply limit**: all that is send from each plant $i \in I$ must be less than or equal to the plant $i$ capacity $C_i$. Thus, we have that
+- **Linear production**: The quantity of oil used is the quantity of final product, in any given month $j$. Thus we have that
 
 ```{math}
-\sum_{j \in J} x_{ij} \le C_i, \forall i \in I.
+\sum_{i \in I} u_{ij} = p_j, \forall j \in J.
 ```
 
-- **Demand fulfillment**: the accumulated total that is sent from plants $i \in I$ to each client $j \in J$ must be equal to the client $j$ demand $D_j$. Therefore, we have
+- **Processing limits**: Every month, we can refine only up to a certain amount of vegetable and non-vegetable oils. Therefore we have
 
 ```{math}
-\sum_{i \in I} x_{ij} = D_j, \forall j \in J.
+\begin{rcases}
+\begin{aligned}
+u_{1j}+u_{2j} &\leq L_1 \\
+u_{3j}+u_{4j}+u_{5j}&\leq L_2
+\end{aligned}
+\end{rcases} \forall j \in J
+```
+
+- **Hardness interval**: The product hardness must lie within the correct interval. We can incorporate this with
+
+```{math}
+\begin{rcases}
+\sum_{i \in I} H_iu_{ij} \leq H_u y_j \\
+\sum_{i \in I} H_iu_{ij} \geq H_d y_j \\
+\end{rcases} \forall j \in J
+```
+
+- **Storage continuity**: Using and storing product must happen correctly.
+
+```{math}
+\begin{rcases}
+\begin{aligned}
+B + b_{i1}-u_{i1}-s_{i1} &= 0 \\
+s_{i(j-1)} + b_{ij} -u_{ij} - s_{ij} &= 0, \forall j \in J\setminus\{J_1,J_m\} \\
+s_{i5} + b_{i6} -u_{i6} &= T
+\end{aligned}
+\end{rcases} \forall i \in I
+```
+
+- **Storage limits**: We can store up to $S$ units of each oil per month.
+
+```{math}
+\begin{align}
+s_{ij}\leq S, \forall i \in I, j \in J.
+\end{align}
 ```
 
 Putting the whole model together, we obtain
@@ -123,10 +170,17 @@ Putting the whole model together, we obtain
 ```{math}
 \begin{equation}
 \begin{aligned}
-    \mini_x & \sum_{i \in I} \sum_{j \in J} T_{ij}x_{ij} \\
-    \st & \sum_{j \in J} x_{ij} \le C_i, \forall i \in I \\
-    & \sum_{i \in I} x_{ij} = D_j, \forall j \in J \\
-    & x_{ij} \ge 0, \ \forall i \in I, j \in J.
+    \maxi & \sum_{j \in J} C_Pp_j - \sum_{i \in I} \sum_{j \in J} C_{ij}b_{ij} - \sum_{i \in I} \sum_{j\in J}C_S s_{ij} \\
+    \st & \sum_{i \in I} u_{ij} = p_j, \forall j \in J \\
+    & u_{1j}+u_{2j} \leq L_1, \forall j \in J \\
+    & u_{3j}+u_{4j}+u_{5j} \leq L_2, \forall j \in J \\
+    & \sum_{i \in I} H_iu_{ij} \leq H_u y_j, \forall j \in J \\
+    & \sum_{i \in I} H_iu_{ij} \geq H_d y_j, \forall j \in J \\
+    & B + b_{i1}-u_{i1}-s_{i1} = 0, \forall i \in I \\
+    & s_{i5} + b_{i6} -u_{i6} = T, \forall i \in I \\
+    & s_{i(j-1)} + b_{ij} -u_{ij} - s_{ij} = 0, \forall i \in I, \forall j \in J\setminus\{J_1,J_m\} \\
+    & b_{ij}, u_{ij}, s_{ij}, p_j \geq 0, \forall i \in I, j \in J \\
+    & s_{ij} \leq 1000, \forall i \in I, j \in J
 \end{aligned}
 \end{equation}
 ```
@@ -135,8 +189,7 @@ Putting the whole model together, we obtain
 
 ### Small problem
 
-Recall that in {numref}`p1l5:transportation`, we discussed an instance of the transportation problem.
-Here, we show how to solve the problem programmatically.
+Now, we show how to solve the problem programmatically by solving the instance discussed in {numref}`p1l5:food`.
 First, we determine the parameters of our problem.
 
 ```{code-cell}
@@ -144,34 +197,64 @@ First, we determine the parameters of our problem.
 
 using JuMP, HiGHS
 
-supply = [35, 50, 40]
-demand = [45, 20, 30, 30]
-cost = [ 8  6 10 9;
-         9 12 13 7;
-        14  9 15 5]
+cost = [ 110 130 110 120 100  90;
+         120 130 140 110 120 100;
+         130 110 130 120 150 140;
+         110  90 100 120 110  80;
+         115 115  95 125 105 135 ]
+hardness = [8.8, 6.1, 2.0, 4.2, 5.0]
+hardness_ul = 6
+hardness_ll = 3
+price_product = 150
+process_limit_veg = 200
+process_limit_non = 250
+storage_limit = 1000
+initial_oil = 500
+target_oil = 500
+cost_storing = 5
 ```
 
 Then, we wrap the model in a function, so that we can easily use it for different instances of the problem.
 
 ```{code-cell}
-function solve_transportation(cost, supply, demand)
+function solve_food_manufacture(
+    cost, hardness, hardness_ul, hardness_ll, price_product,
+    process_limit_veg, process_limit_non, storage_limit,
+    initial_oil, target_oil, cost_storing
+)
     I,J = size(cost)
 
     model = Model(HiGHS.Optimizer)
-    @variable(model, x[1:I, 1:J] >= 0)
-    @objective(model, Min, sum(cost[i,j]*x[i,j] for i in 1:I, j in 1:J))
-    @constraint(model, c_supply[i in 1:I], sum(x[i,:]) <= supply[i])
-    @constraint(model, c_demand[j in 1:J], sum(x[:,j]) >= demand[j])
+    @variable(model, b[1:I, 1:J] >= 0)
+    @variable(model, u[1:I, 1:J] >= 0)
+    @variable(model, storage_limit >= s[1:I, 1:J] >= 0)
+    @variable(model, p[1:J] >= 0)
+
+    @objective(model, Max, price_product*sum(p) - sum(cost[i,j]*b[i,j] for i in 1:I, j in 1:J) - cost_storing*sum(s))
+
+    @constraint(model, c_production[j in 1:J], sum(u[:,j]) == p[j])
+    @constraint(model, c_processing_veg[j in 1:J], sum(u[begin:2,j]) <= process_limit_veg)
+    @constraint(model, c_processing_non[j in 1:J], sum(u[3:end,j]) <= process_limit_non)
+    @constraint(model, c_hardness_ul[j in 1:J], sum(hardness[i]*u[i,j] for i in 1:I) <= hardness_ul*p[j])
+    @constraint(model, c_hardness_ll[j in 1:J], sum(hardness[i]*u[i,j] for i in 1:I) >= hardness_ll*p[j])
+    @constraint(model, c_storage_start[i in 1:I], b[i,1]-u[i,1]-s[i,1] == -initial_oil)
+    @constraint(model, c_storage[i in 1:I, j in 2:J], s[i,j-1]+b[i,j]-u[i,j]-s[i,j] == 0)
+    @constraint(model, c_storage_end[i in 1:I], s[i,6] == target_oil)
 
     set_attribute(model, "output_flag", false) # Remove the solver printed statement
     optimize!(model)
     @assert is_solved_and_feasible(model)
 
-    return value.(x), model
+    return value.(b), value.(u), value.(s), value.(p), model
 end
 
-x, model = solve_transportation(cost, supply, demand);
+b, u, s, p, model = solve_food_manufacture(cost, hardness, hardness_ul,
+                        hardness_ll, price_product, process_limit_veg,
+                        process_limit_non, storage_limit, initial_oil, target_oil, cost_storing
+                        );
 ```
+What is happening here?
+Let's inspect step by step.
 
 In order to solve the problem, we first need to define the model.
 In `JuMP`, this requires creating a `Model` object, which is given an optimizer that actually implements the optimisation algorithms.
@@ -180,33 +263,34 @@ In `JuMP`, this requires creating a `Model` object, which is given an optimizer 
 model = Model(HiGHS.Optimizer)
 ```
 
-Next, we define a decision variable for each decision Powerco must make, that is how much power plant {math}`i` (for {math}`i=1,2,3`) sends to city {math}`j` ({math}`j=1,2,3,4`).
-`JuMP` allows one to set nonnegativity constraints of variables in their definition, so we make use of that as well.
+Next, we define a decision variable for each decision that must be made, that is how much oils are purchased, used and stored, and how much product is produced.
+`JuMP` allows one to set upper and lower limits, which is ideal for nonnegativity constraints and others.
 
 ```julia
-@variable(model, x[1:I, 1:J] >= 0);
+@variable(model, b[1:I, 1:J] >= 0)
+@variable(model, u[1:I, 1:J] >= 0)
+@variable(model, storage_limit >= s[1:I, 1:J] >= 0)
+@variable(model, p[1:J] >= 0)
 ```
 
 ```{note}
-This is equivalent to manually adding the constrains $x_{11} \ge 0, x_{12} \ge 0, ... x_{34} \ge 0$.
+The first line is equivalent to manually adding the constrains $b_{11} \ge 0, ... p_{6} \ge 0$, and the third line is similar.
 ```
 
-The objective can be specified using a comprehension, writing out all terms in the double summation {eq}`p1l6:obj`, which we can then sum over.
+The objective can be specified using comprehensions, writing out all terms in the summation terms of {eq}`p1l6:obj`, which we can then sum over.
 ```julia
-@objective(model, Min, sum(cost[i,j]*x[i,j] for i in 1:I, j in 1:J));
+@objective(model, Min, price_product*sum(p) - sum(cost[i,j]*b[i,j] for i in 1:I, j in 1:J) - cost_storing*sum(s))
 ```
 Multiple constraints obeying the same form can be defined and labeled in a single statement.
-Here is the supply limit:
+Here, we define the same linear production constraint for every month,
 ```julia
-@constraint(model, c_supply[i in 1:I], sum(x[i,:]) <= supply[i]);
+@constraint(model, c_production[j in 1:J], sum(u[:,j]) == p[j])
 ```
-and here is demand fulfillment.
-```julia
-@constraint(model, c_demand[j in 1:J], sum(x[:,j]) >= demand[j]);
-```
+and other constraints are replicated similarly.
 
 With the model specified in `JuMP`, we can print it to see the equations directly.
 ```{code-cell}
+:tags: ["hide-output"]
 print(model)
 ```
 
@@ -223,11 +307,23 @@ println("Objective value: ", objective_value(model))
 
 ```{code-cell}
 using DataFrames
-a = DataFrame(x, ["City $(i)" for i in 1:4])
-display(a)
+oils = ["Veg 1", "Veg 2", "Oil 1", "Oil 2", "Oil 3"]
+months = ["January", "February", "March", "April", "May", "June"]
+df_b = DataFrame(transpose(b), oils)
+df_u = DataFrame(transpose(u), oils)
+df_s = DataFrame(transpose(s), oils)
+df_p = DataFrame(transpose([p])..., months)
+println("Purchasing variables")
+display(df_b)
+println("Using variables")
+display(df_u)
+println("Storing variables")
+display(df_s)
+println("Production amount")
+display(df_p)
 ```
 
-The minimum transmission cost is €1020, with the above distribution plan.
+The maximum profit is €107842, with the above distribution plan.
 
 In this small problem, we had 12 decision variables (one for each plant-city combination) as well as a non-negativity constraint for each of the variables, 3 constraints to ensure supply is not exceeded, and 4 constraints to ensure demand is met, for a total of 19 constraints.
 However, with symbolic formulation, we can immediately handle much larger models.
@@ -266,14 +362,14 @@ end
 
 Since it is the same problem, we can just reuse the function we defined above.
 
-```{code-cell}
+```
 x, model = solve_transportation(T, C, D);
 ```
 
 Since there are too many variables, printing the solution is not viable.
 However, we can visualise it.
 
-```{code-cell}
+```
 :tags: ["remove-input"]
 using CairoMakie
 

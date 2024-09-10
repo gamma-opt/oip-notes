@@ -1,57 +1,52 @@
 # Lecture 5 - Example Models
 
-(p1l5:transportation)=
-## Transportation Problem
+The examples below are based on {cite}`williams_model_2013`.
 
-This example is based on Section 7.1 of {cite}`winston2022operations`.
+(p1l5:food)=
+## Food Manufacture
 
-Suppose that a power company named Powerco is planning electricity distribution from their three power plants in order to supply the needs of four cities.
-Each power plant has a certain amount of power production that can be consumed, and each city has a level of demand that must be met.
-In addition, the cost of transmiting power depends both on the power plant origin and the destination city.
-These data are given in {numref}`table_powerco`.
+Suppose that we are at the helm of a food production company, where our main product is manufactured by the blending of vegetable and non-vegetable oils.
+We can purchase oils either for immediate delivery or for delivery in a later month.
+The prices for the oils are given in {numref}`table_food_manufacture`.
 
-```{list-table} Costs of sending 1 million kwh of electricity from plants to cities
-:name: table_powerco
-:header-rows: 1
-:stub-columns: 1
-:widths: 25 20 20 20 20 25
-:align: "right"
+```{table} Oil prices in €/ton
+:name: table_food_manufacture
+|          | VEG 1 | VEG 2 | OIL 1 | OIL 2 | OIL 3 |
+|----------|-------|-------|-------|-------|-------|
+| January  | 110   | 120   | 130   | 110   | 115   |
+| February | 130   | 130   | 110   | 90    | 115   |
+| March    | 110   | 140   | 130   | 100   | 95    |
+| April    | 120   | 110   | 120   | 120   | 125   |
+| May      | 100   | 120   | 150   | 110   | 105   |
+| June     | 90    | 100   | 140   | 80    | 95    |
+```
+The final product sells at €150 per ton.
 
-* - From
-  - City 1
-  - City 2
-  - City 3
-  - City 4
-  - Supply  
-    (million kwh)
-* - Plant 1
-  - €8
-  - €6
-  - €10
-  - €9
-  - 35
-* - Plant 2
-  - €9
-  - €12
-  - €13
-  - €7
-  - 50
-* - Plant 3
-  - €14
-  - €9
-  - €16
-  - €5
-  - 40
-* - Demand  
-    (million kwh)
-  - 45
-  - 20
-  - 30
-  - 30
-  - 
+We can process a maximum of 200 tons of vegetable oil and 250 tons of non-vegetable oil in any given month. In addition, we can store up to 1000 tons of each raw oil for later use at a cost of €5 per ton per month.
+
+Lastly, we need to ensure that the resulting product has appropriate hardness, which should be in between 3 and 6 units.
+Hardness blends linearly with the input oils, which have the hardness values
+
+```{list-table} Oil hardness values
+:header-rows: 0
+
+* - VEG 1
+  - 8.8
+* - VEG 2
+  - 6.1
+* -
+  -
+* - OIL 1
+  - 2.0
+* - OIL 2
+  - 4.2
+* - OIL 3
+  - 5.0
 ```
 
-Our task is to formulate an optimisation model to determine the best way to meet the demands of these cities while minimising (transmission) costs.
+Assume that at the start of January, we have a stock of 500 tons of each raw oil in storage.
+We need to ensure that these stocks will exist at the end of June.
+What 6-month production policy should we pursue to maximize profit?
 
 ### Solution
 
@@ -62,69 +57,163 @@ Recall our set of steps for modelling optimisation problems:
 3. Formulate **objective function**;
 4. Formulate **constraints**. 
 
-Listing the parameters has already been done for us, so we can proceed to defining our decision variables. In this case, we want to decide how much power each plant should transmit to each city. Thus, we define
+Listing the parameters has already been done for us, so we can proceed to defining our decision variables. 
+In this case, we want to decide how much oil of each type we would like to purchase in a month, how much of it to store and how much to use for processing.
+This is then repeated 6 times, one for each month in the half-year period.
+Thus we define
 
-- $x_{ij}$ - amount of power transmitted from power plant $i$ to city $j$, for $i=1,2,3$ and $j=1,2,3,4$.
+- $b_{ij}$ - amount of oil $i$ purchased in month $j$,
+- $u_{ij}$ - amount of oil $i$ used for blending in month $j$,
+- $s_{ij}$ - amount of oil $i$ stored in month $j$,
+- $p_j$ - amount of product produced in month $j$,
 
-Notice that this means we have 12 decision variables: $x_{11}, x_{12}, \dots, x_{34}$.
+where we label oils 1 to 5 as vegetable oil 1 and 2, followed by non-vegetable oil 1, 2 and 3.
+This means we have 91 decision variables, all of which are non-negative.
 
-Once the variables have been defined, we can pose our objective function. In this case, our function is the total transmission cost, which we would like to *minimise*. Thus, we have that
-
-```{math}
-\begin{align}
-  \mini & f(x_{11}, x_{12}, \dots, x_{34}) = \\ 
-        & 8x_{11} + 6x_{12} + 10x_{13} + 9x_{14} + 9x_{21} + 12x_{22} + 13x_{23} + 7x_{24} + 14x_{31} + 9x_{32} + 16x_{33} + 5x_{34}
-\end{align}
-```
-
-From our problem statement, we can see that there are two sources of constraints we must consider: power generation capacity and demand satisfaction. The power supply limit constraint for power plant 1 is given by:
-
-```{math}
-\text{(total amount transmitted by plant 1)}~ x_{11} + x_{12} + x_{13} + x_{14} \le 35 ~\text{(plant 1 supply)}.
-```
-
-Analogously, the power supply limit constraints for plants 2 and 3 are given by
+Once the variables have been defined, we can pose our objective function. In this case, our function is the total profit, which we would like to *maximize*. Thus, we have that
 
 ```{math}
 \begin{align}
-  & x_{21} + x_{22} + x_{23} + x_{24} \le 50 \\
-  & x_{31} + x_{32} + x_{33} + x_{34} \le 45.
+  \maxi & f(b_{ij}, u_{ij}, s_{ij}, p_j) = \\ 
+        & -110b_{11} -130b_{12} -110b_{13} -120b_{14} -100b_{15} - 90b_{16} \\
+        & -120b_{21} -130b_{22} -140b_{23} -110b_{24} -120b_{25} -100b_{26} \\
+        & -130b_{31} -110b_{32} -130b_{33} -120b_{34} -150b_{35} -140b_{36} \\
+        & -110b_{41} - 90b_{42} -100b_{43} -120b_{44} -110b_{45} - 80b_{46} \\
+        & -115b_{51} -115b_{52} - 95b_{53} -125b_{54} -105b_{55} -135b_{56} \\
+        & -5(s_{11}+\dots+s_{56}) \\
+        & +150(y_1+y_2+y_3+y_4+y_5+y_6).
 \end{align}
 ```
+composed of costs of purchasing the oil, storage costs, and income from selling the blended product.
 
-The demand satisfaction constraints can stated as follows:
+From our problem statement, we can see that there are four sources of constraints we must consider: linear production, processing limits, hardness constraints and the handling of storage.
+
+Linear production just means that we produce as much product as we use oils in any given month $j$
 
 ```{math}
-\text{(total power transmitted to city 1)}~ x_{11} + x_{21} + x_{31} = 45 ~\text{(city 1 demand)}.
+u_{1j}+u_{2j}+u_{3j}+u_{4j}+u_{5j} = p_j
 ```
 
-Likewise, the demand satisfaction constraints for the other cities can be stated as
+The processing limits are easy, for month $j$ we need
+
+```{math}
+u_{1j}+u_{2j} \leq 200 \\
+u_{3j}+u_{4j}+u_{5j} \leq 250.
+```
+
+The hardness constraints for month $j$ are also not complicated:
+
+```{math}
+8.8u_{1j}+6.1u_{2j}+2.0u_{3j}+4.2u_{4j}+5.0u_{5j} \leq 6y_j \\
+8.8u_{1j}+6.1u_{2j}+2.0u_{3j}+4.2u_{4j}+5.0u_{5j} \geq 3y_j.
+```
+
+For storage, we link these variables together by the relation
+```{math}
+\text{quantity stored in month }(j-1) + \text{quantity bought in month }j
+
+= \text{quantity used in month }j + \text{quantity stored in month }j.
+```
+
+In doing the above, we need to make the initial storage of 500 tons per oil available and ensure that it exists at the end as well.
+Thus we obtain for oil $i$
+
+```{math}
+& b_{i1} -u_{i1}-s_{i1} &= -500 \\
+s_{i1} +& b_{i2} -u_{i2}-s_{i2} &= 0 \\
+s_{i2} +& b_{i3} -u_{i3}-s_{i3} &= 0 \\
+s_{i3} +& b_{i4} -u_{i4}-s_{i4} &= 0 \\
+s_{i4} +& b_{i5} -u_{i5}-s_{i5} &= 0 \\
+s_{i5} +& b_{i6} -u_{i6} &=500.
+```
+
+There is also a storage limit for each type of oil, which we can implement by constraining the variables
+```{math}
+s_{11},\dots,s_{5,6}\leq 1000.
+```
+
+Lastly, since we cannot work with negative amounts of oil, we must add nonnegativity constraints in the definition of the decision variables. Thus, we must guarantee that $b_{ij} \ge 0, u_{ij} \ge 0,  s_{ij} \ge 0, p_j\ge 0$.
+
+Putting it all together, the optimisation model that provides the maximum profit is given by
 
 ```{math}
 \begin{align}
-  & x_{12} + x_{22} + x_{32} = 20 \\
-  & x_{13} + x_{23} + x_{33} = 30 \\
-  & x_{14} + x_{24} + x_{34} = 30. 
+  \maxi & f(b_{ij}, u_{ij}, s_{ij}, p_j) = \\ 
+        & -110b_{11} -130b_{12} -110b_{13} -120b_{14} -100b_{15} - 90b_{16} \\
+        & -120b_{21} -130b_{22} -140b_{23} -110b_{24} -120b_{25} -100b_{26} \\
+        & -130b_{31} -110b_{32} -130b_{33} -120b_{34} -150b_{35} -140b_{36} \\
+        & -110b_{41} - 90b_{42} -100b_{43} -120b_{44} -110b_{45} - 80b_{46} \\
+        & -115b_{51} -115b_{52} - 95b_{53} -125b_{54} -105b_{55} -135b_{56} \\
+        & -5(s_{11}+\dots+s_{56}) \\
+        & +150(y_1+y_2+y_3+y_4+y_5+y_6) \\
+  \st & u_{11}+u_{21}+u_{31}+u_{41}+u_{51} = p_1 \\
+  & u_{12}+u_{22}+u_{32}+u_{42}+u_{52} = p_2 \\
+  & u_{13}+u_{23}+u_{33}+u_{43}+u_{53} = p_3 \\
+  & u_{14}+u_{24}+u_{34}+u_{44}+u_{54} = p_4 \\
+  & u_{15}+u_{25}+u_{35}+u_{45}+u_{55} = p_5 \\
+  & u_{16}+u_{26}+u_{36}+u_{46}+u_{56} = p_6 \\
+  & u_{11}+u_{21} \leq 200 \\
+  & u_{12}+u_{22} \leq 200 \\
+  & u_{13}+u_{23} \leq 200 \\
+  & u_{14}+u_{24} \leq 200 \\
+  & u_{15}+u_{25} \leq 200 \\
+  & u_{16}+u_{26} \leq 200 \\
+  & u_{31}+u_{41}+u_{51} \leq 250 \\
+  & u_{32}+u_{42}+u_{52} \leq 250 \\
+  & u_{33}+u_{43}+u_{53} \leq 250 \\
+  & u_{34}+u_{44}+u_{54} \leq 250 \\
+  & u_{35}+u_{45}+u_{55} \leq 250 \\
+  & u_{36}+u_{46}+u_{56} \leq 250 \\
+  & 8.8u_{11}+6.1u_{21}+2.0u_{31}+4.2u_{41}+5.0u_{51} \leq 6y_1 \\
+  & 8.8u_{12}+6.1u_{22}+2.0u_{32}+4.2u_{42}+5.0u_{52} \leq 6y_2 \\
+  & 8.8u_{13}+6.1u_{23}+2.0u_{33}+4.2u_{43}+5.0u_{53} \leq 6y_3 \\
+  & 8.8u_{14}+6.1u_{24}+2.0u_{34}+4.2u_{44}+5.0u_{54} \leq 6y_4 \\
+  & 8.8u_{15}+6.1u_{25}+2.0u_{35}+4.2u_{45}+5.0u_{55} \leq 6y_5 \\
+  & 8.8u_{16}+6.1u_{26}+2.0u_{36}+4.2u_{46}+5.0u_{56} \leq 6y_6 \\
+  & 8.8u_{11}+6.1u_{21}+2.0u_{31}+4.2u_{41}+5.0u_{51} \geq 3y_1 \\
+  & 8.8u_{12}+6.1u_{22}+2.0u_{32}+4.2u_{42}+5.0u_{52} \geq 3y_2 \\
+  & 8.8u_{13}+6.1u_{23}+2.0u_{33}+4.2u_{43}+5.0u_{53} \geq 3y_3 \\
+  & 8.8u_{14}+6.1u_{24}+2.0u_{34}+4.2u_{44}+5.0u_{54} \geq 3y_4 \\
+  & 8.8u_{15}+6.1u_{25}+2.0u_{35}+4.2u_{45}+5.0u_{55} \geq 3y_5 \\
+  & 8.8u_{16}+6.1u_{26}+2.0u_{36}+4.2u_{46}+5.0u_{56} \geq 3y_6 \\
+  & b_{11} -u_{11}-s_{11} = -500 \\
+  & b_{21} -u_{21}-s_{21} = -500 \\
+  & b_{31} -u_{31}-s_{31} = -500 \\
+  & b_{41} -u_{41}-s_{41} = -500 \\
+  & b_{51} -u_{51}-s_{51} = -500 \\
+  & s_{11} + b_{12} -u_{12}-s_{12} = 0 \\
+  & s_{12} + b_{13} -u_{13}-s_{13} = 0 \\
+  & s_{13} + b_{14} -u_{14}-s_{14} = 0 \\
+  & s_{14} + b_{15} -u_{15}-s_{15} = 0 \\
+  & s_{21} + b_{22} -u_{22}-s_{22} = 0 \\
+  & s_{22} + b_{23} -u_{23}-s_{23} = 0 \\
+  & s_{23} + b_{24} -u_{24}-s_{24} = 0 \\
+  & s_{24} + b_{25} -u_{25}-s_{25} = 0 \\
+  & s_{31} + b_{32} -u_{32}-s_{32} = 0 \\
+  & s_{32} + b_{33} -u_{33}-s_{33} = 0 \\
+  & s_{33} + b_{34} -u_{34}-s_{34} = 0 \\
+  & s_{34} + b_{35} -u_{35}-s_{35} = 0 \\
+  & s_{41} + b_{42} -u_{42}-s_{42} = 0 \\
+  & s_{42} + b_{43} -u_{43}-s_{43} = 0 \\
+  & s_{43} + b_{44} -u_{44}-s_{44} = 0 \\
+  & s_{44} + b_{45} -u_{45}-s_{45} = 0 \\
+  & s_{51} + b_{52} -u_{52}-s_{52} = 0 \\
+  & s_{52} + b_{53} -u_{53}-s_{53} = 0 \\
+  & s_{53} + b_{54} -u_{54}-s_{54} = 0 \\
+  & s_{54} + b_{55} -u_{55}-s_{55} = 0 \\
+  & s_{15} + b_{16} -u_{16} =500 \\
+  & s_{25} + b_{26} -u_{26} =500 \\
+  & s_{35} + b_{36} -u_{36} =500 \\
+  & s_{45} + b_{46} -u_{46} =500 \\
+  & s_{55} + b_{56} -u_{56} =500 \\
+  & b_{11}, \dots, b_{56} \geq 0 \\
+  & u_{11}, \dots, u_{56} \geq 0 \\
+  & s_{11}, \dots, s_{56} \geq 0 \\
+  & p_1, \dots, p_6 \geq 0 \\
+  & s_{11}, \dots, s_{56} \leq 1000 
 \end{align}
 ```
 
-Lastly, since the power transmitted cannot be negative, we must add nonnegativity constraints in the definition of the decision variables. Thus, we must guarantee that $x_{11} \ge 0, x_{12} \ge 0, ... x_{34} \ge 0$.
-
-Putting it all together, the optimisation model that provides the minimum cost power transmission for Powerco is given by
-
-```{math}
-\begin{align}
-  \mini & 8x_{11} + 6x_{12} + 10x_{13} + 9x_{14} + 9x_{21} + 12x_{22} + 13x_{23} + 7x_{24} + 14x_{31} + 9x_{32} + 16x_{33} + 5x_{34} \\
-  \st   & x_{11} + x_{12} + x_{13} + x_{14} \le 35 \\
-  & x_{21} + x_{22} + x_{23} + x_{24} \le 50 \\
-  & x_{31} + x_{32} + x_{33} + x_{34} \le 45 \\
-  & x_{11} + x_{21} + x_{31} = 45 \\
-  & x_{12} + x_{22} + x_{32} = 20 \\
-  & x_{13} + x_{23} + x_{33} = 30 \\
-  & x_{14} + x_{24} + x_{34} = 30 \\
-  & x_{11} \ge 0, x_{12} \ge 0, ... x_{34} \ge 0.
-\end{align}
-```
 (p1l5:production)=
 ## Production Planning
 
