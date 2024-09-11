@@ -20,28 +20,44 @@ In this lecture, we revisit the production and combined problem from [](lecture0
 ## Production Planning
 
 Now, we revisit the example in {numref}`p1l5:production`.
-Our goal is to make a quarterly electricity production plan over a period of a year, so that 3 power plants would produce enough electricity for the consumption of 4 cities.
+Our goal is to make a factory production plan over a period of six months, so that we maximize profits.
 
 ```{code-cell}
 :tags: [remove-output]
 using JuMP, HiGHS, DataFrames
 
-# city x quarters
-demand = [40 60 75 25;
-          95 20 45 85;
-          60 25 90 30;
-          55 40 40 50]  
+I = 7 # number of products
+J = 6 # number of months
+K = 5 # number of machines
 
-# plant x quarters
-cost = [ 8  6 10 9;
-         9 12 13 7;
-        14  9 15 5]
+profit = [10, 6, 8, 4, 11, 9, 3]
 
-prod_cap = [60 80 50] # per quarter
-over_cap_cost = 50    # per terawatt
+machine_usage = [0.5  0.7  0    0    0.3  0.2 0.5;
+                 0.1  0.2  0    0.3  0    0.6 0;
+                 0.2  0    0.8  0    0    0   0.6;
+                 0.05 0.03 0    0.07 0.1  0   0.08;
+                 0    0    0.01 0    0.05 0   0.05]
 
-holding_cost = 10
-starting_inventory = 50
+n_machines = [4, 2, 3, 1, 1]
+maintenance = [1 0 0 0 0;
+               0 0 2 0 0;
+               0 0 0 1 0;
+               0 1 0 0 0;
+               1 1 0 0 0;
+               0 0 1 0 1]
+
+holding_cost = 0.5
+market_limits = [500 1000 300 300  800 200 100;
+                 600  500 200   0  400 300 150;
+                 300  600   0   0  500 400 100;
+                 200  300 400 500  200   0 100;
+                   0  100 500 100 1000 300   0;
+                 500  500 100 300 1100 500  60]
+holding_limit = 100
+holding_target = 50
+days_per_month = 24
+shifts_per_day = 2
+hours_per_shift = 8
 
 model = Model(HiGHS.Optimizer)
 ```
@@ -53,72 +69,54 @@ model = Model(HiGHS.Optimizer)
 set_attribute(model, "output_flag", false)
 ```
 
-We start by defining a variable for each decision Powerco must make, that is how many units to produce in a given plant.
-These cannot be negative, and there is a cap beyond which production incurs additional costs, so we model before cap and after cap separately.
-Since demand must be met exactly, the number of units produced also controls how many of them must be stored, which also gets its own variable.
+We start by defining a variable for each decision we must make, that is how much products we manufacture, hold and sell.
+These cannot be negative, and there are upper limits to storing and selling.
 
 ```{code-cell}
 :tags: ["remove-output"]
 
-@variable(model, 0 <= x[f=1:3, q=1:4] <= prod_cap[f])  # n_units produced within cap in facility i quarter j
-@variable(model, 0 <= y[f=1:3, q=1:4])                 # n_units produced beyond cap in facility i quarter j
-@variable(model, 0 <= i[q=1:4])                        # n_units in inventory at the end of quarter j
+@variable(model, 0 <= m[1:I, 1:J])
+@variable(model, 0 <= h[1:I, 1:J] <= holding_limit)
+@variable(model, 0 <= s[i in 1:I, j in 1:J] <= market_limits[j,i])
 ```
 
-The objective is to minimize all costs over the year.
+The objective is to maximize profit after holding costs.
 
 ```{code-cell}
 :tags: ["remove-output"]
 
-@objective(model, Min, sum(x[f,q]*cost[f,q] for f=1:3, q=1:4) 
-                     + sum(y[f,q]*(cost[f,q]+over_cap_cost) for f=1:3, q=1:4)
-                     + sum(i[q]*holding_cost for q=1:4))
+@objective(model, Max, sum(s[i,j]*profit[i] for i in 1:I, j in 1:J) - holding_cost*sum(h))
 ```
 
-We need to ensure that demand is met, and any leftovers are stored in the inventory in a continuous manner, i.e. the inventory of last quarter matches the use next quarter and so on.
-The starting inventory is also available in the first month, so it is added separately, since we didn't define `i[0]`.
-
+We have a couple of constraints.
+First is to meet the target inventory at the end of June.
 ```{code-cell}
 :tags: ["remove-output"]
 
-@constraint(model, inventory1, starting_inventory+sum(x[:,1])+sum(y[:,1])-sum(demand[:,1]) == i[1])
-@constraint(model, inventory[q=2:4], i[q-1]+sum(x[:,q])+sum(y[:,q])-sum(demand[:,q]) == i[q])
+@constraint(model, holding_jun[i in 1:I], h[i,6] == holding_target)
 ```
 
-Note that in the above we don't explicitly say that demand is met.
-However, if it wasn't, i.e. the number of terawatts produced plus previous inventory didn't exceed demand, the next months inventory would be negative.
-This violates the constraint on the variables `i` we set up originally, so the demand constraint is implicit here.
+Another is the continuity of the product variables.
+```{code-cell}
+:tags: ["remove-output"]
+
+@constraint(model, continuity_jan[i in 1:I], m[i,1]-s[i,1]-h[i,1] == 0)
+@constraint(model, continuity[i in 1:I, j in 2:J], h[i,j-1]+m[i,j]-s[i,j]-h[i,j] == 0)
+```
+
+Lastly, we need constraints about machine usage.
+```{code-cell}
+:tags: ["remove-output"]
+
+@constraint(model, usage[j in 1:J, k=1:K], sum(machine_usage[k,:].*m[:,j]) <= days_per_month*shifts_per_day*hours_per_shift*(n_machines[k]-maintenance[j,k]))
+```
 
 Having specified the model, we can ask `JuMP` to show it to us.
 
 ```{code-cell}
-:tags: [remove-output]
+:tags: ["hide-output"]
 print(model)
 ```
-
-```{code-cell}
-:tags: [remove-input]
-
-io = IOBuffer()
-JuMP._print_latex(io, model)
-latex = String(take!(io))
-lines = split(latex, "\n")
-newlines = []
-push!(newlines, lines[1])
-push!(newlines, lines[2][begin:133] * "\\\\\n&" * lines[2][134:249] * "\\\\\n&" * lines[2][250:end])
-for i in 3:6
-    push!(newlines, lines[i])
-end
-for i in 27:length(lines)-1
-    left = lines[i-20][begin:end-2]
-    right = lines[i][begin+3:end]
-    push!(newlines, left*",\\quad "*right)
-end
-push!(newlines, lines[end])
-latex = join(newlines, "\n")
-display("text/latex", latex)
-```
-
 And we solve it.
 
 ```{code-cell}
@@ -133,14 +131,15 @@ println("Objective value: ", objective_value(model))
 ```
 
 ```{code-cell}
-println("Production before cap")
-a = DataFrame(value.(x), ["Q$(i)" for i=1:4])
+println("Manufacturing")
+label = ["Product $(i)" for i in 1:I]
+a = DataFrame(transpose(value.(m)), label)
 display(a)
-println("Production after cap")
-b = DataFrame(value.(y), ["Q$(i)" for i=1:4])
+println("Holding")
+b = DataFrame(transpose(value.(h)), label)
 display(b)
-println("Inventory use")
-c = DataFrame(reshape(value.(i),1,4), ["Q$(i)" for i=1:4])  # this is a vector, so we convert it to matrix for DataFrame
+println("Selling")
+c = DataFrame(transpose(value.(s)), label)
 display(c)
 ```
 

@@ -13,12 +13,12 @@ The prices for the oils are given in {numref}`table_food_manufacture`.
 :name: table_food_manufacture
 |          | VEG 1 | VEG 2 | OIL 1 | OIL 2 | OIL 3 |
 |----------|-------|-------|-------|-------|-------|
-| January  | 110   | 120   | 130   | 110   | 115   |
-| February | 130   | 130   | 110   | 90    | 115   |
-| March    | 110   | 140   | 130   | 100   | 95    |
-| April    | 120   | 110   | 120   | 120   | 125   |
-| May      | 100   | 120   | 150   | 110   | 105   |
-| June     | 90    | 100   | 140   | 80    | 95    |
+| *January*  | 110   | 120   | 130   | 110   | 115   |
+| *February* | 130   | 130   | 110   | 90    | 115   |
+| *March*    | 110   | 140   | 130   | 100   | 95    |
+| *April*    | 120   | 110   | 120   | 120   | 125   |
+| *May*      | 100   | 120   | 150   | 110   | 105   |
+| *June*     | 90    | 100   | 140   | 80    | 95    |
 ```
 The final product sells at €150 per ton.
 
@@ -30,17 +30,17 @@ Hardness blends linearly with the input oils, which have the hardness values
 ```{list-table} Oil hardness values
 :header-rows: 0
 
-* - VEG 1
+* - *VEG 1*
   - 8.8
-* - VEG 2
+* - *VEG 2*
   - 6.1
 * -
   -
-* - OIL 1
+* - *OIL 1*
   - 2.0
-* - OIL 2
+* - *OIL 2*
   - 4.2
-* - OIL 3
+* - *OIL 3*
   - 5.0
 ```
 
@@ -215,81 +215,73 @@ Putting it all together, the optimisation model that provides the maximum profit
 ```
 
 (p1l5:production)=
-## Production Planning
+## Factory Planning
 
-%TODO: Tweak the problem so that we can obtain more interesting solutions?
+In this example, we are at an engineering factory that makes seven different products.
+The production processes of these involve the following machines:
+- four grinders,
+- two vertical drills,
+- three horizontal drills,
+- one borer, and
+- one planer.
 
-Upon our success, Powerco approaches us with another project at a different location.
-In this location, we again have 3 plants and 4 cities, however we are asked to make a quarterly electricity production plan for the entire year.
-{numref}`table_production_demand` contains the projected demand from each of the 4 cities over next year, all of which must be satisfied exactly.
+The process of making every product is different and different products require the use of machines differently.
+Similarly, every product yields a certain net profit.
+These figures are described in {numref}`p1l5:production_table`, where a dash means that the product doesn't use the indicated machine.
 
+```{table} Production figures
+:name: p1l5:production_table
 
-```{list-table} Projected demand from the cities in terawatts
-:name: table_production_demand
-:header-rows: 1
-:stub-columns: 1
-
-* - 
-  - Q1
-  - Q2
-  - Q3
-  - Q4
-* - City 1
-  - 40
-  - 60
-  - 75
-  - 25
-* - City 2
-  - 95
-  - 20
-  - 45
-  - 85
-* - City 3
-  - 60
-  - 25
-  - 90
-  - 30
-* - City 4
-  - 55
-  - 40
-  - 40
-  - 50
+|                         | **Product 1** | **Product 2** | **Product 3** | **Product 4** | **Product 5** | **Product 6** | **Product 7** |
+|:-----------------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|---------------|
+|        **Profit**       | 10            | 6             | 8             | 4             | 11            | 9             | 3             |
+|       **Grinding**      | 0.5           | 0.7           | -             | -             | 0.3           | 0.2           | 0.5           |
+|  **Vertical drilling**  | 0.1           | 0.2           | -             | 0.3           | -             | 0.6           | -             |
+| **Horizontal drilling** | 0.2           | -             | 0.8           | -             | -             | -             | 0.6           |
+|        **Boring**       | 0.05          | 0.04          | -             | 0.7           | 0.1           | -             | 0.08          |
+|       **Planing**       | -             | -             | 0.01          | -             | 0.05          | -             | 0.05          |
 ```
 
-{numref}`table_production_cost` contains the expected costs of producing electricity in each of the 3 facilities, taking into account costs that change over the year.
+The machines are not always available, some will be under maintenance at certain months. The maintenance schedule is
 
-```{list-table} Costs of producing a terawatt of electricity (in thousands)
-:name: table_production_cost
-:header-rows: 1
-:stub-columns: 1
+```{list-table} Maintenance schedule
+:header-rows: 0
 
-* - 
-  - Q1
-  - Q2
-  - Q3
-  - Q4
-* - Plant 1
-  - €8
-  - €6
-  - €10
-  - €9
-* - Plant 2
-  - €9
-  - €12
-  - €13
-  - €7
-* - Plant 3
-  - €14
-  - €9
-  - €15
-  - €5
+* - **January**
+  - 1 Grinder
+* - **February**
+  - 2 Horizontal drills
+* - **March**
+  - 1 Borer
+* - **April**
+  - 1 Vertical drill
+* - **May**
+  - 1 Grinder and 1 Vertical drill
+* - **June**
+  - 1 Planer and 1 Horizontal drill
 ```
 
-In a given quarter, plant 1 can produce 60 terawatts of electricity with regular-time labor, plant 2 can produce 80, and plant 3 can produce 50.
-In addition, each plant can produce more electricity with overtime labor, at an additional cost of €50000 per terawatts.
-Lastly, there is a battery inventory shared across plants where any excess electricity can be stored at a cost of €10000 per terawatt.
-At the beginning of the first quarter, the inventory contains 50 terawatts.
-Both the inventory and all the plans work with whole number units only.
+In addition, due to market conditions, there are limits to how much of each product we can seel every month.
+
+```{table} Limits on selling products
+|                         | **Product 1** | **Product 2** | **Product 3** | **Product 4** | **Product 5** | **Product 6** | **Product 7** |
+|:-----------------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|---------------|
+|        **Profit**       | 500           | 1000          | 300           | 300           | 800           | 200           | 100           |
+|       **Grinding**      | 600           | 500           | 200           | 0             | 400           | 300           | 150           |
+|  **Vertical drilling**  | 300           | 600           | 0             | 0             | 500           | 400           | 100           |
+| **Horizontal drilling** | 200           | 300           | 400           | 500           | 200           | 0             | 100           |
+|        **Boring**       | 0             | 100           | 500           | 100           | 1000          | 300           | 0             |
+|       **Planing**       | 500           | 500           | 100           | 300           | 1100          | 500           | 60            |
+```
+
+Once again, we can store products, up to 100 of each at a cost of €0.05 per unit per month.
+However, this time we have no initial stock, but we would like to accumulate a one: 50 of each product by the end of June.
+
+The factory works 24 days a month, each day containing two 8 hour shifts.
+
+Assume that the production process can use the machines in any order.
+
+Our objective is to determine a production schedule that maximises total profit.
 
 ### Solution
 
@@ -301,66 +293,213 @@ Once again, our list guides us.
 4. Formulate **constraints**.
 
 The parameters are listed in the tables and the text above.
-Our task is to decide quarterly electricity production for each plant throughout the year.
-However, we need to be careful about keeping track of different modes of production:
-each plant can produce electricity with either regular-time or overtime labor, which have different limits and costs.
-A simple solution is to keep track of this production in separate variables.
+This problem is somewhat similar to the food manufacturing problem.
+Here, instead of having multiple raw materials and a single product, we are ignoring the raw materials and dealing with multiple products.
+Our task is to decide when to manufacture, store and sell these products, thus we define three types of variables:
 
-Another lever in our control is the battery usage, which can be used either to make up for lacking supply in meeting the demand of a quarter, or deposit oversupply to be used later.
-Since transportation costs are not a factor in this problem and we only need to meet demand, we can follow only the amount of electricity in the battery at the end of the quarter.
-If it is less than the previous quarter, we know it was used to meet demand, and if it is more, it must be storing additional supply.
+- $m_{ij}$ - amount of product $i$ manufactured in month $j$,
+- $h_{ij}$ - amount of product $i$ held in storage in month $j$, and
+- $s_{ij}$ - amount of product $i$ sold in month $j$.
 
-Consequently, we define:
-
-- $x_{ij}$ - amount of power produced with regular-time labor at plant $i$ in quarter $j$, for $i=1,2,3$ and $j=1,2,3,4$,
-- $y_{ij}$ - amount of power produced with overtime labor at plant $i$ in quarter $j$, for $i=1,2,3$ and $j=1,2,3,4$, and
-- $s_j$ - amount of power stored in the battery at the end of quarter $j$, for $j=1,2,3,4$.
-
-Our objective function is the _minimisation_ of the total cost of the production schedule, which involves the costs of regular- and overtime labor, and the use of battery.
+Our objective function is the _maximisation_ of the total profits of the production schedule, after subtracting holding costs.
 
 ```{math}
-\mini & f(x_{ij}, y_{ij}, s_i) = \\ 
-      & 8x_{11} + 6x_{12} + 10x_{13} + 9x_{14} + 9x_{21} + 12x_{22} + 13x_{23} + 7x_{24} + 14x_{31} + 9x_{32} + 16x_{33} + 5x_{34} \\
-      & + (8+50)y_{11} + (6+50)y_{12} + (10+50)y_{13} + (9+50)y_{14} + (9+50)y_{21} + (12+50)y_{22} + (13+50)y_{23} + (7+50)y_{24} + (14+50)y_{31} + (9+50)y_{32} + (16+50)y_{33} + (5+50)y_{34} \\
-      & + 10s_1 + 10s_2 + 10s_3 + 10s_4
+\maxi & f(m_{ij}, h_{ij}, s_{ij}) = \\ 
+      10 &( s_{11}+s_{12}+s_{13}+s_{14}+s_{15}+s_{16}) \\
+      +6 &( s_{21}+s_{22}+s_{23}+s_{24}+s_{25}+s_{26}) \\
+      +8 &( s_{31}+s_{32}+s_{33}+s_{34}+s_{35}+s_{36}) \\
+      +4 &( s_{41}+s_{42}+s_{43}+s_{44}+s_{45}+s_{46}) \\
+     +11 &( s_{51}+s_{52}+s_{53}+s_{54}+s_{55}+s_{56}) \\
+      +9 &( s_{61}+s_{62}+s_{63}+s_{64}+s_{65}+s_{66}) \\
+      +3 &( s_{71}+s_{72}+s_{73}+s_{74}+s_{75}+s_{76}) \\
+      -0.5 &( h_{11} + \dots h_{76})
 ```
 
 There are multiple constraints we need to keep track of.
-The basic one is that none of the decision variables we defined can be negative, imposing a lower bound on each: $x_{ij},y_{ij},s_j\geq 0$.
-In addition, each factory has a limited capacity for regular-time labor, which gives an upper bound as well: $x_{1j}\leq 60, x_{2j}\leq 80, x_{3j}\leq 50$.
-
-Note that we are given a starting inventory as well, which we can keep track in a consistent manner as the above with $s_0=50$.
-
-Next, we need to ensure that the demand is met.
-In any quarter, we need to use the produced electricity along with the stored electricity from the previous quarter to meet the demands of the four cities, with any leftovers going back to the battery.
-We can express these quarterly constraints as follows:
-
+The basic one is that none of the decision variables we defined can be negative, imposing a lower bound on each: $m_{ij},h_{ij},s_{ij}\geq 0$.
+In addition, we can store only up to 100 of each product, which means the holding variables need an upper bound $h_{ij}\leq 100$.
+Similarly, the market imposes an upper bound on how much we can sell per month:
 ```{math}
-s_0 + \sum_i \big( x_{i1} + y_{i1} \big) - s_1 = 40+95+60+55 \\
-s_1 + \sum_i \big( x_{i2} + y_{i2} \big) - s_2 = 60+20+25+40 \\
-s_2 + \sum_i \big( x_{i3} + y_{i3} \big) - s_3 = 75+45+90+40 \\
-s_3 + \sum_i \big( x_{i4} + y_{i4} \big) - s_4 = 25+85+30+50 
+s_{11} \leq 500, s_{21} \leq 1000, &\dots, s_{71} \leq 100 \\
+s_{12} \leq 600, s_{22} \leq 500, &\dots, s_{72} \leq 150 \\
+\vdots& \\
+s_{16} \leq 500, s_{26} \leq 500, &\dots, s_{76} \leq 60
 ```
 
-These constraints not only enforce meeting the demand of cities (along with the nonnegativity of the variables), but also ensure the battery is used in a continuous manner, since they explicitly code the quarterly difference in battery to be related to production and demand.
+Another easy one is ensuring that we have a stock of 50 of each product at the end, which we can do via
+```{math}
+h_{16}=\dots=h_{76} = 50.
+```
 
-Putting this all together, the optimisation model for the minimum cost electricity production plan for Powerco is given by
+To model the amount of production, recall that the processes can use machines in any order.
+This means that we can calculate the availability of each machine for every month in hours, and add a constraints to ensure they are not exceeded.
+For example, our factory has four grinders, which multiplied with 24 days a month, 2 shifts a day and 8 hours a shift gives
+```{math}
+4\times 24 \times 2 \times 8 = 1536
+```
+hours available per month.
+However, according to the maintenance schedule, in January and May we will have access to only three grinders, meaning the availability is
+```{math}
+3\times 24\times 2\times 8 = 1152
+```
+hours instead.
+Thus we can write the constraints
+```{math}
+0.5m_{11}+0.7m_{21}+0.3m_{51}+0.2m_{61}+0.5m_{71}\leq 1152 \\
+0.5m_{12}+0.7m_{22}+0.3m_{52}+0.2m_{62}+0.5m_{72}\leq 1536 \\
+0.5m_{13}+0.7m_{23}+0.3m_{53}+0.2m_{63}+0.5m_{73}\leq 1536 \\
+0.5m_{14}+0.7m_{24}+0.3m_{54}+0.2m_{64}+0.5m_{74}\leq 1536 \\
+0.5m_{15}+0.7m_{25}+0.3m_{55}+0.2m_{65}+0.5m_{75}\leq 1152 \\
+0.5m_{16}+0.7m_{26}+0.3m_{56}+0.2m_{66}+0.5m_{76}\leq 1536
+```
+for the grinders.
+
+Repeating this for the other machines, we obtain
+```{math}
+0.1m_{11} + 0.2m_{21} + 0.3m_{41} + 0.6m_{61} \leq 768 \\
+0.1m_{12} + 0.2m_{22} + 0.3m_{42} + 0.6m_{62} \leq 768 \\
+0.1m_{13} + 0.2m_{23} + 0.3m_{43} + 0.6m_{63} \leq 768 \\
+0.1m_{14} + 0.2m_{24} + 0.3m_{44} + 0.6m_{64} \leq 384 \\
+0.1m_{15} + 0.2m_{25} + 0.3m_{45} + 0.6m_{65} \leq 384 \\
+0.1m_{16} + 0.2m_{26} + 0.3m_{46} + 0.6m_{66} \leq 768
+```
+for the vertical drills,
+```{math}
+0.2m_{11} + 0.8m_{31} + 0.6m_{71} &\leq 1152 \\
+0.2m_{12} + 0.8m_{32} + 0.6m_{72} &\leq 384 \\
+0.2m_{13} + 0.8m_{33} + 0.6m_{73} &\leq 1152 \\
+0.2m_{14} + 0.8m_{34} + 0.6m_{74} &\leq 1152 \\
+0.2m_{15} + 0.8m_{35} + 0.6m_{75} &\leq 1152 \\
+0.2m_{16} + 0.8m_{36} + 0.6m_{76} &\leq 768
+```
+for the horizontal drills,
+```{math}
+0.05m_{11} + 0.03m_{21} + 0.07m_{41} + 0.1m_{51} + 0.08m_{71} &\leq 384 \\
+0.05m_{12} + 0.03m_{22} + 0.07m_{42} + 0.1m_{52} + 0.08m_{72} &\leq 384 \\
+0.05m_{13} + 0.03m_{23} + 0.07m_{43} + 0.1m_{53} + 0.08m_{73} &\leq 0 \\
+0.05m_{14} + 0.03m_{24} + 0.07m_{44} + 0.1m_{54} + 0.08m_{74} &\leq 384 \\
+0.05m_{15} + 0.03m_{25} + 0.07m_{45} + 0.1m_{55} + 0.08m_{75} &\leq 384 \\
+0.05m_{16} + 0.03m_{26} + 0.07m_{46} + 0.1m_{56} + 0.08m_{76} &\leq 384
+```
+for the borer, and
+```{math}
+0.01m_{31} + 0.05m_{51} + 0.05m_{71} &\leq 384 \\
+0.01m_{32} + 0.05m_{52} + 0.05m_{72} &\leq 384 \\
+0.01m_{33} + 0.05m_{53} + 0.05m_{73} &\leq 384 \\
+0.01m_{34} + 0.05m_{54} + 0.05m_{74} &\leq 384 \\
+0.01m_{35} + 0.05m_{55} + 0.05m_{75} &\leq 384 \\
+0.01m_{36} + 0.05m_{56} + 0.05m_{76} &\leq 0
+```
+for the planer.
+
+Lastly, we need to link the manufacturing, holding and selling variables together.
+We can only sell or store what is already available, either freshly manufactured or from the previous month's inventory, which is 0 in the first month. 
+Thus for Product 1
+```{math}
+m_{11}-s_{11}-h_{11} &= 0 \\
+h_{11} + m_{12}-s_{12}-h_{12} &= 0 \\
+h_{12} + m_{13}-s_{13}-h_{13} &= 0 \\
+h_{13} + m_{14}-s_{14}-h_{14} &= 0 \\
+h_{14} + m_{15}-s_{15}-h_{15} &= 0 \\
+h_{15} + m_{16}-s_{16}-h_{16} &= 0 \\
+```
+and identical constraints govern the other products.
+
+Putting this all together, the optimisation model for the maximum profit production plan for the factory is given by
 
 ```{math}
-\mini & f(x_{ij}, y_{ij}, s_i) = \\ 
-      & 8x_{11} + 6x_{12} + 10x_{13} + 9x_{14} + 9x_{21} + 12x_{22} + 13x_{23} + 7x_{24} + 14x_{31} + 9x_{32} + 16x_{33} + 5x_{34} \\
-      & + (8+50)y_{11} + (6+50)y_{12} + (10+50)y_{13} + (9+50)y_{14} + (9+50)y_{21} + (12+50)y_{22} + (13+50)y_{23} + (7+50)y_{24} + (14+50)y_{31} + (9+50)y_{32} + (16+50)y_{33} + (5+50)y_{34} \\
-      & + 10s_1 + 10s_2 + 10s_3 + 10s_4 \\
-\st & s_0 + \sum_i \big( x_{i1} + y_{i1} \big) - s_1 = 250 \\
-    & s_1 + \sum_i \big( x_{i2} + y_{i2} \big) - s_2 = 145 \\
-    & s_2 + \sum_i \big( x_{i3} + y_{i3} \big) - s_3 = 250 \\
-    & s_3 + \sum_i \big( x_{i4} + y_{i4} \big) - s_4 = 190 \\
-    & 60 \geq x_{11},\dots,x_{14}\geq 0 \\
-    & 80 \geq x_{21},\dots,x_{24}\geq 0 \\
-    & 50 \geq x_{31},\dots,x_{34}\geq 0 \\
-    & y_{11},\dots,y_{34}\geq 0 \\
-    & s_1,\dots,s_4\geq 0 \\
-    & s_0 = 50
+\maxi & f(m_{ij}, h_{ij}, s_{ij}) = \\ 
+      10 &( s_{11}+s_{12}+s_{13}+s_{14}+s_{15}+s_{16}) \\
+      +6 &( s_{21}+s_{22}+s_{23}+s_{24}+s_{25}+s_{26}) \\
+      +8 &( s_{31}+s_{32}+s_{33}+s_{34}+s_{35}+s_{36}) \\
+      +4 &( s_{41}+s_{42}+s_{43}+s_{44}+s_{45}+s_{46}) \\
+     +11 &( s_{51}+s_{52}+s_{53}+s_{54}+s_{55}+s_{56}) \\
+      +9 &( s_{61}+s_{62}+s_{63}+s_{64}+s_{65}+s_{66}) \\
+      +3 &( s_{71}+s_{72}+s_{73}+s_{74}+s_{75}+s_{76}) \\
+      -0.5 &( h_{11} + \dots + h_{76}) \\
+\st & s_{11} \leq 500, s_{21} \leq 1000, s_{31} \leq 300, s_{41} \leq 300, s_{51} \leq 800, s_{61} \leq 200, s_{71} \leq 100 \\
+    & s_{12} \leq 600, s_{22} \leq 500, s_{32} \leq 200, s_{42} \leq 0, s_{52} \leq 400, s_{62} \leq 300, s_{72} \leq 150 \\
+    & s_{13} \leq 300, s_{23} \leq 600, s_{33} \leq   0, s_{43} \leq 0, s_{53} \leq 500, s_{63} \leq 400, s_{73} \leq 100 \\
+    & s_{14} \leq 600, s_{24} \leq 300, s_{34} \leq 400, s_{44} \leq 500, s_{54} \leq 200, s_{64} \leq 0, s_{74} \leq 100 \\
+    & s_{15} \leq 600, s_{25} \leq 100, s_{35} \leq 500, s_{45} \leq 100, s_{55} \leq 1000, s_{65} \leq 300, s_{75} \leq 0 \\
+    & s_{16} \leq 500, s_{26} \leq 500, s_{36} \leq 100, s_{46} \leq 300, s_{56} \leq 1100, s_{66} \leq 500, s_{76} \leq 60 \\
+    & 0.5m_{11}+0.7m_{21}+0.3m_{51}+0.2m_{61}+0.5m_{71}\leq 1152 \\
+    & 0.5m_{12}+0.7m_{22}+0.3m_{52}+0.2m_{62}+0.5m_{72}\leq 1536 \\
+    & 0.5m_{13}+0.7m_{23}+0.3m_{53}+0.2m_{63}+0.5m_{73}\leq 1536 \\
+    & 0.5m_{14}+0.7m_{24}+0.3m_{54}+0.2m_{64}+0.5m_{74}\leq 1536 \\
+    & 0.5m_{15}+0.7m_{25}+0.3m_{55}+0.2m_{65}+0.5m_{75}\leq 1152 \\
+    & 0.5m_{16}+0.7m_{26}+0.3m_{56}+0.2m_{66}+0.5m_{76}\leq 1536 \\
+    & 0.1m_{11} + 0.2m_{21} + 0.3m_{41} + 0.6m_{61} \leq 768 \\
+    & 0.1m_{12} + 0.2m_{22} + 0.3m_{42} + 0.6m_{62} \leq 768 \\
+    & 0.1m_{13} + 0.2m_{23} + 0.3m_{43} + 0.6m_{63} \leq 768 \\
+    & 0.1m_{14} + 0.2m_{24} + 0.3m_{44} + 0.6m_{64} \leq 384 \\
+    & 0.1m_{15} + 0.2m_{25} + 0.3m_{45} + 0.6m_{65} \leq 384 \\
+    & 0.1m_{16} + 0.2m_{26} + 0.3m_{46} + 0.6m_{66} \leq 768 \\
+    & 0.2m_{11} + 0.8m_{31} + 0.6m_{71} \leq 1152 \\
+    & 0.2m_{12} + 0.8m_{32} + 0.6m_{72} \leq 384 \\
+    & 0.2m_{13} + 0.8m_{33} + 0.6m_{73} \leq 1152 \\
+    & 0.2m_{14} + 0.8m_{34} + 0.6m_{74} \leq 1152 \\
+    & 0.2m_{15} + 0.8m_{35} + 0.6m_{75} \leq 1152 \\
+    & 0.2m_{16} + 0.8m_{36} + 0.6m_{76} \leq 768 \\
+    & 0.05m_{11} + 0.03m_{21} + 0.07m_{41} + 0.1m_{51} + 0.08m_{71} \leq 384 \\
+    & 0.05m_{12} + 0.03m_{22} + 0.07m_{42} + 0.1m_{52} + 0.08m_{72} \leq 384 \\
+    & 0.05m_{13} + 0.03m_{23} + 0.07m_{43} + 0.1m_{53} + 0.08m_{73} \leq 0 \\
+    & 0.05m_{14} + 0.03m_{24} + 0.07m_{44} + 0.1m_{54} + 0.08m_{74} \leq 384 \\
+    & 0.05m_{15} + 0.03m_{25} + 0.07m_{45} + 0.1m_{55} + 0.08m_{75} \leq 384 \\
+    & 0.05m_{16} + 0.03m_{26} + 0.07m_{46} + 0.1m_{56} + 0.08m_{76} \leq 384 \\
+    & 0.01m_{31} + 0.05m_{51} + 0.05m_{71} \leq 384 \\
+    & 0.01m_{32} + 0.05m_{52} + 0.05m_{72} \leq 384 \\
+    & 0.01m_{33} + 0.05m_{53} + 0.05m_{73} \leq 384 \\
+    & 0.01m_{34} + 0.05m_{54} + 0.05m_{74} \leq 384 \\
+    & 0.01m_{35} + 0.05m_{55} + 0.05m_{75} \leq 384 \\
+    & 0.01m_{36} + 0.05m_{56} + 0.05m_{76} \leq 0 \\
+    & m_{11}-s_{11}-h_{11} = 0 \\
+    & h_{11} + m_{12}-s_{12}-h_{12} = 0 \\
+    & h_{12} + m_{13}-s_{13}-h_{13} = 0 \\
+    & h_{13} + m_{14}-s_{14}-h_{14} = 0 \\
+    & h_{14} + m_{15}-s_{15}-h_{15} = 0 \\
+    & h_{15} + m_{16}-s_{16}-h_{16} = 0 \\
+    & m_{21}-s_{21}-h_{21} = 0 \\
+    & h_{21} + m_{22}-s_{22}-h_{22} = 0 \\
+    & h_{22} + m_{23}-s_{23}-h_{23} = 0 \\
+    & h_{23} + m_{24}-s_{24}-h_{24} = 0 \\
+    & h_{24} + m_{25}-s_{25}-h_{25} = 0 \\
+    & h_{25} + m_{26}-s_{26}-h_{26} = 0 \\
+    & m_{31}-s_{31}-h_{31} = 0 \\
+    & h_{31} + m_{32}-s_{32}-h_{32} = 0 \\
+    & h_{32} + m_{33}-s_{33}-h_{33} = 0 \\
+    & h_{33} + m_{34}-s_{34}-h_{34} = 0 \\
+    & h_{34} + m_{35}-s_{35}-h_{35} = 0 \\
+    & h_{35} + m_{36}-s_{36}-h_{36} = 0 \\
+    & m_{41}-s_{41}-h_{41} = 0 \\
+    & h_{41} + m_{42}-s_{42}-h_{42} = 0 \\
+    & h_{42} + m_{43}-s_{43}-h_{43} = 0 \\
+    & h_{43} + m_{44}-s_{44}-h_{44} = 0 \\
+    & h_{44} + m_{45}-s_{45}-h_{45} = 0 \\
+    & h_{45} + m_{46}-s_{46}-h_{46} = 0 \\
+    & m_{51}-s_{51}-h_{51} = 0 \\
+    & h_{51} + m_{52}-s_{52}-h_{52} = 0 \\
+    & h_{52} + m_{53}-s_{53}-h_{53} = 0 \\
+    & h_{53} + m_{54}-s_{54}-h_{54} = 0 \\
+    & h_{54} + m_{55}-s_{55}-h_{55} = 0 \\
+    & h_{55} + m_{56}-s_{56}-h_{56} = 0 \\
+    & m_{61}-s_{61}-h_{61} = 0 \\
+    & h_{61} + m_{62}-s_{62}-h_{62} = 0 \\
+    & h_{62} + m_{63}-s_{63}-h_{63} = 0 \\
+    & h_{63} + m_{64}-s_{64}-h_{64} = 0 \\
+    & h_{64} + m_{65}-s_{65}-h_{65} = 0 \\
+    & h_{65} + m_{66}-s_{66}-h_{66} = 0 \\
+    & m_{71}-s_{71}-h_{71} = 0 \\
+    & h_{71} + m_{72}-s_{72}-h_{72} = 0 \\
+    & h_{72} + m_{73}-s_{73}-h_{73} = 0 \\
+    & h_{73} + m_{74}-s_{74}-h_{74} = 0 \\
+    & h_{74} + m_{75}-s_{75}-h_{75} = 0 \\
+    & h_{75} + m_{76}-s_{76}-h_{76} = 0 \\
+    & h_{16}=\dots=h_{76} = 50 \\
+    & h_{11} \leq 100, \dots, h_{76} \leq 100 \\
+    & m_{11} \geq 0, \dots, m_{76} \geq 0 \\
+    & h_{11} \geq 0, \dots, h_{76} \geq 0 \\
+    & s_{11} \geq 0, \dots, s_{76} \geq 0.
 ```
 (p1l5:combined)=
 ## Combined Production-Transporation Problem
@@ -373,7 +512,7 @@ Suppose that there are 3 power plants, 4 cities, and a battery where we can stor
 We need to consider the costs associated with electricity production (let's say it depends on the plant and the quarter), costs for transmission from plants to cities or to the battery, costs for transmission from the battery to the cities, and costs for storing in the battery.
 We would like to minimize the total costs, while ensuring that each city's electricity demand is satisfied.
 
-Suppose the demand is the same as in {numref}`table_production_demand`, the additional parameters are as given below, and the cost of storing electricity is €1.
+Suppose the demand is the same as in , the additional parameters are as given below, and the cost of storing electricity is €1.
 
 ```{list-table} Transportation costs for the combined problem
 :name: table_combined_transportation

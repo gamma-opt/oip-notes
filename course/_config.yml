@@ -47,6 +47,7 @@ sphinx:
           "[+]": 
             - "textmacros"    # For ~ to work as non-breaking space
             - "mathtools"
+        maxBuffer: 6*1024  # in order to render large model equations in p1l5
         # If you add something, you should probably add to latex_elements below as well
         macros:
           "reals": "\\mathbb{R}"
