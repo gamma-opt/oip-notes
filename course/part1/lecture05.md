@@ -501,202 +501,148 @@ Putting this all together, the optimisation model for the maximum profit product
     & h_{11} \geq 0, \dots, h_{76} \geq 0 \\
     & s_{11} \geq 0, \dots, s_{76} \geq 0.
 ```
-(p1l5:combined)=
-## Combined Production-Transporation Problem
 
-In the transportation problem, we minimized the cost of transmiting electricity according to cities' demands with a set amount of supply.
-In the production problem, we minimized the cost of producing electricity enough to satisfy the demand for it, without worrying about transportation costs.
-Now we consider a problem where the objective is to minimize the cost, taking into account both the production and the transportation.
+(p1l5:distribution)=
+## Distribution Problem
 
-Suppose that there are 3 power plants, 4 cities, and a battery where we can store electricity in between quarters, electricity sent to which can only be used the next quarter.
-We need to consider the costs associated with electricity production (let's say it depends on the plant and the quarter), costs for transmission from plants to cities or to the battery, costs for transmission from the battery to the cities, and costs for storing in the battery.
-We would like to minimize the total costs, while ensuring that each city's electricity demand is satisfied.
+In this problem, we are searching for a minimum cost distribution routing from two factories, in Helsinki and Jyväskylä, to depots and customers.
+More specifically, there are four depots where we can store our product: in Turku, Tampere, Kuopio and Oulu.
+In addition, we sell the product to six customers C1 to C6, who can be supplied from either a factory or a depot.
 
-Suppose the demand is the same as in , the additional parameters are as given below, and the cost of storing electricity is €1.
+The costs associated with the distribution of the products are given in {numref}`p1l5:distibution_costs`.
 
-```{list-table} Transportation costs for the combined problem
-:name: table_combined_transportation
-:header-rows: 1
-:stub-columns: 1
-:widths: 25 20 20 20 20 20 25
-:align: "right"
-
-* - From \ To
-  - City 1
-  - City 2
-  - City 3
-  - City 4
-  - Battery
-  - Supply  
-    (million kwh)
-* - Plant 1
-  - €8
-  - €6
-  - €10
-  - €9
-  - €6
-  - 35
-* - Plant 2
-  - €9
-  - €12
-  - €13
-  - €7
-  - €4
-  - 50
-* - Plant 3
-  - €14
-  - €9
-  - €16
-  - €5
-  - €8
-  - 40
-* - Battery
-  - €4
-  - €2
-  - €7
-  - €5
-  -
-  -
-* - Demand  
-    (million kwh)
-  - 45
-  - 20
-  - 30
-  - 30
-  -
-  - 
+```{table} Distribution costs
+:name: p1l5:distibution_costs
+|             | **Helsinki factory** | **Jväskylä factory** | **Turku depot** | **Tampere depot** | **Kuopio depot** | **Oulu depot** |
+|:-----------:|----------------------|----------------------|-----------------|-------------------|------------------|----------------|
+|   _Depots_  |                      |                      |                 |                   |                  |                |
+|  **Turku**  | 0.5                  | -                    |                 |                   |                  |                |
+| **Tampere** | 0.5                  | 0.3                  |                 |                   |                  |                |
+| **Kuopio**  | 1.0                  | 0.5                  |                 |                   |                  |                |
+| **Oulu**    | 0.2                  | 0.2                  |                 |                   |                  |                |
+| _Customers_ |                      |                      |                 |                   |                  |                |
+| **C1**      | 1.0                  | 2.0                  | -               | 1.0               | -                | -              |
+| **C2**      | -                    | -                    | 1.5             | 0.5               | 1.5              | -              |
+| **C3**      | 1.5                  | -                    | 0.5             | 0.5               | 2.0              | 0.2            |
+| **C4**      | 2.0                  | -                    | 1.5             | 1.0               | -                | 1.5            |
+| **C5**      | -                    | -                    | -               | 0.5               | 0.5              | 0.5            |
+| **C6**      | 1.0                  | -                    | 1.0             | -                 | 1.5              | 1.5            |
 ```
 
-% Maybe make the production problem use these values, and just add link to it instead of a new table
-```{list-table} Production costs for the combined problem
-:name: table_combined_production
-:header-rows: 1
-:stub-columns: 1
+In addition, some customers prefer to be supplied from certain locations.
 
-* - 
-  - Q1
-  - Q2
-  - Q3
-  - Q4
-* - Plant 1
-  - €4
-  - €2
-  - €7
-  - €3
-* - Plant 2
-  - €5
-  - €8
-  - €4
-  - €2
-* - Plant 3
-  - €3
-  - €6
-  - €5
-  - €8
+```{list-table}
+:header-rows: 0
+
+* - **C1**
+  - Helsinki (factory)
+* - **C2**
+  - Turku (depot)
+* - **C3**
+  - No preferences
+* - **C4**
+  - No preferences
+* - **C5**
+  - Tampere (depot)
+* - **C6**
+  - Kuopio or Oulu (depots)
 ```
+
+Each factory has a monthly supply capacity:
+- Helsinki: 150000 units
+- Brighton: 200000 units
+
+Each depot has a monthly throughput limit:
+- Turku: 70000 units
+- Tampere: 50000 units
+- Kuopio: 100000 units
+- Oulu: 40000 units
+
+Lastly, each customer has a montly demand that must be met exactly:
+- C1: 50000 units
+- C2: 10000 units
+- C3: 40000 units
+- C4: 35000 units
+- C5: 60000 units
+- C6: 20000 units
+
+What distribution pattern would minimize total cost?
 
 ### Solution
 
+% Add note about solving this as a minimum cost flow problem?
+
 With the parameters described as above, we need to define some decision variables.
-First is for production, which is simpler this time since we don't have overtime labor.
-- $x_{ij}$ - amount of power produced at plant $i$ in quarter $j$, for $i=1,2,3$ and $j=1,2,3,4$.
+- $x_{ij}$ - Amount supplied from factory $i$ to depot $j$, $i=1,2$, $j=1,2,3,4$,
+- $y_{ik}$ - Amount supplied from factory $i$ to customer $k$, $i=1,2$, $k=1,2,3,4,5,6$, and
+- $z_{jk}$ - Amount supplied from depot $j$ to customer $k$, $j=1,2,3,4$, $k=1,2,3,4,5,6$,
 
-Next is transportation, which can happen from power plants to cities, from plants to the battery, or from the battery to the cities.
-- $p2c_{ijk}$ - amount of transporation from plant $i$ to city $k$ in quarter $j$, for $i=1,2,3$, $j=1,2,3,4$, and $k=1,2,3,4$,
-- $p2b_{ij}$ - amount of transportation from plant $i$ to the battery in quarter $j$, for $i=1,2,3$ and $j=1,2,3,4$,
-- $b2c_{jk}$ - amount of transportation from the battery to city $k$ in quarter $j$, for $j=1,2,3,4$ and $k=1,2,3,4$.
+where we enumerate the locations in the order they appear in the lists above.
 
-Lastly, we need to consider the use of the battery.
-- $bat_j$ - amount of power stored in the battery at the end of quarter $j$, for $j=1,2,3,4$.
+Not all these routes are feasible. We can enforce these restrictions either by omitting the variables or by constraining them to be zero.
 
-We can decompose the objective function into production, transportation and storage costs, the sum of which we want to minimise.
-```{math}
-p(x_{11},\dots,x_{34}) = & 4x_{11} + 2x_{12} + 7x_{13} + 3x_{14} + 5x_{21} + 8x_{22} + 4x_{23} + 2x_{24} + 3x_{31} + 6x_{32} + 5x_{33} + 8x_{34} \\
-t(p2c_{ijk}, p2b_{ij}, b2c_{jk}) = & 8\sum_j p2c_{1j1} + 6\sum_j p2c_{1j2} + 10\sum_j p2c_ {1j3} + 9\sum_j p2c_{1j4} \\
-& + 9\sum_j p2c_{2j1} + 12\sum_j p2c_{2j2} + 13\sum_j p2c_{2j3} + 7\sum_j p2c_{2j4} \\
-& + 14\sum_j p2c_{3j1} + 9\sum_j p2c_{3j2} + 16\sum_j p2c_{3j3} + 8\sum_j p2c_{3j4} \\ 
-& + 6\sum_j p2b_{1j} + 4\sum_j p2b_{2j} + 8\sum_j p2b_{3j} + 4\sum_j b2c_{j1} \\
-& + 2\sum_j b2c_{j2} + 7\sum_j b2c_{j3} + 5\sum_j b2c_{j4} \\
-s(bat_1,\dots,bat_4) = & bat_1 + bat_2 + bat_3 + bat_4 \\
-```
+Our objective is to minimize distribution costs, which is given by
 
 ```{math}
-\mini f(x_{ij}, p2c_{ijk}, p2b_{ij}, b3c_{jk}, bat_j) = p(x_{ij}) + t(p2c_{ijk}, p2b_{ij}, b2c_{jk}) + s(bat_j)
+\mini &f(x_{ij}, y_{ij}, z_{ij}) = \\
+& 0.5x_{11}+0.5x_{12}+1.0x_{13}+0.2x_{14} + 0.3x_{22}+0.5x_{23}+0.2x_{24} \\
+ + &1.0y_{11}+1.5y_{13}+2.0y_{14}+1.0y_{16} + 2.0y_{21} \\
+ + &1.5z_{12}+0.5z_{13}+1.5z_{14}+1.0z_{16} + 1.0z_{21}+0.5z_{22}+0.5z_{23}+1.0z_{24}+0.5z_{25} \\
+ + &1.5z_{32}+2.0z_{33}+0.5z_{35}+1.5z_{36} + 0.2z_{43}+1.5z_{44}+0.5z_{45}+1.5z_{46}.
 ```
-
-The most immediate constraint is to meet the quarterly demands of the cities, using transmission from plants and the battery.
-For example, for city 1 in the first quarter, we have
+There are a few constraints we need to account for.
+Both factories have a capacity limiting their supply.
 ```{math}
-p2c_{111} + p2c_{211} + p2c_{311} + p2c_{411} + b2c_{11} \geq 40.
+x_{11}+x_{12}+x_{13}+x_{14}+y_{11}+y_{12}+y_{13}+y_{14}+y_{15}+y_{16} \leq 150000 \\
+x_{21}+x_{22}+x_{23}+x_{24}+y_{21}+y_{22}+y_{23}+y_{24}+y_{25}+y_{26} \leq 200000
 ```
 
-This in turn highlights the need for sufficient production, i.e. we can only transmit as much electricity as we produce. 
-For the first plant in the first quarter, this can be written as
+We also need to make sure depot throughput is obeyed, both in terms of what the depots are receiving
 ```{math}
-p2c_{111} + p2c_{112} + p2c_{113} + p2c_{114} + p2b_{11} = x_{11} 
+x_{11}+x_{21} \leq 70000 \\
+x_{12}+x_{22} \leq 50000 \\
+x_{13}+x_{23} \leq 100000 \\
+x_{14}+x_{24} \leq 40000
 ```
-
-Next, we need to ensure that the battery is used in a continuous manner, and the used and stored amounts make sense.
-For the sake of writing the constraint neatly, suppose $bat_0=0$, then for quarter 1 we have
+and in terms of what they are supplying
 ```{math}
-bat_0 + p2b_{11} + p2b_{21} + p2b_{31} - b2c_{11} - b2c_{12} - b2c_{13} - b2c_{14} = bat_1
+z_{11}+z_{12}+z_{13}+z_{14}+z_{15}+z_{16} = x_{11}+x_{21} \\
+z_{21}+z_{22}+z_{23}+z_{24}+z_{25}+z_{26} = x_{12}+x_{22} \\
+z_{31}+z_{32}+z_{33}+z_{34}+z_{35}+z_{36} = x_{13}+x_{23} \\
+z_{41}+z_{42}+z_{43}+z_{44}+z_{45}+z_{46} = x_{14}+x_{24}.
 ```
 
-Finally, we need to ensure that electricity sent to the battery is used only in the later quarters.
-This means that the amount of use in a given quarter cannot exceed what was in store at the end of the last quarter.
-In the first quarter, this means
+The last constraint is to make sure customers receive sufficient supply.
 ```{math}
-b2c_{11} + b2c_{12} + b2c_{13} + b2c_{14} \leq bat_0
+y_{11}+y_{21}+z_{11}+z_{21}+z_{31}+z_{41} = 50000 \\
+y_{12}+y_{22}+z_{12}+z_{22}+z_{32}+z_{42} = 10000 \\
+y_{13}+y_{23}+z_{13}+z_{23}+z_{33}+z_{43} = 40000 \\
+y_{14}+y_{24}+z_{14}+z_{24}+z_{34}+z_{44} = 35000 \\
+y_{15}+y_{25}+z_{15}+z_{25}+z_{35}+z_{45} = 60000 \\
+y_{16}+y_{26}+z_{16}+z_{26}+z_{36}+z_{46} = 20000
 ```
-% In the above constraint, everything is necessarily 0. But modeling it this way is arguably clearer/simpler (at least for me). Should we take a note of this?
 
-We should also not forget that all the variables here are non-negative.
-
-All in all, we end up with the optimisation model
+Our full model is thus
 ```{math}
-\mini f(x_{ij}, p2c_{ijk}, p2b_{ij}, b3c_{jk}, bat_j) = & p(x_{ij}) + t(p2c_{ijk}, p2b_{ij}, b2c_{jk}) + s(bat_j) \\
-\st & p2c_{111} + p2c_{211} + p2c_{311} + p2c_{411} + b2c_{11} \geq 40 \\
-    & p2c_{121} + p2c_{221} + p2c_{321} + p2c_{421} + b2c_{21} \geq 60 \\
-    & p2c_{131} + p2c_{231} + p2c_{331} + p2c_{431} + b2c_{31} \geq 75 \\
-    & p2c_{141} + p2c_{241} + p2c_{341} + p2c_{441} + b2c_{41} \geq 25 \\
-    & p2c_{112} + p2c_{212} + p2c_{312} + p2c_{412} + b2c_{12} \geq 95 \\
-    & p2c_{122} + p2c_{222} + p2c_{322} + p2c_{422} + b2c_{22} \geq 20 \\
-    & p2c_{132} + p2c_{232} + p2c_{332} + p2c_{432} + b2c_{32} \geq 45 \\
-    & p2c_{142} + p2c_{242} + p2c_{342} + p2c_{442} + b2c_{42} \geq 85 \\
-    & p2c_{113} + p2c_{213} + p2c_{313} + p2c_{413} + b2c_{13} \geq 60 \\
-    & p2c_{123} + p2c_{223} + p2c_{323} + p2c_{423} + b2c_{23} \geq 25 \\
-    & p2c_{133} + p2c_{233} + p2c_{333} + p2c_{433} + b2c_{33} \geq 90 \\
-    & p2c_{143} + p2c_{243} + p2c_{343} + p2c_{443} + b2c_{43} \geq 30 \\
-    & p2c_{114} + p2c_{214} + p2c_{314} + p2c_{414} + b2c_{14} \geq 55 \\
-    & p2c_{124} + p2c_{224} + p2c_{324} + p2c_{424} + b2c_{24} \geq 40 \\
-    & p2c_{134} + p2c_{234} + p2c_{334} + p2c_{434} + b2c_{34} \geq 40 \\
-    & p2c_{144} + p2c_{244} + p2c_{344} + p2c_{444} + b2c_{44} \geq 50 \\
-    & p2c_{111} + p2c_{112} + p2c_{113} + p2c_{114} + p2b_{11} = x_{11} \\
-    & p2c_{121} + p2c_{122} + p2c_{123} + p2c_{124} + p2b_{12} = x_{12} \\
-    & p2c_{131} + p2c_{132} + p2c_{133} + p2c_{134} + p2b_{13} = x_{13} \\
-    & p2c_{141} + p2c_{142} + p2c_{143} + p2c_{144} + p2b_{14} = x_{14} \\
-    & p2c_{211} + p2c_{212} + p2c_{213} + p2c_{214} + p2b_{21} = x_{21} \\
-    & p2c_{221} + p2c_{222} + p2c_{223} + p2c_{224} + p2b_{22} = x_{22} \\
-    & p2c_{231} + p2c_{232} + p2c_{233} + p2c_{234} + p2b_{23} = x_{23} \\
-    & p2c_{241} + p2c_{242} + p2c_{243} + p2c_{244} + p2b_{24} = x_{24} \\
-    & p2c_{311} + p2c_{312} + p2c_{313} + p2c_{314} + p2b_{31} = x_{31} \\
-    & p2c_{321} + p2c_{322} + p2c_{323} + p2c_{324} + p2b_{32} = x_{32} \\
-    & p2c_{331} + p2c_{332} + p2c_{333} + p2c_{334} + p2b_{33} = x_{33} \\
-    & p2c_{341} + p2c_{342} + p2c_{343} + p2c_{344} + p2b_{34} = x_{34} \\
-    & p2b_{11} + p2b_{21} + p2b_{31} - b2c_{11} - b2c_{12} - b2c_{13} - b2c_{14} = bat_1 \\
-    & bat_1 + p2b_{12} + p2b_{22} + p2b_{32} - b2c_{21} - b2c_{22} - b2c_{23} - b2c_{24} = bat_2 \\
-    & bat_2 + p2b_{13} + p2b_{23} + p2b_{33} - b2c_{31} - b2c_{32} - b2c_{33} - b2c_{34} = bat_3 \\
-    & bat_3 + p2b_{14} + p2b_{24} + p2b_{34} - b2c_{41} - b2c_{42} - b2c_{43} - b2c_{44} = bat_4 \\
-    & b2c_{11} + b2c_{12} + b2c_{13} + b2c_{14} \leq 0 \\
-    & b2c_{21} + b2c_{22} + b2c_{23} + b2c_{24} \leq bat_1 \\
-    & b2c_{31} + b2c_{32} + b2c_{33} + b2c_{34} \leq bat_2 \\
-    & b2c_{41} + b2c_{42} + b2c_{43} + b2c_{44} \leq bat_3 \\
-    & x_{11},\dots,x_{34} \geq 0 \\
-    & p2c_{111},\dots,p2c_{344} \geq 0 \\
-    & p2b_{11},\dots,p2b_{34} \geq 0 \\
-    & b2c_{11},\dots,b2c_{44} \geq 0 \\
-    & bat_1, bat_2, bat_3, bat_4 \geq 0
+\mini &f(x_{ij}, y_{ij}, z_{ij}) = \\
+& 0.5x_{11}+0.5x_{12}+1.0x_{13}+0.2x_{14} + 0.3x_{22}+0.5x_{23}+0.2x_{24} \\
+ & +1.0y_{11}+1.5y_{13}+2.0y_{14}+1.0y_{16} + 2.0y_{21} \\
+ & +1.5z_{12}+0.5z_{13}+1.5z_{14}+1.0z_{16} + 1.0z_{21}+0.5z_{22}+0.5z_{23}+1.0z_{24}+0.5z_{25} \\
+ & +1.5z_{32}+2.0z_{33}+0.5z_{35}+1.5z_{36} + 0.2z_{43}+1.5z_{44}+0.5z_{45}+1.5z_{46} \\
+ \st &x_{11}+x_{12}+x_{13}+x_{14}+y_{11}+y_{12}+y_{13}+y_{14}+y_{15}+y_{16} \leq 150000 \\
+  & x_{21}+x_{22}+x_{23}+x_{24}+y_{21}+y_{22}+y_{23}+y_{24}+y_{25}+y_{26} \leq 200000 \\
+  & x_{11}+x_{21} \leq 70000 \\
+  & x_{12}+x_{22} \leq 50000 \\
+  & x_{13}+x_{23} \leq 100000 \\
+  & x_{14}+x_{24} \leq 40000 \\
+  & z_{11}+z_{12}+z_{13}+z_{14}+z_{15}+z_{16} = x_{11}+x_{21} \\
+  & z_{21}+z_{22}+z_{23}+z_{24}+z_{25}+z_{26} = x_{12}+x_{22} \\
+  & z_{31}+z_{32}+z_{33}+z_{34}+z_{35}+z_{36} = x_{13}+x_{23} \\
+  & z_{41}+z_{42}+z_{43}+z_{44}+z_{45}+z_{46} = x_{14}+x_{24} \\
+  & y_{11}+y_{21}+z_{11}+z_{21}+z_{31}+z_{41} = 50000 \\
+  & y_{12}+y_{22}+z_{12}+z_{22}+z_{32}+z_{42} = 10000 \\
+  & y_{13}+y_{23}+z_{13}+z_{23}+z_{33}+z_{43} = 40000 \\
+  & y_{14}+y_{24}+z_{14}+z_{24}+z_{34}+z_{44} = 35000 \\
+  & y_{15}+y_{25}+z_{15}+z_{25}+z_{35}+z_{45} = 60000 \\
+  & y_{16}+y_{26}+z_{16}+z_{26}+z_{36}+z_{46} = 20000.
 ```
-
-Even though this problem is conceptionally not very difficult and the model not complicated, it exemplifies how models can get very large and difficult to keep track of very quickly.
-In the next lecture, we will discuss how to formulate problems so that they are easier to work with.

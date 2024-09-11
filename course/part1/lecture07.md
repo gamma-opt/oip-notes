@@ -143,31 +143,30 @@ c = DataFrame(transpose(value.(s)), label)
 display(c)
 ```
 
-## Combined Problem
+## Distribution Problem
 
-Finally, we cover the combined production-transportation problem presented in {numref}`p1l5:combined`.
+Finally, we cover the distribution problem presented in {numref}`p1l5:distribution`.
 
 ```{code-cell}
 :tags: [remove-output]
 
-# plant x quarter
-cost_production = [4 2 7 3;
-                   5 8 4 2;
-                   3 6 5 8]
-# plant x city
-cost_transmission_plant2city = [ 8  6 10 9;
-                                 9 12 13 7;
-                                14  9 15 5]
-cost_transmission_plant2battery = [6 4 8]
+I = 2 # number of factories
+J = 4 # number of depots
+K = 6 # number of customers
 
-cost_transmission_battery2city = [4 2 7 5]
+fac2dep = [0.5 0.5 1.0 0.2;
+           missing 0.3 0.5 0.2]
+fac2c = [1.0 missing 1.5 2.0 missing 1;
+         2.0 missing missing missing missing missing]
 
-cost_storing = 1
+dep2c = [missing 1.5 0.5 1.5 missing 1.0;
+         1.0 0.5 0.5 1.0 0.5 missing;
+         missing 1.5 2.0 missing 0.5 1.5;
+         missing missing 0.2 1.5 0.5 1.5]
 
-demand = [40 60 75 25;
-          95 20 45 85;
-          60 25 90 30;
-          55 40 40 50]
+fac_capacity = [150000, 200000]
+dep_throughput = [70000, 50000, 100000, 40000]
+demands = [50000 10000 40000 35000 60000 20000]
 
 model = Model(HiGHS.Optimizer)
 ```
@@ -179,56 +178,51 @@ model = Model(HiGHS.Optimizer)
 set_attribute(model, "output_flag", false)
 ```
 
-We need to decide on how much electricity each plant is producing in each quarter.
-Once we have that, we can _spend_ it on towards satisfying city demands or storing in the battery, which are represented here by {math}`p2c` and {math}`p2b`.
-By having a {math}`battery` variable, it is easier to keep track of how much electricity is added or used from storage, and finally {math}`b2c` tracks this used amount.
-
+Then we define our variables.
 ```{code-cell}
 :tags: [remove-output]
 
-@variable(model, x[p in 1:3, q in 1:4] >= 0)              # production
-@variable(model, p2c[p in 1:3, c in 1:4, q in 1:4] >= 0)  # transmission from plants to cities
-@variable(model, p2b[p in 1:3, q in 1:4] >= 0)            # transmission from plants to battery
-@variable(model, battery[q in 1:4] >= 0)                  # stored in battery at the end of quarter
-@variable(model, b2c[c in 1:4, q in 1:4] >= 0)            # transmission from battery to cities (in q=1 should be 0)
+@variable(model, x[1:I,1:J] >= 0)
+@variable(model, y[1:I,1:K] >= 0)
+@variable(model, z[1:J,1:K] >= 0)
 ```
 
-Given the above variables, our objective is to minimize all costs, which comes from production, transmission, and storing in the battery.
+Given the above variables, our objective is to minimize distribution costs.
 
 ```{code-cell}
 :tags: [remove-output]
 
 @objective(model, Min, 
-    sum(cost_production[p,q]*x[p,q] for p in 1:3, q in 1:4) +
-    sum(cost_transmission_plant2city[p,c]*sum(p2c[p,c,:]) for p in 1:3, c in 1:4) +
-    sum(cost_transmission_plant2battery[p]*sum(p2b[p,:]) for p in 1:3) +
-    sum(cost_transmission_battery2city[c]*sum(b2c[c,:]) for c in 1:4) +
-    cost_storing*sum(battery)
+    sum(coalesce.(fac2dep,0)[i,j]*x[i,j] for i in 1:I, j in 1:J)
+    + sum(coalesce.(fac2c,0)[i,k]*y[i,k] for i in 1:I, k in 1:K)
+    + sum(coalesce.(dep2c,0)[j,k]*z[j,k] for j in 1:J, k in 1:K)
 )
 ```
 
 There are a few constraints we need to impose on the model.
-First is that city demands must be met.
-In addition, we need to ensure that our variables make sense, for example that we can only use as much electricity as we produce, and the stored amount of electricity in a quarter depends on how much there were before, how much is added, and how much is used.
-
 ```{code-cell}
 :tags: [remove-output]
 
-# city demands are satisfied
-@constraint(model, c_demand[c in 1:4, q in 1:4], sum(p2c[:,c,q]) + sum(b2c[c,q]) >= demand[c,q])
+# factory capacities are not exceeded
+@constraint(model, capacity[i in 1:I], sum(x[i,:]) + sum(y[i,:]) <= fac_capacity[i])
 
-# production continuity
-@constraint(model, c_prod_cont[p in 1:3, q in 1:4], sum(p2c[p,:,q])+p2b[p,q] == x[p,q])
+# depot throughput it obeyed
+@constraint(model, throughput_in[j in 1:J], sum(x[:,j]) <= dep_throughput[j])
+@constraint(model, throughput_out[j in 1:J], sum(z[j,:]) == sum(x[:,j]))
 
-# battery continuity
-@constraint(model, c_battery_cont1, sum(p2b[:,1]) - sum(b2c[:,1]) == battery[1])
-@constraint(model, c_battery_cont[q in 2:4], battery[q-1] + sum(p2b[:,q]) - sum(b2c[:,q]) == battery[q])
-```
+# customer demands met
+@constraint(model, demand[k in 1:K], sum(y[:,k]) + sum(z[:,k]) == demands[k])
 
-Lastly, and optionally, we impose an additional constraint that batteries don't use electricity sent in that quarter, or equivalently, that batteries receive electricity at the end of the quarter.
-This may not be strictly necessary to do, but here it prevents electricity from being delivered to cities through plants in the same quarter, which bypasses the proper transmission costs.
-```{code-cell}
-@constraint(model, c_battery_rule[q in 2:4], sum(b2c[:,q]) <= battery[q-1])
+# unavailable routes
+for idx in findall(ismissing, fac2dep)
+    @constraint(model, x[idx]==0)
+end
+for idx in findall(ismissing, fac2c)
+    @constraint(model, y[idx]==0)
+end
+for idx in findall(ismissing, dep2c)
+    @constraint(model, z[idx]==0)
+end
 ```
 
 This model is relatively large, so we print it in a dropdown menu.
@@ -237,20 +231,25 @@ This model is relatively large, so we print it in a dropdown menu.
 
 print(model)
 optimize!(model)
+is_solved_and_feasible(model)
 ```
 
-TODO: Display and discuss results nicely.
+Great, we have a feasible solution. Let’s see what it entails.
+```{code-cell}
+println("Objective value: ", objective_value(model))
+```
 
 ```{code-cell}
-if is_solved_and_feasible(model)
-    println("\nSolved!\n")
-    println("Objective value: ", objective_value(model))
-    println("x: ", value.(x))
-    println("p2c: ", value.(p2c))
-    println("p2b: ", value.(p2b))
-    println("battery: ", value.(battery))
-    println("b2c: ", value.(b2c))
-else
-    print("couldn't solve")
-end
+label_fac = ["Helsinki", "Jyväskylä"]
+label_dep = ["Turku", "Tampere", "Kuopio", "Oulu"]
+
+println("Factory to depots")
+a = DataFrame(transpose(value.(x)), label_fac)
+display(a)
+println("Factory to customers")
+b = DataFrame(transpose(value.(y)), label_fac)
+display(b)
+println("Depot to customers")
+c = DataFrame(transpose(value.(z)), label_dep)
+display(c)
 ```
