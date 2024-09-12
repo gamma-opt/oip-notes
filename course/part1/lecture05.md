@@ -52,7 +52,7 @@ What 6-month production policy should we pursue to maximize profit?
 
 Recall our set of steps for modelling optimisation problems:
 
-1. List **Parameters**;
+1. List **parameters**;
 2. Define **decision variables**; 
 3. Formulate **objective function**;
 4. Formulate **constraints**. 
@@ -84,9 +84,9 @@ Once the variables have been defined, we can pose our objective function. In thi
         & +150(y_1+y_2+y_3+y_4+y_5+y_6).
 \end{align}
 ```
-composed of costs of purchasing the oil, storage costs, and income from selling the blended product.
+which is composed of costs of purchasing the oil, storage costs, and income from selling the blended product.
 
-From our problem statement, we can see that there are four sources of constraints we must consider: linear production, processing limits, hardness constraints and the handling of storage.
+From our problem statement, we can see that there are five sources of constraints we must consider: linear production, processing limits, hardness constraints, storage continuity and storage limits.
 
 Linear production just means that we produce as much product as we use oils in any given month $j$
 
@@ -97,15 +97,15 @@ u_{1j}+u_{2j}+u_{3j}+u_{4j}+u_{5j} = p_j
 The processing limits are easy, for month $j$ we need
 
 ```{math}
-u_{1j}+u_{2j} \leq 200 \\
-u_{3j}+u_{4j}+u_{5j} \leq 250.
+u_{1j}+u_{2j} &\leq 200 \\
+u_{3j}+u_{4j}+u_{5j} &\leq 250.
 ```
 
 The hardness constraints for month $j$ are also not complicated:
 
 ```{math}
-8.8u_{1j}+6.1u_{2j}+2.0u_{3j}+4.2u_{4j}+5.0u_{5j} \leq 6y_j \\
-8.8u_{1j}+6.1u_{2j}+2.0u_{3j}+4.2u_{4j}+5.0u_{5j} \geq 3y_j.
+8.8u_{1j}+6.1u_{2j}+2.0u_{3j}+4.2u_{4j}+5.0u_{5j} &\leq 6y_j \\
+8.8u_{1j}+6.1u_{2j}+2.0u_{3j}+4.2u_{4j}+5.0u_{5j} &\geq 3y_j.
 ```
 
 For storage, we link these variables together by the relation
@@ -119,12 +119,13 @@ In doing the above, we need to make the initial storage of 500 tons per oil avai
 Thus we obtain for oil $i$
 
 ```{math}
-& b_{i1} -u_{i1}-s_{i1} &= -500 \\
-s_{i1} +& b_{i2} -u_{i2}-s_{i2} &= 0 \\
-s_{i2} +& b_{i3} -u_{i3}-s_{i3} &= 0 \\
-s_{i3} +& b_{i4} -u_{i4}-s_{i4} &= 0 \\
-s_{i4} +& b_{i5} -u_{i5}-s_{i5} &= 0 \\
-s_{i5} +& b_{i6} -u_{i6} &=500.
+:label: p1l5:food_storage
+ b_{i1} -u_{i1}-s_{i1} &= -500 \\
+s_{i1} + b_{i2} -u_{i2}-s_{i2} &= 0 \\
+s_{i2} + b_{i3} -u_{i3}-s_{i3} &= 0 \\
+s_{i3} + b_{i4} -u_{i4}-s_{i4} &= 0 \\
+s_{i4} + b_{i5} -u_{i5}-s_{i5} &= 0 \\
+s_{i5} + b_{i6} -u_{i6}\hspace{1.2cm} &=500.
 ```
 
 There is also a storage limit for each type of oil, which we can implement by constraining the variables
@@ -227,9 +228,9 @@ The production processes of these involve the following machines:
 
 The process of making every product is different and different products require the use of machines differently.
 Similarly, every product yields a certain net profit.
-These figures are described in {numref}`p1l5:production_table`, where a dash means that the product doesn't use the indicated machine.
+The time consumed by machine operations in hours and net profits in € are described in {numref}`p1l5:production_table`, where a dash means that the product doesn't use the indicated machine.
 
-```{table} Production figures
+```{table} Production parameters: net profits (€) and time needed by machines (h)
 :name: p1l5:production_table
 
 |                         | **Product 1** | **Product 2** | **Product 3** | **Product 4** | **Product 5** | **Product 6** | **Product 7** |
@@ -261,17 +262,17 @@ The machines are not always available, some will be under maintenance at certain
   - 1 Planer and 1 Horizontal drill
 ```
 
-In addition, due to market conditions, there are limits to how much of each product we can seel every month.
+In addition, due to market conditions, there are limits to how much of each product we can sell every month.
 
 ```{table} Limits on selling products
 |                         | **Product 1** | **Product 2** | **Product 3** | **Product 4** | **Product 5** | **Product 6** | **Product 7** |
 |:-----------------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|:-------------:|---------------|
-|        **Profit**       | 500           | 1000          | 300           | 300           | 800           | 200           | 100           |
-|       **Grinding**      | 600           | 500           | 200           | 0             | 400           | 300           | 150           |
-|  **Vertical drilling**  | 300           | 600           | 0             | 0             | 500           | 400           | 100           |
-| **Horizontal drilling** | 200           | 300           | 400           | 500           | 200           | 0             | 100           |
-|        **Boring**       | 0             | 100           | 500           | 100           | 1000          | 300           | 0             |
-|       **Planing**       | 500           | 500           | 100           | 300           | 1100          | 500           | 60            |
+|        **January**       | 500           | 1000          | 300           | 300           | 800           | 200           | 100           |
+|       **February**      | 600           | 500           | 200           | 0             | 400           | 300           | 150           |
+|  **March**  | 300           | 600           | 0             | 0             | 500           | 400           | 100           |
+| **April** | 200           | 300           | 400           | 500           | 200           | 0             | 100           |
+|        **May**       | 0             | 100           | 500           | 100           | 1000          | 300           | 0             |
+|       **June**       | 500           | 500           | 100           | 300           | 1100          | 500           | 60            |
 ```
 
 Once again, we can store products, up to 100 of each at a cost of €0.05 per unit per month.
@@ -287,7 +288,7 @@ Our objective is to determine a production schedule that maximises total profit.
 
 Once again, our list guides us.
 
-1. List **Parameters**;
+1. List **parameters**;
 2. Define **decision variables**; 
 3. Formulate **objective function**;
 4. Formulate **constraints**.
@@ -328,6 +329,7 @@ s_{16} \leq 500, s_{26} \leq 500, &\dots, s_{76} \leq 60
 
 Another easy one is ensuring that we have a stock of 50 of each product at the end, which we can do via
 ```{math}
+:label: p1l5:production_storage
 h_{16}=\dots=h_{76} = 50.
 ```
 
@@ -404,6 +406,16 @@ h_{14} + m_{15}-s_{15}-h_{15} &= 0 \\
 h_{15} + m_{16}-s_{16}-h_{16} &= 0 \\
 ```
 and identical constraints govern the other products.
+
+```{admonition} Do the above constraints look familiar?
+:class: dropdown, note
+The above constraints are very similar to {eq}`p1l5:food_storage` in the food manufacturing problem, where we kept track of storage variables.
+In both cases, we have a target stock to accumulate at the end of the time period, pay attention to how that is modeled.
+
+In the previous problem, we incorporated specific values into the constraints.
+Here, we preserve the form of the equations, and add the targets as a separate constraint in {eq}`p1l5:production_storage`.
+Both are equivalent.
+```
 
 Putting this all together, the optimisation model for the maximum profit production plan for the factory is given by
 
@@ -511,7 +523,7 @@ In addition, we sell the product to six customers C1 to C6, who can be supplied 
 
 The costs associated with the distribution of the products are given in {numref}`p1l5:distibution_costs`.
 
-```{table} Distribution costs
+```{table} Distribution costs (in € per tons delivered)
 :name: p1l5:distibution_costs
 |             | **Helsinki factory** | **Jväskylä factory** | **Turku depot** | **Tampere depot** | **Kuopio depot** | **Oulu depot** |
 |:-----------:|----------------------|----------------------|-----------------|-------------------|------------------|----------------|
@@ -549,22 +561,22 @@ In addition, some customers prefer to be supplied from certain locations.
 ```
 
 Each factory has a monthly supply capacity:
-- Helsinki: 150000 units
-- Brighton: 200000 units
+- Helsinki: 150000 tons
+- Brighton: 200000 tons
 
 Each depot has a monthly throughput limit:
-- Turku: 70000 units
-- Tampere: 50000 units
-- Kuopio: 100000 units
-- Oulu: 40000 units
+- Turku: 70000 tons
+- Tampere: 50000 tons
+- Kuopio: 100000 tons
+- Oulu: 40000 tons
 
 Lastly, each customer has a montly demand that must be met exactly:
-- C1: 50000 units
-- C2: 10000 units
-- C3: 40000 units
-- C4: 35000 units
-- C5: 60000 units
-- C6: 20000 units
+- C1: 50000 tons
+- C2: 10000 tons
+- C3: 40000 tons
+- C4: 35000 tons
+- C5: 60000 tons
+- C6: 20000 tons
 
 What distribution pattern would minimize total cost?
 
