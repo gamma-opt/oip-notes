@@ -28,7 +28,7 @@ using JuMP, HiGHS, DataFrames
 
 I = 7 # number of products
 J = 6 # number of months
-K = 5 # number of machines
+K = 5 # number of machine types
 
 profit = [10, 6, 8, 4, 11, 9, 3]
 
