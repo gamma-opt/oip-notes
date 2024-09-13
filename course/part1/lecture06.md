@@ -169,21 +169,17 @@ s_{ij}\leq S, \forall i \in I, j \in J.
 Putting the whole model together, we obtain
 
 ```{math}
-\begin{equation}
-\begin{aligned}
-    \maxi & \sum_{j \in J} C_Pp_j - \sum_{i \in I} \sum_{j \in J} C_{ij}b_{ij} - \sum_{i \in I} \sum_{j\in J}C_S s_{ij} \\
-    \st & \sum_{i \in I} u_{ij} = p_j, \forall j \in J \\
-    & \sum_{i=1}^N u_{ij} \leq L_1, \forall j \in J \\
-    & \sum_{i=N+1}^{|I|} u_{ij} \leq L_2, \forall j \in J \\
-    & \sum_{i \in I} H_iu_{ij} \leq H_u y_j, \forall j \in J \\
-    & \sum_{i \in I} H_iu_{ij} \geq H_d y_j, \forall j \in J \\
-    & B + b_{i1}-u_{i1}-s_{i1} = 0, \forall i \in I \\
-    & s_{i5} + b_{i6} -u_{i6} = T, \forall i \in I \\
-    & s_{i(j-1)} + b_{ij} -u_{ij} - s_{ij} = 0, \forall i \in I, \forall j \in J\setminus\{J_1,J_m\} \\
-    & b_{ij}, u_{ij}, s_{ij}, p_j \geq 0, \forall i \in I, j \in J \\
-    & s_{ij} \leq 1000, \forall i \in I, j \in J
-\end{aligned}
-\end{equation}
+\maxi & \sum_{j \in J} C_Pp_j - \sum_{i \in I} \sum_{j \in J} C_{ij}b_{ij} - \sum_{i \in I} \sum_{j\in J}C_S s_{ij} \\
+\st & \sum_{i \in I} u_{ij} = p_j, \forall j \in J \\
+& \sum_{i=1}^N u_{ij} \leq L_1, \forall j \in J \\
+& \sum_{i=N+1}^{|I|} u_{ij} \leq L_2, \forall j \in J \\
+& \sum_{i \in I} H_iu_{ij} \leq H_u y_j, \forall j \in J \\
+& \sum_{i \in I} H_iu_{ij} \geq H_d y_j, \forall j \in J \\
+& B + b_{i1}-u_{i1}-s_{i1} = 0, \forall i \in I \\
+& s_{i5} + b_{i6} -u_{i6} = T, \forall i \in I \\
+& s_{i(j-1)} + b_{ij} -u_{ij} - s_{ij} = 0, \forall i \in I, \forall j \in J\setminus\{J_1,J_m\} \\
+& b_{ij}, u_{ij}, s_{ij}, p_j \geq 0, \forall i \in I, j \in J \\
+& s_{ij} \leq 1000, \forall i \in I, j \in J
 ```
 
 ## Code
