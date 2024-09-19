@@ -7,3 +7,11 @@
                 no-repeat left top !important;
               background-size: 105px 30px !important;
 }
+
+/* 
+  quantecon theme aligns table headers to left
+  this restores (part of) default behavior
+*/
+table thead tr th.text-center {
+  text-align: center!important;
+}

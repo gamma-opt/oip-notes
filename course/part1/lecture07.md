@@ -20,7 +20,50 @@ In this lecture, we revisit the production and combined problem from [](lecture0
 ## Production Planning
 
 Now, we revisit the example in {numref}`p1l5:production`.
-Our goal is to make a factory production plan over a period of six months, so that we maximize profits.
+Our goal is to make a factory production plan over a period of six months, so that we maximize profits. In {numref}`production_variables`, the relevant symbols are defined, where the indexing sets are 
+- $I$ - set of products,
+- $J$ - set of months, and
+- $K$ - set of machine types.
+
+```{table} Variables in the Production Planning problem
+:name: production_variables
+| **Symbol** |                                   **Value**                                   |   **Variable name**  |
+|:----------:|:-----------------------------------------------------------------------------:|:--------------------:|
+|  $m_{ij}$  |                Amount of product $i$ manufactured in month $j$                |       `m[i,j]`       |
+|  $h_{ij}$  |               Amount of product $i$ held in storage in month $j$              |       `h[i,j]`       |
+|  $s_{ij}$  |                    Amount of product $i$ sold in month $j$                    |       `s[i,j]`       |
+|    $P_i$   |                      Profit made from selling product $i$                     |      `profit[i]`     |
+|  $U_{ki}$  |    Usage of machines of type $k$ required to produce a unit of product $i$    | `machine_usage[k,i]` |
+|    $N_k$   |                    Number of machines of type $k$ available                   |    `n_machines[k]`   |
+| $M_{jk}$   | Number of machines of type $k$ that is scheduled for maintenance in month $j$ | `maintenance[j,k]`   |
+| $C_H$      | Cost of holding a product                                                     | `holding_cost`       |
+| $L_{j,i}$  | Market limits of selling product $i$ in month $j$                             | `market_limits[j,i]` |
+| $L_H$      | Holding limit per product                                                     | `holding_limit`      |
+| $T_H$      | Holding target per product at the end of June                                 | `holding_target`     |
+```
+
+```{note}
+Note the symbols and the variable names in the above table.
+In writing mathematical models, it may be desirable to keep equations shorter and neater by using symbols.
+When it comes to writing code however, there is a lot of value in using informative variable names, especially if you'd like to use the code again a while after writing it or if other people will use it as well.
+```
+
+We also present the model in summary.
+
+```{math}
+\maxi & \sum_{i,j} P_i s_{ij} - \sum_{i,j} C_H h_{ij} \\
+\st & s_{i,j} \leq L_{j,i}, \forall i\in I, j \in J \\
+& \sum_i U_{ki} m_{ij} \leq 384*(N_k - M_{jk}), \forall k\in K, j\in J \\
+& m_{i1} - s_{i1} - h_{i1} = 0, \forall i\in I \\
+& h_{i(j-1)} + m_{ij} - s_{ij} - h_{ij} = 0, \forall i \in I, j \in J\setminus\{1\} \\
+& h_{i6} = T_H, \forall i \in I \\
+& h_{ij} \leq L_H, \forall i\in I, j\in J \\
+& m_{ij} \geq 0, \forall i\in I, j\in J \\
+& h_{ij} \geq 0, \forall i\in I, j\in J \\
+& s_{ij} \geq 0, \forall i\in I, j\in J
+```
+
+Now, we implement the problem in code.
 
 ```{code-cell}
 :tags: [remove-output]
@@ -145,7 +188,25 @@ display(c)
 
 ## Distribution Problem
 
-Finally, we cover the distribution problem presented in {numref}`p1l5:distribution`.
+Finally, we cover the distribution problem presented in {numref}`p1l5:distribution`.The indexing sets are 
+- $I$ - set of factories
+- $J$ - set of depots
+- $K$ - set of customers.
+
+```{table} Variables in the Distribution problem
+:name: distribution_variables
+| **Symbol** |                    **Value**                   |  **Variable name**  |
+|:----------:|:----------------------------------------------:|:-------------------:|
+|  $x_{ij}$  | Amount delivered from factory $i$ to depot $j$ |       `x[i,j]`      |
+|  $y_{ik}$  |  Amount delivered from factory $i$ to city $k$ |       `y[i,k]`      |
+|  $z_{jk}$  |   Amount delivered from depot $j$ to city $k$  |       `z[j,k]`      |
+| $f2d_{ij}$ | Cost of delivery from factory $i$ to depot $j$ |    `fac2dep[i,j]`   |
+| $f2c_{ik}$ |  Cost of delivery from factory $i$ to city $k$ |     `fac2c[i,k]`    |
+| $d2c_{jk}$ |   Cost of delivery from depot $j$ to city $k$  |     `dep2c[j,k]`    |
+| $C_{i}$    | Supply capacity of factory $i$                 | `fac_capacity[i]`   |
+| $T_{j}$    | Throughput of depot $j$                        | `dep_throughput[j]` |
+| $D_{k}$    | Demand of city $k$                             | `demands[k]`        |
+```
 
 ```{code-cell}
 :tags: [remove-output]
