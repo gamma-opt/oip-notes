@@ -333,4 +333,8 @@ text!(ax,
 f
 ```
 
-% Add note about how both methods above turn the problem into single objective, but other methods exist that don't do that (like EA)?
+## Other methods
+
+Both of the above methods work by effectively transforming the multiobjective problem into a singleobjective one.
+However alternative approaches like goal programming and interactive methods exist.
+We will not cover them in this course.
