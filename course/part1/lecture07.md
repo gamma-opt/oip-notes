@@ -20,28 +20,87 @@ In this lecture, we revisit the production and combined problem from [](lecture0
 ## Production Planning
 
 Now, we revisit the example in {numref}`p1l5:production`.
-Our goal is to make a quarterly electricity production plan over a period of a year, so that 3 power plants would produce enough electricity for the consumption of 4 cities.
+Our goal is to make a factory production plan over a period of six months, so that we maximize profits. In {numref}`production_variables`, the relevant symbols are defined, where the indexing sets are 
+- $I$ - set of products,
+- $J$ - set of months, and
+- $K$ - set of machine types.
+
+```{table} Variables in the Production Planning problem
+:name: production_variables
+| **Symbol** |                                   **Value**                                   |   **Variable name**  |
+|:----------:|:-----------------------------------------------------------------------------:|:--------------------:|
+|  $m_{ij}$  |                Amount of product $i$ manufactured in month $j$                |       `m[i,j]`       |
+|  $h_{ij}$  |               Amount of product $i$ held in storage in month $j$              |       `h[i,j]`       |
+|  $s_{ij}$  |                    Amount of product $i$ sold in month $j$                    |       `s[i,j]`       |
+|    $P_i$   |                      Profit made from selling product $i$                     |      `profit[i]`     |
+|  $U_{ki}$  |    Usage of machines of type $k$ required to produce a unit of product $i$    | `machine_usage[k,i]` |
+|    $N_k$   |                    Number of machines of type $k$ available                   |    `n_machines[k]`   |
+| $M_{jk}$   | Number of machines of type $k$ that is scheduled for maintenance in month $j$ | `maintenance[j,k]`   |
+| $C_H$      | Cost of holding a product                                                     | `holding_cost`       |
+| $L_{j,i}$  | Market limits of selling product $i$ in month $j$                             | `market_limits[j,i]` |
+| $L_H$      | Holding limit per product                                                     | `holding_limit`      |
+| $T_H$      | Holding target per product at the end of June                                 | `holding_target`     |
+```
+
+```{note}
+Note the symbols and the variable names in the above table.
+In writing mathematical models, it may be desirable to keep equations shorter and neater by using symbols.
+When it comes to writing code however, there is a lot of value in using informative variable names, especially if you'd like to use the code again a while after writing it or if other people will use it as well.
+```
+
+We also present the model in summary.
+
+```{math}
+\maxi & \sum_{i,j} P_i s_{ij} - \sum_{i,j} C_H h_{ij} \\
+\st & s_{i,j} \leq L_{j,i}, \forall i\in I, j \in J \\
+& \sum_i U_{ki} m_{ij} \leq 384*(N_k - M_{jk}), \forall k\in K, j\in J \\
+& m_{i1} - s_{i1} - h_{i1} = 0, \forall i\in I \\
+& h_{i(j-1)} + m_{ij} - s_{ij} - h_{ij} = 0, \forall i \in I, j \in J\setminus\{1\} \\
+& h_{i6} = T_H, \forall i \in I \\
+& h_{ij} \leq L_H, \forall i\in I, j\in J \\
+& m_{ij} \geq 0, \forall i\in I, j\in J \\
+& h_{ij} \geq 0, \forall i\in I, j\in J \\
+& s_{ij} \geq 0, \forall i\in I, j\in J
+```
+
+Now, we implement the problem in code.
 
 ```{code-cell}
 :tags: [remove-output]
 using JuMP, HiGHS, DataFrames
 
-# city x quarters
-demand = [40 60 75 25;
-          95 20 45 85;
-          60 25 90 30;
-          55 40 40 50]  
+I = 7 # number of products
+J = 6 # number of months
+K = 5 # number of machine types
 
-# plant x quarters
-cost = [ 8  6 10 9;
-         9 12 13 7;
-        14  9 15 5]
+profit = [10, 6, 8, 4, 11, 9, 3]
 
-prod_cap = [60 80 50] # per quarter
-over_cap_cost = 50    # per terawatt
+machine_usage = [0.5  0.7  0    0    0.3  0.2 0.5;
+                 0.1  0.2  0    0.3  0    0.6 0;
+                 0.2  0    0.8  0    0    0   0.6;
+                 0.05 0.03 0    0.07 0.1  0   0.08;
+                 0    0    0.01 0    0.05 0   0.05]
 
-holding_cost = 10
-starting_inventory = 50
+n_machines = [4, 2, 3, 1, 1]
+maintenance = [1 0 0 0 0;
+               0 0 2 0 0;
+               0 0 0 1 0;
+               0 1 0 0 0;
+               1 1 0 0 0;
+               0 0 1 0 1]
+
+holding_cost = 0.5
+market_limits = [500 1000 300 300  800 200 100;
+                 600  500 200   0  400 300 150;
+                 300  600   0   0  500 400 100;
+                 200  300 400 500  200   0 100;
+                   0  100 500 100 1000 300   0;
+                 500  500 100 300 1100 500  60]
+holding_limit = 100
+holding_target = 50
+days_per_month = 24
+shifts_per_day = 2
+hours_per_shift = 8
 
 model = Model(HiGHS.Optimizer)
 ```
@@ -53,72 +112,54 @@ model = Model(HiGHS.Optimizer)
 set_attribute(model, "output_flag", false)
 ```
 
-We start by defining a variable for each decision Powerco must make, that is how many units to produce in a given plant.
-These cannot be negative, and there is a cap beyond which production incurs additional costs, so we model before cap and after cap separately.
-Since demand must be met exactly, the number of units produced also controls how many of them must be stored, which also gets its own variable.
+We start by defining a variable for each decision we must make, that is how much products we manufacture, hold and sell.
+These cannot be negative, and there are upper limits to storing and selling.
 
 ```{code-cell}
 :tags: ["remove-output"]
 
-@variable(model, 0 <= x[f=1:3, q=1:4] <= prod_cap[f])  # n_units produced within cap in facility i quarter j
-@variable(model, 0 <= y[f=1:3, q=1:4])                 # n_units produced beyond cap in facility i quarter j
-@variable(model, 0 <= i[q=1:4])                        # n_units in inventory at the end of quarter j
+@variable(model, 0 <= m[1:I, 1:J])
+@variable(model, 0 <= h[1:I, 1:J] <= holding_limit)
+@variable(model, 0 <= s[i in 1:I, j in 1:J] <= market_limits[j,i])
 ```
 
-The objective is to minimize all costs over the year.
+The objective is to maximize profit after holding costs.
 
 ```{code-cell}
 :tags: ["remove-output"]
 
-@objective(model, Min, sum(x[f,q]*cost[f,q] for f=1:3, q=1:4) 
-                     + sum(y[f,q]*(cost[f,q]+over_cap_cost) for f=1:3, q=1:4)
-                     + sum(i[q]*holding_cost for q=1:4))
+@objective(model, Max, sum(s[i,j]*profit[i] for i in 1:I, j in 1:J) - holding_cost*sum(h))
 ```
 
-We need to ensure that demand is met, and any leftovers are stored in the inventory in a continuous manner, i.e. the inventory of last quarter matches the use next quarter and so on.
-The starting inventory is also available in the first month, so it is added separately, since we didn't define `i[0]`.
-
+We have a couple of constraints.
+First is to meet the target inventory at the end of June.
 ```{code-cell}
 :tags: ["remove-output"]
 
-@constraint(model, inventory1, starting_inventory+sum(x[:,1])+sum(y[:,1])-sum(demand[:,1]) == i[1])
-@constraint(model, inventory[q=2:4], i[q-1]+sum(x[:,q])+sum(y[:,q])-sum(demand[:,q]) == i[q])
+@constraint(model, holding_jun[i in 1:I], h[i,6] == holding_target)
 ```
 
-Note that in the above we don't explicitly say that demand is met.
-However, if it wasn't, i.e. the number of terawatts produced plus previous inventory didn't exceed demand, the next months inventory would be negative.
-This violates the constraint on the variables `i` we set up originally, so the demand constraint is implicit here.
+Another is the continuity of the product variables.
+```{code-cell}
+:tags: ["remove-output"]
+
+@constraint(model, continuity_jan[i in 1:I], m[i,1]-s[i,1]-h[i,1] == 0)
+@constraint(model, continuity[i in 1:I, j in 2:J], h[i,j-1]+m[i,j]-s[i,j]-h[i,j] == 0)
+```
+
+Lastly, we need constraints about machine usage.
+```{code-cell}
+:tags: ["remove-output"]
+
+@constraint(model, usage[j in 1:J, k=1:K], sum(machine_usage[k,:].*m[:,j]) <= days_per_month*shifts_per_day*hours_per_shift*(n_machines[k]-maintenance[j,k]))
+```
 
 Having specified the model, we can ask `JuMP` to show it to us.
 
 ```{code-cell}
-:tags: [remove-output]
+:tags: ["hide-output"]
 print(model)
 ```
-
-```{code-cell}
-:tags: [remove-input]
-
-io = IOBuffer()
-JuMP._print_latex(io, model)
-latex = String(take!(io))
-lines = split(latex, "\n")
-newlines = []
-push!(newlines, lines[1])
-push!(newlines, lines[2][begin:133] * "\\\\\n&" * lines[2][134:249] * "\\\\\n&" * lines[2][250:end])
-for i in 3:6
-    push!(newlines, lines[i])
-end
-for i in 27:length(lines)-1
-    left = lines[i-20][begin:end-2]
-    right = lines[i][begin+3:end]
-    push!(newlines, left*",\\quad "*right)
-end
-push!(newlines, lines[end])
-latex = join(newlines, "\n")
-display("text/latex", latex)
-```
-
 And we solve it.
 
 ```{code-cell}
@@ -133,42 +174,60 @@ println("Objective value: ", objective_value(model))
 ```
 
 ```{code-cell}
-println("Production before cap")
-a = DataFrame(value.(x), ["Q$(i)" for i=1:4])
+println("Manufacturing")
+label = ["Product $(i)" for i in 1:I]
+a = DataFrame(transpose(value.(m)), label)
 display(a)
-println("Production after cap")
-b = DataFrame(value.(y), ["Q$(i)" for i=1:4])
+println("Holding")
+b = DataFrame(transpose(value.(h)), label)
 display(b)
-println("Inventory use")
-c = DataFrame(reshape(value.(i),1,4), ["Q$(i)" for i=1:4])  # this is a vector, so we convert it to matrix for DataFrame
+println("Selling")
+c = DataFrame(transpose(value.(s)), label)
 display(c)
 ```
 
-## Combined Problem
+## Distribution Problem
 
-Finally, we cover the combined production-transportation problem presented in {numref}`p1l5:combined`.
+Finally, we cover the distribution problem presented in {numref}`p1l5:distribution`.The indexing sets are 
+- $I$ - set of factories
+- $J$ - set of depots
+- $K$ - set of customers.
+
+```{table} Variables in the Distribution problem
+:name: distribution_variables
+| **Symbol** |                    **Value**                   |  **Variable name**  |
+|:----------:|:----------------------------------------------:|:-------------------:|
+|  $x_{ij}$  | Amount delivered from factory $i$ to depot $j$ |       `x[i,j]`      |
+|  $y_{ik}$  |  Amount delivered from factory $i$ to city $k$ |       `y[i,k]`      |
+|  $z_{jk}$  |   Amount delivered from depot $j$ to city $k$  |       `z[j,k]`      |
+| $f2d_{ij}$ | Cost of delivery from factory $i$ to depot $j$ |    `fac2dep[i,j]`   |
+| $f2c_{ik}$ |  Cost of delivery from factory $i$ to city $k$ |     `fac2c[i,k]`    |
+| $d2c_{jk}$ |   Cost of delivery from depot $j$ to city $k$  |     `dep2c[j,k]`    |
+| $C_{i}$    | Supply capacity of factory $i$                 | `fac_capacity[i]`   |
+| $T_{j}$    | Throughput of depot $j$                        | `dep_throughput[j]` |
+| $D_{k}$    | Demand of city $k$                             | `demands[k]`        |
+```
 
 ```{code-cell}
 :tags: [remove-output]
 
-# plant x quarter
-cost_production = [4 2 7 3;
-                   5 8 4 2;
-                   3 6 5 8]
-# plant x city
-cost_transmission_plant2city = [ 8  6 10 9;
-                                 9 12 13 7;
-                                14  9 15 5]
-cost_transmission_plant2battery = [6 4 8]
+I = 2 # number of factories
+J = 4 # number of depots
+K = 6 # number of customers
 
-cost_transmission_battery2city = [4 2 7 5]
+fac2dep = [0.5 0.5 1.0 0.2;
+           missing 0.3 0.5 0.2]
+fac2c = [1.0 missing 1.5 2.0 missing 1;
+         2.0 missing missing missing missing missing]
 
-cost_storing = 1
+dep2c = [missing 1.5 0.5 1.5 missing 1.0;
+         1.0 0.5 0.5 1.0 0.5 missing;
+         missing 1.5 2.0 missing 0.5 1.5;
+         missing missing 0.2 1.5 0.5 1.5]
 
-demand = [40 60 75 25;
-          95 20 45 85;
-          60 25 90 30;
-          55 40 40 50]
+fac_capacity = [150000, 200000]
+dep_throughput = [70000, 50000, 100000, 40000]
+demands = [50000 10000 40000 35000 60000 20000]
 
 model = Model(HiGHS.Optimizer)
 ```
@@ -180,56 +239,51 @@ model = Model(HiGHS.Optimizer)
 set_attribute(model, "output_flag", false)
 ```
 
-We need to decide on how much electricity each plant is producing in each quarter.
-Once we have that, we can _spend_ it on towards satisfying city demands or storing in the battery, which are represented here by {math}`p2c` and {math}`p2b`.
-By having a {math}`battery` variable, it is easier to keep track of how much electricity is added or used from storage, and finally {math}`b2c` tracks this used amount.
-
+Then we define our variables.
 ```{code-cell}
 :tags: [remove-output]
 
-@variable(model, x[p in 1:3, q in 1:4] >= 0)              # production
-@variable(model, p2c[p in 1:3, c in 1:4, q in 1:4] >= 0)  # transmission from plants to cities
-@variable(model, p2b[p in 1:3, q in 1:4] >= 0)            # transmission from plants to battery
-@variable(model, battery[q in 1:4] >= 0)                  # stored in battery at the end of quarter
-@variable(model, b2c[c in 1:4, q in 1:4] >= 0)            # transmission from battery to cities (in q=1 should be 0)
+@variable(model, x[1:I,1:J] >= 0)
+@variable(model, y[1:I,1:K] >= 0)
+@variable(model, z[1:J,1:K] >= 0)
 ```
 
-Given the above variables, our objective is to minimize all costs, which comes from production, transmission, and storing in the battery.
+Given the above variables, our objective is to minimize distribution costs.
 
 ```{code-cell}
 :tags: [remove-output]
 
 @objective(model, Min, 
-    sum(cost_production[p,q]*x[p,q] for p in 1:3, q in 1:4) +
-    sum(cost_transmission_plant2city[p,c]*sum(p2c[p,c,:]) for p in 1:3, c in 1:4) +
-    sum(cost_transmission_plant2battery[p]*sum(p2b[p,:]) for p in 1:3) +
-    sum(cost_transmission_battery2city[c]*sum(b2c[c,:]) for c in 1:4) +
-    cost_storing*sum(battery)
+    sum(coalesce.(fac2dep,0)[i,j]*x[i,j] for i in 1:I, j in 1:J)
+    + sum(coalesce.(fac2c,0)[i,k]*y[i,k] for i in 1:I, k in 1:K)
+    + sum(coalesce.(dep2c,0)[j,k]*z[j,k] for j in 1:J, k in 1:K)
 )
 ```
 
 There are a few constraints we need to impose on the model.
-First is that city demands must be met.
-In addition, we need to ensure that our variables make sense, for example that we can only use as much electricity as we produce, and the stored amount of electricity in a quarter depends on how much there were before, how much is added, and how much is used.
-
 ```{code-cell}
 :tags: [remove-output]
 
-# city demands are satisfied
-@constraint(model, c_demand[c in 1:4, q in 1:4], sum(p2c[:,c,q]) + sum(b2c[c,q]) >= demand[c,q])
+# factory capacities are not exceeded
+@constraint(model, capacity[i in 1:I], sum(x[i,:]) + sum(y[i,:]) <= fac_capacity[i])
 
-# production continuity
-@constraint(model, c_prod_cont[p in 1:3, q in 1:4], sum(p2c[p,:,q])+p2b[p,q] == x[p,q])
+# depot throughput it obeyed
+@constraint(model, throughput_in[j in 1:J], sum(x[:,j]) <= dep_throughput[j])
+@constraint(model, throughput_out[j in 1:J], sum(z[j,:]) == sum(x[:,j]))
 
-# battery continuity
-@constraint(model, c_battery_cont1, sum(p2b[:,1]) - sum(b2c[:,1]) == battery[1])
-@constraint(model, c_battery_cont[q in 2:4], battery[q-1] + sum(p2b[:,q]) - sum(b2c[:,q]) == battery[q])
-```
+# customer demands met
+@constraint(model, demand[k in 1:K], sum(y[:,k]) + sum(z[:,k]) == demands[k])
 
-Lastly, and optionally, we impose an additional constraint that batteries don't use electricity sent in that quarter, or equivalently, that batteries receive electricity at the end of the quarter.
-This may not be strictly necessary to do, but here it prevents electricity from being delivered to cities through plants in the same quarter, which bypasses the proper transmission costs.
-```{code-cell}
-@constraint(model, c_battery_rule[q in 2:4], sum(b2c[:,q]) <= battery[q-1])
+# unavailable routes
+for idx in findall(ismissing, fac2dep)
+    @constraint(model, x[idx]==0)
+end
+for idx in findall(ismissing, fac2c)
+    @constraint(model, y[idx]==0)
+end
+for idx in findall(ismissing, dep2c)
+    @constraint(model, z[idx]==0)
+end
 ```
 
 This model is relatively large, so we print it in a dropdown menu.
@@ -238,20 +292,25 @@ This model is relatively large, so we print it in a dropdown menu.
 
 print(model)
 optimize!(model)
+is_solved_and_feasible(model)
 ```
 
-TODO: Display and discuss results nicely.
+Great, we have a feasible solution. Let’s see what it entails.
+```{code-cell}
+println("Objective value: ", objective_value(model))
+```
 
 ```{code-cell}
-if is_solved_and_feasible(model)
-    println("\nSolved!\n")
-    println("Objective value: ", objective_value(model))
-    println("x: ", value.(x))
-    println("p2c: ", value.(p2c))
-    println("p2b: ", value.(p2b))
-    println("battery: ", value.(battery))
-    println("b2c: ", value.(b2c))
-else
-    print("couldn't solve")
-end
+label_fac = ["Helsinki", "Jyväskylä"]
+label_dep = ["Turku", "Tampere", "Kuopio", "Oulu"]
+
+println("Factory to depots")
+a = DataFrame(transpose(value.(x)), label_fac)
+display(a)
+println("Factory to customers")
+b = DataFrame(transpose(value.(y)), label_fac)
+display(b)
+println("Depot to customers")
+c = DataFrame(transpose(value.(z)), label_dep)
+display(c)
 ```
