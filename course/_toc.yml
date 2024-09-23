@@ -4,7 +4,7 @@ parts:
 - caption: The Fundamentals of Mathematical Optimisation Modelling
   numbered: true
   chapters:
-  - file: part1/lecture01
+  - file: course/part1/1-intro.md
   - file: part1/lecture02
   - file: part1/lecture03
   - file: part1/lecture04

@@ -15,7 +15,12 @@ kernelspec:
 
 %TODO: Identify a good reference material to build upon. 
 
-# Lecture 3
+# Functions and optimisation
+
+
+
+
+
 
 ## What is a function?
 
@@ -159,4 +164,7 @@ A function {math}`f:\reals^n\to\reals^m` is differentiable at a point {math}`x\i
 ```
 ````
 
-Additional content... 
+## Function shapes, convexity and its role in optimisation
+
+- Define the notion of convexity from an intuitive standpoint
+- Discuss that if a function is convex one only need to find THE point where nabla f = 0 to find the optimum
