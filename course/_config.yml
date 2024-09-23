@@ -1,6 +1,6 @@
 title: Optimisation in Practice
 author: Fabricio Oliveira & Tunç Başar Köse
-logo: _static/sidebar_logo.png
+#logo: _static/sidebar_logo.png
 only_build_toc_files: true
 
 # Code execution settings
