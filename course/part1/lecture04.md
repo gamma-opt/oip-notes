@@ -110,8 +110,8 @@ The carpenter has raw material and labour availability constraints. These can be
 ```{math}
 \text{total amount used}&\hspace{0.7cm} \text{total amount available} \\
 3x_t + 5x_c& \leq 40 \text{ (labour)}\\
-7x_t + 4x_c& \leq 60 \text{ (wood)}  \\
-\end{align}
+7x_t + 4x_c& \leq 60 \text{ (wood)}
+```
 
 Finally, the mathematical model that maximises the income of the carpenter is given by:
 

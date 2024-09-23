@@ -148,6 +148,7 @@ sphinx:
         [\rule{\textwidth}{1pt}] % code to run after title
 
         \usepackage{mathtools}
+        \allowdisplaybreaks  % break equations between pages
         % Math commands
         \newcommand{\reals}{\mathbb{R}}
         \newcommand{\integers}{\mathbb{Z}}

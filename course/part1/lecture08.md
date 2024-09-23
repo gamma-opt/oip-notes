@@ -22,12 +22,10 @@ Next, we focus on extending the types of variables we can consider in our optimi
 Conceptually, this is a somewhat small change in the model formulation, but one with major consequences to how difficult the optimisation model is to solve. Let us return to our example in {numref}`p1l4:first-model`. One point we raised is that the problem was modelled considering that the number of tables and chairs, represented by decision variables $x_t$ and $x_c$ could take fractional values. Now, let us assume that we require the number of tables and chairs to be integer. Thus, we can modify our model formulation as 
 
 ```{math}
-\begin{align}
 \text{maximise}_{x_t,x_c} \ &1000x_t + 500x_c \\
 \text{subject to: } &3x_t + 5x_c \leq 40\\
 &7x_t + 4x_c \leq 60\\
 &x_t, x_c \in \mathbb{Z}_+.
-\end{align}
 ```
 
 ```{admonition} Alternative notation for integer-valued variables
@@ -109,16 +107,14 @@ Let's revisit the carpenter's problem from {numref}`p1l4:first-model` as an exam
 For that, we must define two additional binary variables, namely $y_t$ and $y_c$ that assume value 1 if the tools for making chairs and tables are acquired. Then, original model can be modified as follows
 
 ```{math}
-\begin{align}
-  \text{maximise}_{x_t,x_c} \ &1000x_t + 500x_c - 5000y_t - 600y_c\\
-  \text{subject to: } 
-  &3x_t + 5x_c \leq 40\\
-  &7x_t + 4x_c \leq 60\\
-  & x_t \le My_t \\
-  & x_c \le My_c \\
-  &x_t, x_c \geq 0 \\
-  &y_t, y_c \in \{0,1\}.
-\end{align}
+\text{maximise}_{x_t,x_c} \ &1000x_t + 500x_c - 5000y_t - 600y_c\\
+\text{subject to: } 
+&3x_t + 5x_c \leq 40\\
+&7x_t + 4x_c \leq 60\\
+& x_t \le My_t \\
+& x_c \le My_c \\
+&x_t, x_c \geq 0 \\
+&y_t, y_c \in \{0,1\}.
 ```
 
 We can implement this similarly as before.
@@ -257,7 +253,6 @@ As the aphorism goes: All models are wrong (or in this case incomplete), but som
 The updated and corrected carpenter's model becomes
 
 ```{math}
-\begin{align}
 \text{maximise}_{x_t,x_c} \ &1000x_t + 500x_c - 5000y_t^{01} - 8700y_t^{10} - 600y_c\\
 \text{subject to: } 
 &3x_t + 5x_c \leq 40 + M(1 - y_t^{01} - y_t^{00})\\
@@ -269,7 +264,6 @@ The updated and corrected carpenter's model becomes
 & x_c \le My_c \\
 &x_t, x_c \geq 0 \\
 &y_t^{01}, y_t^{10}, y_t^{00}, y_c \in \{0,1\}.
-\end{align}
 ```
 
 and the solution we get is

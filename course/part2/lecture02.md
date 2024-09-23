@@ -26,10 +26,8 @@ A function being differentiable means that it can be locally well-approximated w
 
 Exploring this idea further leads to the fact that differentiation is a linear operation, which formalizes the above intuition with
 ```{math}
-\begin{align*}
 \nabla -f(x_0) &= \nabla (-1 \cdot f(x_0)) \\
 &= -1 \nabla f(x_0) = -\nabla f(x_0)
-\end{align*}
 ```
 which means that the direction of steepest ascent for a function {math}`f` must necessarily be the direction of steepest descent for {math}`-f`.
 ````

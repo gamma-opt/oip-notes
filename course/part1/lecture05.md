@@ -136,6 +136,8 @@ Lastly, since we cannot work with negative amounts of oil, we must add nonnegati
 Putting it all together, the optimisation model that provides the maximum profit is given by
 
 ```{math}
+:nowrap:
+\begin{align*}
 \maxi & f(b_{ij}, u_{ij}, s_{ij}, p_j) = \\ 
       & -110b_{11} -130b_{12} -110b_{13} -120b_{14} -100b_{15} - 90b_{16} \\
       & -120b_{21} -130b_{22} -140b_{23} -110b_{24} -120b_{25} -100b_{26} \\
@@ -208,7 +210,8 @@ Putting it all together, the optimisation model that provides the maximum profit
 & u_{11}, \dots, u_{56} \geq 0 \\
 & s_{11}, \dots, s_{56} \geq 0 \\
 & p_1, \dots, p_6 \geq 0 \\
-& s_{11}, \dots, s_{56} \leq 1000 
+& s_{11}, \dots, s_{56} \leq 1000
+\end{align*}
 ```
 
 (p1l5:production)=
@@ -416,6 +419,8 @@ Both are equivalent.
 Putting this all together, the optimisation model for the maximum profit production plan for the factory is given by
 
 ```{math}
+:nowrap:
+\begin{align*}
 \maxi & f(m_{ij}, h_{ij}, s_{ij}) = \\ 
       10 &( s_{11}+s_{12}+s_{13}+s_{14}+s_{15}+s_{16}) \\
       +6 &( s_{21}+s_{22}+s_{23}+s_{24}+s_{25}+s_{26}) \\
@@ -508,6 +513,7 @@ Putting this all together, the optimisation model for the maximum profit product
     & m_{11} \geq 0, \dots, m_{76} \geq 0 \\
     & h_{11} \geq 0, \dots, h_{76} \geq 0 \\
     & s_{11} \geq 0, \dots, s_{76} \geq 0.
+\end{align*}
 ```
 
 (p1l5:distribution)=
