@@ -108,29 +108,29 @@ Let $x_t$ be total of tables produced weekly and $x_c$ the total of chairs produ
 The carpenter has raw material and labour availability constraints. These can be expressed as
 
 ```{math}
-\begin{align}
 \text{total amount used}&\hspace{0.7cm} \text{total amount available} \\
 3x_t + 5x_c& \leq 40 \text{ (labour)}\\
 7x_t + 4x_c& \leq 60 \text{ (wood)}  \\
 \end{align}
-```
 
-Finally, the mathematical programming model that maximises the income of the carpenter is given by:
+Finally, the mathematical model that maximises the income of the carpenter is given by:
 
 ```{math}
-\begin{align}
 \text{maximise}_{x_t,x_c} \ &1000x_t + 500x_c \\
 \text{subject to: } &3x_t + 5x_c \leq 40\\
 &7x_t + 4x_c \leq 60\\
 &x_t, x_c \geq 0.
-\end{align}
 ```
 
 ```{admonition} Is this model correct?
 :class: dropdown, caution
 
-Attentive readers may have noticed something about the above model, namely that there is no constraint forcing $x_t$ and $x_c$ above to be integers. Does it make sense to have $x_t=3.5$? As we will see below, the optimal solution to this problem has non-integer values. We will consider this problem more generally in later lectures.
+Attentive readers may have noticed something about the above model, namely that there is no constraint forcing $x_t$ and $x_c$ above to be integers. Does it make sense to have $x_t=3.5$? As we will see below, the optimal solution to this problem has non-integer values, manufacturing exactly 8.57 tables is arguably not very sensible.
+
+We will consider this problem more generally and learn about (mixed-)integer programming, where some variables are constrainted to be integers, in later lectures. For now, it suffices to know that linear optimisation is easier, so we will first focus on that.
 ```
+
+With a mathematical model ready, we can translate it into code for a computational tool that will solve the problem for us.
 
 ```{code-cell}
 using JuMP, HiGHS #JuMP is for writing the mathematical model; HiGHS is the solver (Simplex method). 

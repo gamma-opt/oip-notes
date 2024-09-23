@@ -39,10 +39,15 @@ sphinx:
     mathjax_path: https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js  # Enable MathJax 3
     mathjax3_config:
       loader:
-        load: ["[tex]/textmacros"]  # For ~ to work as non-breaking space
+        load: 
+          - "[tex]/textmacros"  # For ~ to work as non-breaking space
+          - "[tex]/mathtools"   # For rcases
       tex:
         packages:
-          "[+]": ["textmacros"]     # For ~ to work as non-breaking space
+          "[+]": 
+            - "textmacros"    # For ~ to work as non-breaking space
+            - "mathtools"
+        maxBuffer: 6*1024  # in order to render large model equations in p1l5
         # If you add something, you should probably add to latex_elements below as well
         macros:
           "reals": "\\mathbb{R}"
@@ -142,6 +147,7 @@ sphinx:
         {} % code to run before title
         [\rule{\textwidth}{1pt}] % code to run after title
 
+        \usepackage{mathtools}
         % Math commands
         \newcommand{\reals}{\mathbb{R}}
         \newcommand{\integers}{\mathbb{Z}}

@@ -15,140 +15,7 @@ kernelspec:
 
 # Lecture 9
 
-## Set Covering (Facility location)
-
-Note: set covering seems like a good opportunity to have an interactive visualisation for the simple problem.
-
-This example is based on Section 9.2 of {cite}`winston2022operations`.
-
-There are six cities in Kilroy County.
-The county must determine where to build fire stations.
-The county wants to build the minimum number of fire stations needed to ensure that at least one station is within 15 minutes of each city.
-The time (in minutes) required to get between the cities are shown in {numref}`table_setcover`.
-Formulate an IP that will tell Kilroy where fire stations should be built.
-
-```{list-table} Distance between cities (in minutes)
-:name: table_setcover
-:header-rows: 1
-:stub-columns: 1
-
-* - 
-  - City 1
-  - City 2
-  - City 3
-  - City 4
-  - City 5
-  - City 6
-* - City 1
-  - 0
-  - 10
-  - 20
-  - 30
-  - 30
-  - 20
-* - City 2
-  - 10
-  - 0
-  - 25
-  - 35
-  - 20
-  - 10
-* - City 3
-  - 20
-  - 25
-  - 0
-  - 15
-  - 30
-  - 20
-* - City 4
-  - 30
-  - 35
-  - 15
-  - 0
-  - 15
-  - 25
-* - City 5
-  - 30
-  - 20
-  - 30
-  - 15
-  - 0
-  - 14
-* - City 6
-  - 20
-  - 10
-  - 20
-  - 25
-  - 14
-  - 0
-```
-
-### Solution
-
-```{code-cell}
-:tags: [remove-output]
-
-using JuMP, HiGHS
-
-time = [ 0 10 20 30 30 20;
-        10  0 25 35 20 10;
-        20 25  0 15 30 20;
-        30 35 15  0 15 25;
-        30 20 30 15  0 14;
-        20 10 20 25 14  0]
-
-model = Model(HiGHS.Optimizer)
-```
-
-% Remove the solver printed statement
-```{code-cell}
-:tags: [remove-cell]
-
-set_attribute(model, "output_flag", false)
-```
-
-We start by defining the decision variables, which represent whether a fire station gets built in a given city.
-Note that since there are only two options, these are binary variables
-```{code-cell}
-:tags: [remove-output]
-
-@variable(model, x[1:6], Bin)
-```
-
-The objective is to minimize the number of fire stations
-```{code-cell}
-@objective(model, Min, sum(x))
-```
-
-Lastly, we want every city to have a fire station within 15 minutes of it.
-How do we encode that?
-Consider City 1, which has itself and City 2 within 15 minutes of distance.
-Then, what we do want could be expressed as
-```{math}
-x_1+x_2 \geq 1
-```
-so both cities not having a station could be excluded.
-We add such constaints for every city.
-```{code-cell}
-for i in 1:6
-    @constraint(model, sum(x[(time .<= 15)[i,:]]) >= 1)
-end
-```
-
-At the end, our model looks like this.
-```{code-cell}
-print(model)
-```
-Let's solve it.
-
-```{code-cell}
-optimize!(model)
-is_solved_and_feasible(model)
-println("Objective value: ", objective_value(model))
-println("x: ", value.(x))
-```
-
-Thus it is sufficient to build 2 fire stations, in cities 2 and 4.
+In this lecture, we expand on the paradigm of (mixed-)integer programming, first by introducing the famous _Travelling Salesperson Problem_, then expanding previous problems from [](./lecture05.md) to those that will use this paradigm.
 
 ## Travelling Salesperson Problem
 
@@ -223,4 +90,288 @@ This procedure typically terminates far earlier than having all of the possible 
 :align: center
 
 A feasible solution without subtours.
+```
+
+## Food manufacture 2
+
+Recall the problem {ref}`p1l5:food`.
+Suppose we want to add some additional conditions on the problem:
+- The food may never be made up of more than three oils in any month.
+- If an oil is used in a month, at least 20 tons must be used.
+- If either of VEG 1 or VEG 2 are used in a month, then OIL 3 must also be used.
+
+These conditions are not unreasonable, often it may be desirable to not worry about handling too many ingredients or too small amounts.
+Alternatively, some ingredients may interact with each other in certain ways, for example causing an undesirable chemical reaction, leading to us wanting to impose logical conditions in the model.
+How do we extend the previous model to take these restrictions into account?
+
+### Solution
+All the above conditions depend on whether some oil is used in the blend or not.
+This is a true/false condition, thus we need integer variables to model it:
+- $d_{ij}$ - whether or not oil $i$ is used in month $j$.
+
+The value of $d_{ij}$ should be linked to that of $u_{ij}$, which represents the amount of use.
+If $u_{ij}$ is present in the blend, that is it is positive, then $d_{ij}$ should be 1.
+Logically, this is 
+```{math}
+u_{ij} > 0 \iff d_{ij} = 1
+```
+which is logically equivalent to
+```{math}
+(u_{ij} > 0 \implies d_{ij} = 1) \land (d_{ij} = 1 \implies u_{ij} > 0)
+```
+We can model this biconditional using the following constraints
+```{math}
+u_{ij} &\leq M d_{ij} \\
+u_{ij} &\geq \epsilon d_{ij}
+```
+which is the familiar big-M method and its counterpart, where $\epsilon$ should be very small. 
+In fact, since we have limits on what nonzero values $u_{ij}$ can take, we can take this a step further.
+Suppose $i$ is a vegetable oil, so we need it to be at most 200 but at least 20.
+Then we can use
+```{math}
+u_{ij} &\leq 200 d_{ij} \\
+u_{ij} &\geq 20 d_{ij}
+```
+Here if $d_{ij}=1$, then $u_{ij}$ cannot exceed 200, but need at least 20.
+If $d_{ij}=0$, then both right-hand sides are zero, which forces $u_{ij}$ to be zero.
+Repeating this for every oil and month gives us one of the additional conditions we'd like to impose.
+
+With $d_{ij}$ defined and linked to $u_{ij}$, the other conditions are very easy to implement.
+To limit the number of ingredients in a blend to three oils, we can just add
+```{math}
+\sum_{i}d_{ij} \leq 3, \forall j \in J.
+```
+
+The last condition logically is
+```{math}
+(d_{1j} \lor d_{2j}) \implies d_{5j}
+```
+which we can rewrite as 
+```{math}
+(d_{1j} + d_{2j} \geq 1) \implies d_{5j} = 1
+```
+and
+```{math}
+(d_{1j} + d_{2j} < 1) \lor d_{5j} = 1
+```
+In words, if d_{1j} and d_{2j} are less than 1, i.e. they are 0, we don't care about d_{5j}, the statement is already satisfied.
+If one or both of d_{1j} or d_{2j} are 1, then d_{5j} must be 1.
+What would this look as a mathematical equation?
+
+Let's focus on the first case first.
+On one hand, we have 0, since d_{1j} and d_{2j} are not 1.
+On the other hand, we don't care about d_{5j}, which can only be 0 or 1.
+Thus we have something that must look like
+```{math}
+0\leq d_{5j}
+```
+so that it is satisfiable.
+
+In the second case, we may have 1 or 2 at the left-hand side, but now $d_{5j}$ can only be 1.
+For this to fit into the above form, we have to change it a little bit so that the RHS can satisfy $\leq$
+```{math}
+(1\text{ or } 2) \leq 2d_{5j}.
+```
+
+This gives the constraint
+```{math}
+d_{1j} + d_{2j} \leq 2d_{5j}, \forall j \in J.
+```
+
+With all the additional constraints ready, we can now solve the problem
+```{code-cell}
+:tags: [remove-cell]
+using JuMP, HiGHS
+
+cost = [110 130 110 120 100  90;
+        120 130 140 110 120 100;
+        130 110 130 120 150 140;
+        110  90 100 120 110  80;
+        115 115  95 125 105 135]
+hardness = [8.8, 6.1, 2.0, 4.2, 5.0]
+hardness_ul = 6
+hardness_ll = 3
+price_product = 150
+process_limit_veg = 200
+process_limit_non = 250
+n_veg = 2
+storage_limit = 1000
+initial_oil = 500
+target_oil = 500
+cost_storing = 5
+```
+
+```{code-cell}
+I,J = size(cost)
+
+model = Model(HiGHS.Optimizer)
+
+@variable(model, d[1:I, 1:J], Bin)  # new
+@variable(model, b[1:I, 1:J] >= 0)
+@variable(model, u[1:I, 1:J] >= 0)
+@variable(model, storage_limit >= s[1:I, 1:J] >= 0)
+@variable(model, p[1:J] >= 0)
+
+
+@objective(model, Max, price_product*sum(p) - sum(cost[i,j]*b[i,j] for i in 1:I, j in 1:J) - cost_storing*sum(s))
+
+@constraint(model, c_cond1_ul_veg[i in 1:n_veg, j in 1:J], u[i,j] <= process_limit_veg*d[i,j]) # new
+@constraint(model, c_cond1_ul_non[i in n_veg+1:I, j in 1:J], u[i,j] <= process_limit_non*d[i,j]) # new
+@constraint(model, c_cond1_ll[i in 1:I, j in 1:J], u[i,j] >= 20*d[i,j]) # new
+@constraint(model, c_cond2[j in 1:J], sum(d[:,j]) <= 3)
+@constraint(model, c_cond3[j in 1:J], d[1,j]+d[2,j] <= 2*d[5,j])
+@constraint(model, c_production[j in 1:J], sum(u[:,j]) == p[j])
+@constraint(model, c_processing_veg[j in 1:J], sum(u[begin:n_veg,j]) <= process_limit_veg)
+@constraint(model, c_processing_non[j in 1:J], sum(u[n_veg+1:end,j]) <= process_limit_non)
+@constraint(model, c_hardness_ul[j in 1:J], sum(hardness[i]*u[i,j] for i in 1:I) <= hardness_ul*p[j])
+@constraint(model, c_hardness_ll[j in 1:J], sum(hardness[i]*u[i,j] for i in 1:I) >= hardness_ll*p[j])
+@constraint(model, c_storage_start[i in 1:I], b[i,1]-u[i,1]-s[i,1] == -initial_oil)
+@constraint(model, c_storage[i in 1:I, j in 2:J], s[i,j-1]+b[i,j]-u[i,j]-s[i,j] == 0)
+@constraint(model, c_storage_end[i in 1:I], s[i,J] == target_oil)
+
+set_attribute(model, "output_flag", false) # Remove the solver printed statement
+optimize!(model)
+@assert is_solved_and_feasible(model)
+```
+
+```{code-cell}
+println("Objective value: ", objective_value(model))
+```
+
+```{code-cell}
+:tags: ["remove-input"]
+using DataFrames
+oils = ["Veg 1", "Veg 2", "Oil 1", "Oil 2", "Oil 3"]
+months = ["January", "February", "March", "April", "May", "June"]
+df_b = DataFrame(transpose(value.(b)), oils)
+df_u = DataFrame(transpose(value.(u)), oils)
+df_s = DataFrame(transpose(value.(s)), oils)
+df_p = DataFrame(transpose([value.(p)])..., months)
+println("Purchasing variables")
+display(df_b)
+println("Using variables")
+display(df_u)
+println("Storing variables")
+display(df_s)
+println("Production amount")
+display(df_p)
+```
+
+## Factory planning 2
+
+Recall the problem {ref}`p1l5:production`.
+Now, instead of the given maintenance schedule, suppose it is up to us to find one that maximizes the profits.
+
+- Each machine except the grinders must be down for maintenance in any one of the six months.
+- Only two of the four grinders each need to be down in any one of the six months.
+
+### Solution
+Now, we need to keep track of how many machines are down for maintenance, so we make a new variable
+- $d_{kj}$ - number of machines of type $k$ that are down for maintenance in month $j$,
+
+where $k=1,\dots,5$ is grinders, vertical drills, horizontal drills, borers and planers respectively.
+Of course, $d_{kj}$ are integer variables, and each type $k$ will impose a different upper bound, based on the number of machines available in total.
+
+With these variables defined, we can impose the appropriate number of maintenances with the constraints
+```{math}
+\sum^6_{j=1}d_{kj} = \begin{cases}2 &\text{ for }i=1,2, \\
+3 &\text{ for }i=3, \\
+1 &\text{ for }i=4, \\
+1 &\text{ for }i=5.
+\end{cases}
+```
+
+Lastly, we need these variables to actually affect the amount of production possible.
+We do so by modifying our constraints from before to decrease if there is some maintenance going on.
+For the case of grinders as an example, instead of what we had before
+```{math}
+0.5m_{11}+0.7m_{21}+0.3m_{51}+0.2m_{61}+0.5m_{71}\leq 1152 \\
+0.5m_{12}+0.7m_{22}+0.3m_{52}+0.2m_{62}+0.5m_{72}\leq 1536 \\
+0.5m_{13}+0.7m_{23}+0.3m_{53}+0.2m_{63}+0.5m_{73}\leq 1536 \\
+0.5m_{14}+0.7m_{24}+0.3m_{54}+0.2m_{64}+0.5m_{74}\leq 1536 \\
+0.5m_{15}+0.7m_{25}+0.3m_{55}+0.2m_{65}+0.5m_{75}\leq 1152 \\
+0.5m_{16}+0.7m_{26}+0.3m_{56}+0.2m_{66}+0.5m_{76}\leq 1536
+```
+we now have a uniform number of available hours minus maintenance
+```{math}
+0.5m_{1j}+0.7m_{2j}+0.3m_{5j}+0.2m_{6j}+0.5m_{7j}\leq 1536 -384\d_{1,j},
+```
+and similarly for the remaining machine types.
+
+Now we can solve the modified problem
+```{code-cell}
+:tags: [remove-cell]
+I = 7 # number of products
+J = 6 # number of months
+K = 5 # number of machine types
+
+profit = [10, 6, 8, 4, 11, 9, 3]
+
+machine_usage = [0.5  0.7  0    0    0.3  0.2 0.5;
+                 0.1  0.2  0    0.3  0    0.6 0;
+                 0.2  0    0.8  0    0    0   0.6;
+                 0.05 0.03 0    0.07 0.1  0   0.08;
+                 0    0    0.01 0    0.05 0   0.05]
+
+n_machines = [4, 2, 3, 1, 1]
+
+holding_cost = 0.5
+market_limits = [500 1000 300 300  800 200 100;
+                 600  500 200   0  400 300 150;
+                 300  600   0   0  500 400 100;
+                 200  300 400 500  200   0 100;
+                   0  100 500 100 1000 300   0;
+                 500  500 100 300 1100 500  60]
+holding_limit = 100
+holding_target = 50
+days_per_month = 24
+shifts_per_day = 2
+hours_per_shift = 8
+
+model = Model(HiGHS.Optimizer)
+set_attribute(model, "output_flag", false)
+```
+
+```{code-cell}
+:tags: ["remove-output"]
+
+maintenance = [2, 2, 3, 1, 1]
+
+@variable(model, 0 <= d[k in 1:K, 1:J] <= n_machines[k], Int) # new
+@variable(model, 0 <= m[1:I, 1:J])
+@variable(model, 0 <= h[1:I, 1:J] <= holding_limit)
+@variable(model, 0 <= s[i in 1:I, j in 1:J] <= market_limits[j,i])
+
+@objective(model, Max, sum(s[i,j]*profit[i] for i in 1:I, j in 1:J) - holding_cost*sum(h))
+
+@constraint(model, maintenance[k in 1:K], sum(d[k,:]) == maintenance[k])
+@constraint(model, usage[k in 1:K, j in 1:J], sum(machine_usage[k,:].*m[:,j]) <= days_per_month*shifts_per_day*hours_per_shift*(n_machines[k]-d[k,j])) # modified
+@constraint(model, holding_jun[i in 1:I], h[i,6] == holding_target)
+@constraint(model, continuity_jan[i in 1:I], m[i,1]-s[i,1]-h[i,1] == 0)
+@constraint(model, continuity[i in 1:I, j in 2:J], h[i,j-1]+m[i,j]-s[i,j]-h[i,j] == 0)
+
+optimize!(model)
+@assert is_solved_and_feasible(model)
+```
+
+```{code-cell}
+println("Objective value: ", objective_value(model))
+```
+
+```{code-cell}
+:tags: ["remove-input"]
+println("Manufacturing")
+label = ["Product $(i)" for i in 1:I]
+label2 = ["Machine type $(i)" for i in 1:K]
+a = DataFrame(transpose(value.(m)), label)
+display(a)
+println("Holding")
+b = DataFrame(transpose(value.(h)), label)
+display(b)
+println("Selling")
+c = DataFrame(transpose(value.(s)), label)
+display(c)
+println("Maintenance")
+e = DataFrame(transpose(value.(d)), label2)
+display(e)
 ```
