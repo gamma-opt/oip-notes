@@ -208,6 +208,23 @@ Finally, we cover the distribution problem presented in {numref}`p1l5:distributi
 | $D_{k}$    | Demand of city $k$                             | `demands[k]`        |
 ```
 
+The summarised model is
+```{math}
+\mini & \sum_{i,j, f2d_{ij}\neq 0} f2d_{ij}x_{ij} + \sum_{i,k, f2c_{ik}\neq 0} f2c_{ik}y_{ik} + \sum_{j,k, d2c_{jk}\neq 0} d2c_{jk}z_{jk} \\
+\st & \sum_{j} x_{ij} + \sum_{k} x_{ik} \leq C_i, \forall i \in I \\
+& \sum_{i} x_{ij} \leq T_j, \forall j \in J\\
+& \sum_{k} z_{jk} = \sum_{i} x_{ij}, \forall j \in J \\
+& \sum_{i} y_{ik} + \sum_{j} z_{jk} = D_k, \forall k \in K \\
+& x_{ij} = 0, \forall i \in I, j \in J, \text{ if }f2d_{ij} \text{ is impossible} \\
+& y_{ik} = 0, \forall i \in I, k \in K, \text{ if }f2c_{ik} \text{ is impossible} \\
+& z_{jk} = 0, \forall j \in J, k \in K, \text{ if }d2c_{jk} \text{ is impossible} \\
+& x_{ij} \geq 0, \forall i \in I, j \in J \\
+& y_{ik} \geq 0, \forall i \in I, k \in K \\
+& z_{jk} \geq 0, \forall j \in J, k \in K
+```
+
+In `JuMP`, we can implement the model as follows.
+
 ```{code-cell}
 :tags: [remove-output]
 
@@ -215,15 +232,16 @@ I = 2 # number of factories
 J = 4 # number of depots
 K = 6 # number of customers
 
+# need to be careful that the zeros here are not free, but impossible routes
 fac2dep = [0.5 0.5 1.0 0.2;
-           missing 0.3 0.5 0.2]
-fac2c = [1.0 missing 1.5 2.0 missing 1;
-         2.0 missing missing missing missing missing]
+           0.0 0.3 0.5 0.2]
+fac2c = [1.0 0.0 1.5 2.0 0.0 1;
+         2.0 0.0 0.0 0.0 0.0 0.0]
 
-dep2c = [missing 1.5 0.5 1.5 missing 1.0;
-         1.0 0.5 0.5 1.0 0.5 missing;
-         missing 1.5 2.0 missing 0.5 1.5;
-         missing missing 0.2 1.5 0.5 1.5]
+dep2c = [0.0 1.5 0.5 1.5 0.0 1.0;
+         1.0 0.5 0.5 1.0 0.5 0.0;
+         0.0 1.5 2.0 0.0 0.5 1.5;
+         0.0 0.0 0.2 1.5 0.5 1.5]
 
 fac_capacity = [150000, 200000]
 dep_throughput = [70000, 50000, 100000, 40000]
@@ -249,15 +267,12 @@ Then we define our variables.
 ```
 
 Given the above variables, our objective is to minimize distribution costs.
+Since we chose to use zeros for impossible routes, they will automatically disappear in element-wise multiplication.
 
 ```{code-cell}
 :tags: [remove-output]
 
-@objective(model, Min, 
-    sum(coalesce.(fac2dep,0)[i,j]*x[i,j] for i in 1:I, j in 1:J)
-    + sum(coalesce.(fac2c,0)[i,k]*y[i,k] for i in 1:I, k in 1:K)
-    + sum(coalesce.(dep2c,0)[j,k]*z[j,k] for j in 1:J, k in 1:K)
-)
+@objective(model, Min, sum(fac2dep.*x) + sum(fac2c.*y) + sum(dep2c.*z))
 ```
 
 There are a few constraints we need to impose on the model.
@@ -275,15 +290,9 @@ There are a few constraints we need to impose on the model.
 @constraint(model, demand[k in 1:K], sum(y[:,k]) + sum(z[:,k]) == demands[k])
 
 # unavailable routes
-for idx in findall(ismissing, fac2dep)
-    @constraint(model, x[idx]==0)
-end
-for idx in findall(ismissing, fac2c)
-    @constraint(model, y[idx]==0)
-end
-for idx in findall(ismissing, dep2c)
-    @constraint(model, z[idx]==0)
-end
+fix.(x[findall(iszero, fac2dep)], 0.0; force=true)
+fix.(y[findall(iszero, fac2c)], 0.0; force=true)
+fix.(z[findall(iszero, dep2c)], 0.0; force=true)
 ```
 
 This model is relatively large, so we print it in a dropdown menu.
@@ -314,3 +323,38 @@ println("Depot to customers")
 c = DataFrame(transpose(value.(z)), label_dep)
 display(c)
 ```
+
+````{note}
+It is worth taking a second look at how we dealt with impossible routes in the code.
+Our solution uses `0.0`s to represent them in the data, which is arguably not the best choice as they may easily be mistaken with "free" routes.
+This way, we can form the objective easily using element-wise multiplication
+```julia
+@objective(model, Min, sum(fac2dep.*x) + sum(fac2c.*y) + sum(dep2c.*z))
+```
+but we need to make sure the routes are not actually used
+```julia
+fix.(x[findall(iszero, fac2dep)], 0.0; force=true)
+fix.(y[findall(iszero, fac2c)], 0.0; force=true)
+fix.(z[findall(iszero, dep2c)], 0.0; force=true).
+```
+[`JuMP.fix`](https://jump.dev/JuMP.jl/stable/api/JuMP/#fix) ensures that the given variable is constrained to the specified value, with the `force` flag being necessary since we are overwriting the lower-bound that we made in the creation of the variable.
+
+An alternative approach would be to filter out the variables representing impossible routes
+```julia
+@variable(model, x[i in 1:I, j in 1:J; !iszero(fac2dep[i,j])] >= 0)
+```
+This way, we have less variables, but we need to be more careful in using the ones we have since the container `x` is now a different shape.
+For example,
+```julia
+@objective(model, Min, sum(fac2dep.*x) + sum(fac2c.*y) + sum(dep2c.*z))
+```
+errors.
+We would need to repeat the if conditions to write it properly
+```julia
+@objective(model, Min, 
+    sum(fac2dep[i,j]*x[i,j] for i in 1:I, j in 1:J, if !iszero(fac2dep[i,j]))
+    + sum(fac2c[i,k]*y[i,k] for i in 1:I, k in 1:K, if !iszero(fac2c[i,k]))
+    + sum(dep2c[j,k]*z[j,k] for j in 1:J, k in 1:K, if !iszero(dep2c[j,k]))
+)
+```
+````
