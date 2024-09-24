@@ -15,7 +15,7 @@ kernelspec:
 
 # Lecture 9
 
-In this lecture, we expand on the paradigm of (mixed-)integer programming, first by introducing the famous _Travelling Salesperson Problem_, then expanding previous problems from [](./lecture05.md) to those that will use this paradigm.
+In this lecture, we expand on the paradigm of (mixed-)integer programming, first by introducing the famous _Travelling Salesperson Problem_, then expanding previous problems from [](4-examples_LP-1.md) to those that will use this paradigm.
 
 ## Travelling Salesperson Problem
 
