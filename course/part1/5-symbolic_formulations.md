@@ -13,7 +13,7 @@ kernelspec:
   name: julia-1.10
 ---
 
-# Lecture 6 - Symbolic formulation
+# Symbolic formulation
 
 ## Motivation for symbolic formulations
 

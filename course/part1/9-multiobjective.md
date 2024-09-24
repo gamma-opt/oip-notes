@@ -15,7 +15,7 @@ mystnb:
     execution_mode: 'inline'
 ---
 
-# Lecture 10 - Multiobjective Optimisation
+# Multiobjective Optimisation
 
 So far in the previous lectures, we have discussed optimisation of a single objective, whether it was maximizing profit, minimizing costs or some other goal.
 In many situations, one needs to make a decision about multiple conflicting considerations and identify a good tradeoff.

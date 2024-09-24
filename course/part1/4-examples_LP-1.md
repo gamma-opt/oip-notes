@@ -1,4 +1,4 @@
-# Lecture 5 - Example Models
+# LP model examples 1
 
 The examples below are based on {cite}`williams_model_2013`.
 

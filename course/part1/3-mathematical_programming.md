@@ -13,7 +13,7 @@ kernelspec:
   name: julia-1.10
 ---
 
-# Lecture 4
+# Mathematical programming
 
 In this lecture we will discuss the idea of using the notion of *functions* and their domains to represent problems in a form that can be expressed as mathematical optimisation problems. In other words, we will develop a language such that we can pose real-world problems as the mathematical statement
 

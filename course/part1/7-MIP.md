@@ -13,7 +13,7 @@ kernelspec:
   name: julia-1.10
 ---
 
-# Lecture 8 - Modelling integer decisions
+# Modelling integer decisions
 
 Next, we focus on extending the types of variables we can consider in our optimisation models. An important type of variable that allows us to more realistic model problems is to consider them as *integer* valued. Essentially, we are constraining such variables to only take values from the set of integer numbers, typically represented by $\mathbb{Z}$.
 
