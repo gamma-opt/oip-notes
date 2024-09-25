@@ -13,9 +13,9 @@ kernelspec:
   name: julia-1.10
 ---
 
-# Lecture 7
+# LP model examples 2
 
-In this lecture, we revisit the production and combined problem from [](lecture05.md) and implement them in
+In this lecture, we revisit the production and combined problem from [](4-examples_LP-1.md) and implement them in
 
 ## Production Planning
 
