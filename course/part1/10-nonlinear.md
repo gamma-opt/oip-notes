@@ -112,7 +112,8 @@ The width of the margin is $\frac{2}{\|a\|}$ ([see why here](#margin_width)), th
 
 ```{math}
 \mini & \|a\|^2 \\
-\st & y_i(a^\top x_i - b) \geq 1, \forall i\in I.
+\st & a^\top x_i - b \geq 1, \forall i\in I, \text{ if } y_i = 1\\
+& a^\top x_i - b \leq -1, \forall i\in I, \text{ if } y_i = -1.
 ```
 Here, we minimise $\|a\|^2$ instead as a small shortcut, since the minimum won't change by omitting the square root (this property is called _monotonicity_).
 The constraints ensure that the points are classified correctly, for example if $y_i=1$ for some $i\in I$, then the point should be above the top margin, i.e. $a^\top x_i-b\geq 1$.
