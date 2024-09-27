@@ -167,3 +167,196 @@ fig
 
 Note that in the above, the diamond point we added manually is within the margin because it was not included in the training data.
 However, the fact that it is correctly classified by the maximum-margin classifier is testament to the robustness of this method.
+
+### Agricultural pricing
+
+This example is from {cite}`williams_model_2013`.
+
+We are consulted by the government of a country to help with pricing their dairy products.
+There are four products for us to consider:
+- milk,
+- butter, and
+- two varieties of cheese: Cheese 1 and Cheese 2.
+
+All these products are made directly or indirectly using the country's raw milk production, which is divided into fat and dry matter.
+The total yearly availability for the two ingredients are 600 000 tons of fat and 750 000 tons of dry matter.
+The compositions of the products in terms of the ingredients are provided in {numref}`agri:composition`.
+
+```{table} Percentage compositions of the products
+:name: agri:composition
+|          | **Fat** | **Dry matter** | **Water**   |
+|:--------:|:-------:|:--------------:|:-----------:|
+|   Milk   |    4    |        9       | 87          |
+|  Butter  |    80   |        2       | 18          |
+| Cheese 1 |    35   |       30       | 35          |
+| Cheese 2 |    25   |       40       | 35          |
+```
+
+In addition, we are given the _price elasticities_ of demand in {numref}`agri:elasticity`.
+The price elasticity of a product is a measure of the sensitivity of the demand for the product to its price and is defined as
+```{math}
+E = \frac{\text{\% decrease in demand}}{\text{\% increase in price}}.
+```
+Similarly, the substitution effect between two types of cheese is measured by cross-elasticity of demand.
+The cross-elasticity from a product A to product B is given by
+```{math}
+E_{AB} = \frac{\text{\% decrease in demand for A}}{\text{\% increase in price of B}}.
+```
+
+```{table} Elasticity of products
+:name: agri:elasticity
+| Milk | Butter | Cheese 1 | Cheese 2 | Cheese 1 to Cheese 2 | Cheese 2 to Cheese 1 |
+|:----:|:------:|:--------:|:--------:|:--------------------:|:--------------------:|
+|  0.4 |   2.7  |    1.1   |    0.4   |          0.1         |          0.4         |
+```
+
+Our objective is to maximise the total revenue in terms of price and resultant demand.
+However, we are asked to ensure that the new prices are such that last year's total consumption costs would not have increased with them.
+To this end, we are also given price and consumption data from last year in {numref}`agri:last_year`.
+
+```{table} Information from last year
+:name: agri:last_year
+|                                  | Milk | Butter | Cheese 1 | Cheese 2 |
+|:--------------------------------:|:----:|:------:|:--------:|:--------:|
+| Consumption (1000 tons) | 4820 |   320  |    210   |    70    |
+| Price (€/ton)                    | 297  | 720    | 1050     | 815      |
+```
+
+#### Solution
+
+Let $p_m, p_b, p_{c1}$ and $p_{c2}$ be the prices of milk, butter, cheese 1 and cheese 2 in €1000 per ton, and $x_m, x_b, x_{c1}$ and $x_{c2}$ be the corresponding quantities in thousands of tons.
+
+Our goal is to maximize profit
+```{math}
+\maxi \sum p_i x_i.
+```
+Since both $p_i$ and $x_i$ are variables, this is a nonlinear problem.
+
+We are constrainted by the limited supply of fat and dry matter
+```{math}
+0.04 x_m + 0.8 x_b + 0.35 x_{c1} + 0.25 x_{c2} \leq 600 \\
+0.09 x_m + 0.02 x_b + 0.3 x_{c1} + 0.4 x_{c2} \leq 750.
+```
+Note that since $x_i$ are in the units 1000 tons, we divide the right hand side to match.
+In addition, the consumption costs  of last year should not be larger with the new prices
+```{math}
+4820 p_m + 320 p_b + 210 p_{c1} + 70 p_{c2} \leq 1939.49.
+```
+
+Lastly, we need to relate the quantity variables to the price variables using the elasticity information
+```{math}
+\newcommand{\dx}[1]{\frac{d#1}{#1}}
+\dx{x_m} &= -E_m\dx{p_m}, \\
+\dx{x_b} &= -E_b\dx{p_b}, \\
+\dx{x_{c1}} &= -E_{c1}\dx{p_{c1}} + E_{c1c2}\dx{p_{c2}}, \\
+\dx{x_{c2}} &= -E_{c2}\dx{p_{c2}} + E_{c2c1}\dx{p_{c1}}.
+```
+
+These equations are not ideal, solving them will result in non-convex functions in our constraints.
+In order to avoid this, we approximate them linearly
+```{math}
+\newcommand{\lx}[2]{\frac{#1_{#2}-\bar{#1}_{#2}}{\bar{#1}_{#2}}}
+\lx{x}{m} &= -E_m\lx{p}{m} \\
+\lx{x}{b} &= -E_b\lx{p}{b} \\
+\lx{x}{c1} &= -E_{c1}\lx{p}{c1}+E_{c1c2}\lx{p}{c2} \\
+\lx{x}{c2} &= -E_{c2}\lx{p}{c2}+E_{c2c1}\lx{p}{c1}
+```
+where $\bar{x}_m$ and $\bar{p}_m$ are the quantity and price for milk from the last year, and similarly for other variables and products.
+As long as $x_i$ and $p_i$ don't differ significantly from $\bar{x}_i$ and $\bar{p}_i$, these approximations should work reasonably well.
+
+% This part is not needed unless we want to make the model seperable (which will require further treatment as well)
+%Since all terms except $x$'s and $p$'s are known, we can solve them to obtain quantities we can plug in to the previous equations.
+%For example, for milk we can derive
+%```{math}
+%\lx{x}{m} &= -E_m\lx{p}{m} \\
+%\implies x_m &= -E_m\bar{x}_m\lx{p}{m} + \bar{x}_m
+%```
+%and plug in known values to get
+%```{math}
+%x_m = -6492 p_m + 6748.
+%```
+%Doing the same for the remaining products yield
+%```{math}
+%x_b &= -1200 p_b + 1184 \\
+%x_{c1} &= -220 p_{c1} + 26 p_{c2} + 420 \\
+%x_{c2} &= -34 p_{c2} + 27 p_{c1} + 70
+%```
+
+With that, our full model is
+```{math}
+\maxi &\sum p_i x_i \\
+\st & 0.04 x_m + 0.8 x_b + 0.35 x_{c1} + 0.25 x_{c2} \leq 600 \\
+& 0.09 x_m + 0.02 x_b + 0.3 x_{c1} + 0.4 x_{c2} \leq 750 \\
+& 4820 p_m + 320 p_b + 210 p_{c1} + 70 p_{c2} \leq 1939.49 \\
+& \frac{x_m - 4820}{4820} = -0.4\frac{p_m-0.297}{0.297} \\
+& \frac{x_b - 320}{320} = -2.7\frac{p_b-0.72}{0.72} \\
+& \frac{x_{c1} - 210}{210} = -1.1\frac{p_{c1}-1.05}{1.05} + 0.1\frac{p_{c2}-0.815}{0.815} \\
+& \frac{x_{c2} - 70}{70} = -0.4\frac{p_{c2}-0.815}{0.815} + 0.4\frac{p_{c1}-1.05}{1.05}
+```
+
+We can implement this in `JuMP` as follows.
+```{code-cell}
+using JuMP, Ipopt
+
+cons = [4820, 320, 210, 70]
+price = [297, 720, 1050, 815] ./ 1000
+elas = [0.4, 2.7, 1.1, 0.4]
+elas_c1c2 = 0.1
+elas_c2c1 = 0.4
+cont_fat = [0.04, 0.8, 0.35, 0.25]
+cont_dry = [0.09, 0.02, 0.3, 0.4]
+lim_fat = 600
+lim_dry = 700
+price_index = sum(cons.*price)
+
+model = Model(Ipopt.Optimizer)
+set_silent(model)
+
+@variable(model, x[1:4] >= 0)
+@variable(model, p[1:4])
+
+@objective(model, Max, sum(x.*p))
+
+@constraint(model, fat, sum(cont_fat.*x) <= lim_fat)
+@constraint(model, dry, sum(cont_dry.*x) <= lim_dry)
+@constraint(model, index, sum(cons.*p) <= price_index)
+
+@constraint(model, milk, (x[1]-cons[1])/cons[1] == -elas[1]*(p[1]-price[1])/price[1])
+@constraint(model, butter, (x[2]-cons[2])/cons[2] == -elas[2]*(p[2]-price[2])/price[2])
+@constraint(model, cheese1, (x[3]-cons[3])/cons[3] == -elas[3]*(p[3]-price[3])/price[3] + elas_c1c2*(p[4]-price[4])/price[4])
+@constraint(model, cheese2, (x[4]-cons[4])/cons[4] == -elas[4]*(p[4]-price[4])/price[4] + elas_c2c1*(p[3]-price[3])/price[3])
+
+optimize!(model)
+is_solved_and_feasible(model)
+```
+
+To summarize the results, we compare to the last year.
+```{code-cell}
+:tags: [remove-input]
+new_cons = value.(x)
+new_price = value.(p)
+labs = ["Milk", "Butter", "Cheese 1", "Cheese 2"]
+tbl = (cons = vcat(cons, new_cons),
+       grp = vcat(map(x->repeat([x],4),1:2)...),
+       cat = repeat([1,2,3,4],2),
+       labs = vcat(repeat(["last year"], 4), repeat(["this year"], 4)...),
+       off_l = [(-42,0),(-42,0),(-46,0),(-42,0)],
+       off_r = [(12,0),(12,0),(12,0),(8,0)]
+)
+colors = Makie.wong_colors()
+
+fig = Figure()
+ax_cons = Axis(fig[1,1], yscale=log10, xticks=(1:4, labs), title="Comparison to last year", limits=(nothing, nothing, nothing, 10000), ylabel="Consumption (1000 tons, log-scale)")
+barplot!(ax_cons, tbl.cat, tbl.cons, dodge=tbl.grp, color=colors[tbl.cat], bar_labels=tbl.labs, dodge_gap=0.1)
+
+text!(Point.(1:4,35), text="€".*string.(Int.(price.*1000)), offset=tbl.off_l)
+text!(Point.(1:4,35), text="€".*string.(Int.(round.(new_price.*1000))), offset=tbl.off_r)
+
+fig
+```
+
+```{code-cell}
+using Printf
+@printf "Revenue (last year): %i \n" sum(price.*cons.*1000000)
+@printf "Revenue (this year): %i" sum(new_price.*new_cons.*1000000)
+```
