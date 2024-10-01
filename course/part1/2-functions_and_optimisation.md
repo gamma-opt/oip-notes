@@ -24,11 +24,11 @@ kernelspec:
 
 ## What is a function?
 
-- Discuss the formal definition of a function and how it relates to the idea of converting inputs to outputs
+<!-- - Discuss the formal definition of a function and how it relates to the idea of converting inputs to outputs
 - Describe function properties (unique outputs)
-- Mention example, and show that they can have multiple shapes, discontinuities
+- Mention example, and show that they can have multiple shapes, discontinuities -->
 
-_Maybe have a faster intro, "You may be familiar with the concept of functions, here we review the key parts of it" etc._
+<!-- _Maybe have a faster intro, "You may be familiar with the concept of functions, here we review the key parts of it" etc._ -->
 
 For using mathematics as a framework for explaining the world around us to express problems of our interest, the need for relating one group of quantities to another quickly arises. For example, we may be interested in purchasing a certain number {math}`n` of items and wonder about the associated cost {math}`c`, or given a certain year {math}`t` we may be interested in the population {math}`p` of Finland at the start of that year.
 
@@ -75,59 +75,70 @@ scatter!(ax4, -3:3, [1,2,3,4,3,2,1], markersize = 10)
 fig
 ```
 
-## Function domains
+In mathematical optimisation, our main objective will be searching for points in the function domain $X$ that yield the maximum (or minimum) value $f(x)$. And, as we will see, the ways of achieving this objective is deeply intertwined with ``how the function looks like'', i.e., its analytical properties. For the purpose of optimisation tasks, three properties stand out. They are:
+  1. **Continuity:**
+  2. **Differentiability**
+  3. **Convexity**  
 
-- Describe the notion of for what values it makes sense to evaluate the function (done)
-- Define domain formally
-- Define subdomains, i.e., subsets of the domain that are of interest
-- Discuss open and closed domains
+We will next provide formal definitions of all these, but for now, we can visualise see what they mean. 
+% TODO: relate the above concepts to the example. 
 
-Going back to the population of Finland example, we may not know some values of the function, since the year 2100 has not happened yet.
-However, if we were to limit our years of interest to the range 1990-2024, then we could get all the data from [Statistics Finland](https://stat.fi) and have a fully defined function.
-This illustrates the importance of the set of input values, called the **domain**, of a function {math}`f`, or the set {math}`X` in {prf:ref}`def-function`.
-Similarly, the set {math}`Y`, called the **codomain**, represents where the outputs {math}`f(x)` are located. With these two sets, a function can be formally described as {math}`f: X \to Y`.
+Being able to say whether functions are continuous, smooth, and/or convex allows us to more appropriately choose the appropriate way to search for optimum points $x \in X$. There are essentially two ways that we can go about searching for optima:
+
+  1. Analytically, by posing the mathematical conditions that a point need to satisfy and using basic algebraic techniques to find such point, or
+  2. Use optimisation methods, which are algorithms that are design to, starting from a initial point $x_0$, move (most of the time) towards a point that satisfy the analytical conditions that we know a optimal solution would.
+
+For most practical cases, we rely on the second idea. That is, we rely on algorithms to search for points that satisfy what we call **optimality conditions**, which are, in turn, informed by the analysis described in 1.
 
 ## Analysing a function
 
-- Looking at function values to say something about its shape
+<!-- - Looking at function values to say something about its shape
 - Difference of function values and the notion of derivatives and gradients
 - When you can calculate them, the notion of smoothness and continuity
 - Using gradients to "feel" how the function behaves locally
-- Find points where minimum or maximum function evaluation happen using gradients
+- Find points where minimum or maximum function evaluation happen using gradients -->
 
-In optimisation, we are often interested in finding the maxima or the minima of functions, the former could be profit and the latter costs.
-If the function does not have a nice structure but rather is a mere collection of points, it may be difficult to figure out the extrema without looking at every single value the function can take.
-For example, consider the number of people going into a shop throughout days of a given year.
-It may be possible that on June 15th there were 5 customers and on June 16th there were 0.
-This information doesn't necessarily indicate anything about June 17th.
+In optimisation, we are interested in finding the maxima or the minima of functions. If the function does not have a nice structure but rather is a mere collection of points, it may be difficult to figure out the extrema without looking at every single value the function can take. For example, consider the number of people going into a shop throughout days of a given year. It may be possible that on June 15th there were 5 customers and on June 16th there were 0. This information does not necessarily indicate anything about June 17th.
 
-In the presence of structure, we may be able to make inferences about the function.
-A common example of such structure is continuity, which roughly means that the graph of the function is an uninterrupted line.
-One formal definition is the following:
+### Continuity
+The key point is that, in the presence of structure, we may be able to make inferences about the function. Take, for example, continuity, which roughly means that the graph of the function is an uninterrupted line. One formal definition is the following:
 
 ````{prf:definition}
 :label: continuity
 
 A function {math}`f:X\to \reals` is continuous at point {math}`a\in X` if 
 ```{math}
-\lim_{x\to a}f(x) = f(a).
+\lim_{x \to a}f(x) = f(a).
 ```
 ````
 
-Intuitively, this means that for sufficiently nearby inputs, a continuous function outputs nearby values.
+Intuitively, {prf:ref}`continuity` means that for sufficiently nearby inputs, a continuous function outputs nearby values. Continuity is a useful property for it removes concerns related to whether the function is defined for a given input or not and whether we can rely on neighbouring evaluations to estimate whether its value is increasing or decreasing.
 
-An even stronger structure is that of differentiability.
+### Differentiability
+
+This idea of using function evaluations to infer how a function behaves around a given point $x \in X$ is central for computational optimisation methods. Let $x_k$ and $x_{k+1} = x_k + \Delta x$, with $\Delta x > 0$ represent close-by two points in the domain $X$ of $f$. We can then use the rate $d$
+
+```{math}
+d = \frac{f(x_{k+1}) - f(x_k)}{x_{k+1} - x_{k}}
+```
+
+to guide our search. For example, suppose we would like to find $x \in X$ that maximises $f$. We can use $d$ by looking at its sign:
+  1. if $d > 0$ we know that going in the direction of $x_{k+1}$ is a good idea,
+  2. whereas if $d < 0$, going in the direction of $x_{k+1}$ is not.
+
+If we take this idea to the limit, i.e., make $\Delta x \to 0$, we recover the *derivative* of the function at $x$, which is precisely a local indication of how the function behaves locally in terms of its value. If we can be sure that derivatives are unique and available everywhere in the domain of $f$, we say that the function is *differentiable* (or smooth).
+
 ````{prf:definition}
 :label: differentiability
 
-A function {math}`f:X\to \reals` is differentiable at {math}`a\in X\subseteq \reals` if the derivative
+A function {math}`f:X\to \reals` is differentiable at {math}`a \in X \subseteq \reals` if the derivative
 ```{math}
-f'(a) = \lim_{h\to 0}\frac{f(a+h)-f(a)}{h}
+f'(a) = \lim_{ x \to a}\frac{f(x )-f(a)}{x - a}
 ```
 exists.
 ````
 
-````{admonition} Why is differentiability stronger?
+````{admonition} Why is differentiability stronger than continuity?
 :class: seealso, dropdown
 
 Suppose {math}`f` is differentiable at {math}`a`. Then, the limit in {prf:ref}`differentiability` exists and so
@@ -140,31 +151,93 @@ Suppose {math}`f` is differentiable at {math}`a`. Then, the limit in {prf:ref}`d
 This directly implies the definition of continuity {math}`\lim_{h\to 0} f(a+h)=\lim_{x\to a} f(x)=f(a)`.
 
 However, continuity does not imply differentiability.
-For example, the function {math}`|x|` is continuous at {math}`x=0` but not differentiable, since the one-sided limits don't match.
+For example, the function {math}`|x|` is continuous at {math}`x=0` but not differentiable, since the one-sided limits do not match.
 ````
 
-The derivative {math}`f'(x)` tells us the instantaneous rate of change at a given point {math}`x`, it is equal to the slope of the tangent line going through the point {math}`f(x)`.
-This information can inform our search for the extrema.
-As an example, suppose we want to minimize a quadratic function {math}`f(x)=ax^2+bx+c` with {math}`a> 0`.
+The derivative {math}`f'(x)` tells us the instantaneous rate of change at a given point {math}`x`, it is equal to the slope of the tangent line going through the point {math}`f(x)`. To see that, notice the following
+
+```{math}
+\begin{align}
+  & f'(a) = \lim_{x \to a}\frac{f(x) - f(a)}{x - a} \\
+  & \Leftrightarrow \lim_\lim_{x \to a} \left(\frac{f(x)-f(a)}{x - a} - f'(a)\right) = 0 \\
+  & \Leftrightarrow \lim_{\Delta x \to 0} \frac{f(x) - f(a) - f'(a)(x-a)}{x-a} = 0 \\
+  & \Leftrightarrow \lim_{\Delta x \to 0} \frac{f(x) - J(x)}{x - a} = 0
+\end{align}
+```
+
+where $J(x) = f(x) + f'(a)(x - a)$ is the linear approximation of $f(x)$ at $x = a$, i.e., the tangent line to $f$ going through $f(a)$. Clearly, this information is useful in our search for extrema, although we also must take into account how further we move in the direction of interest.
+
+% TODO: Add an numerical example where we do a series of steps towards the an extrema using derivative information. We will need to use a decaying step size for 
+% it to make sense
+
+<!-- As an example, suppose we want to minimize a quadratic function {math}`f(x)=ax^2+bx+c` with {math}`a> 0`.
 Since this is a quadratic function, we can infer some global information, i.e. {math}`f` is a parabola, which means it has a single (global) minimum.
 If we had a guess {math}`x_0`, we could improve it by calculating the derivative at that point {math}`f(x_0)`. which would tell us which direction to move towards.
-We could even note that the derivative is 0 at the minimum, and thus solve this equation to record the minimum at {math}`-\frac{b}{2a}`.
+We could even note that the derivative is 0 at the minimum, and thus solve this equation to record the minimum at {math}`-\frac{b}{2a}`. -->
 
 So far, we have been talking about functions of a single variable, but similar ideas extend to multivariate functions.
 In fact, {prf:ref}`continuity` for continuity applies as written, assuming now {math}`X=\reals^n` for {math}`n\in\mathbb{N}^+`.
 
-_We don't really need differentiability for \reals^n\to\reals^m. \reals^n\to\reals is enough._
-
-As for differentiability, we need a little adjustment:
+Differentiability in higher dimensions is somewhat analogous. First, we must define the multidimensional equivalent to the tangent line. For that, we need to first the notion of partial derivatives, which is essentially taking derivatives with one of the components of $f$.
 
 ````{prf:definition}
-A function {math}`f:\reals^n\to\reals^m` is differentiable at a point {math}`x\in\reals^n` if there exists a linear map {math}`J:\reals^n\to\reals^m` such that
+:label: partial_derivative
+
+Consider the function $f(x_1,x_2)$ such that {math}`f: X \subseteq \reals^2 \to \reals`. The *partial derivative* of $f$ with respect to $x_1$ is
 ```{math}
-\lim_{h\to 0}\frac{\|f(x+h)-f(x)-J(h)\|}{\|h\|} = 0.
+\frac{\partial f(x)}{\partial x_1} = \lim_{ h \to 0}\frac{f(x_1+h, x_2)-f(x_1, x_2)}{h},
 ```
+provided this limit exists. Analogously, the derivative of $f$ with respect to $x_2$ is
+```{math}
+\frac{\partial f(x)}{\partial x_2} = \lim_{ h \to 0}\frac{f(x_1, x_2+h)-f(x_1, x_2)}{h},
+```
+provided this limit exists. 
+
+The vector $\nabla f(x_1, x_2) = \left[\frac{\partial f(x)}{\partial x_1}, \frac{\partial f(x)}{\partial x_2}\right]$ is the *gradient* of $f$ at $(x_1, x_2)$.
 ````
+
+The multidimensional equivalent to the tangent line, or the tangent hyperplane, is defined as
+
+```{math}
+J(a, b) = f(a , b) + \nabla f(a,b)^\top (x_1 - a, x_2 - b),
+```
+
+where $\nabla f(a, b) is the gradient of $f$ at $(x_1, x_2)$.
+
+%TODO: Add an example visualisation showing the tangent hyperplane on a parabola
+
+With that, we are ready to define differentiability for the multidimensional case.
+
+````{prf:definition}
+:label: differentiability_multi
+
+Consider the function {math}`f: X \subseteq \reals^2 \to \reals`. Suppose its partial derivatives are defined at $(a,b) \in x$. Let $J(a, b) = f(a, b) + \nabla f(a,b)^\top (x_1 - a, x_2 - b)$ with $\nabla f(a,b)$ being the gradient of $f$ at $(a,b)$.
+
+We say that $f$ is differentiable at $(a,b)$ if
+
+```{math}
+\lim_{(x_1, x_2) \to (a,b)} \frac{f(x_1, x_2) - J(x_1, x_2)}{||(x_1, x_2) - (a,b)||} = 0.
+```
+
+If either of the partial derivatives do not exist, or the above limit does not exist or is not 0, then $f$ is not differentiable at $(a,b)$.
+
+````
+
 
 ## Function shapes, convexity and its role in optimisation
 
 - Define the notion of convexity from an intuitive standpoint
 - Discuss that if a function is convex one only need to find THE point where nabla f = 0 to find the optimum
+
+
+## Function domains
+
+- Describe the notion of for what values it makes sense to evaluate the function (done)
+- Define domain formally
+- Define subdomains, i.e., subsets of the domain that are of interest
+- Discuss open and closed domains
+
+Going back to the population of Finland example, we may not know some values of the function, since the year 2100 has not happened yet.
+However, if we were to limit our years of interest to the range 1990-2024, then we could get all the data from [Statistics Finland](https://stat.fi) and have a fully defined function.
+This illustrates the importance of the set of input values, called the **domain**, of a function {math}`f`, or the set {math}`X` in {prf:ref}`def-function`.
+Similarly, the set {math}`Y`, called the **codomain**, represents where the outputs {math}`f(x)` are located. With these two sets, a function can be formally described as {math}`f: X \to Y`.
