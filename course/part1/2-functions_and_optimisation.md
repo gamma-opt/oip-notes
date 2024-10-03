@@ -17,11 +17,6 @@ kernelspec:
 
 # Functions and optimisation
 
-
-
-
-
-
 ## What is a function?
 
 % Discuss the formal definition of a function and how it relates to the idea of converting inputs to outputs
@@ -202,7 +197,7 @@ The multidimensional equivalent to the tangent line, or the tangent hyperplane, 
 J(a, b) = f(a , b) + \nabla f(a,b)^\top (x_1 - a, x_2 - b),
 ```
 
-where $\nabla f(a, b)$ is the gradient of $f$ at $(a, b)$.
+where $\nabla f(a, b)$ is the *gradient* of $f$ at $(a, b)$.
 
 %TODO: Add an example visualisation showing the tangent hyperplane on a parabola
 
@@ -219,25 +214,75 @@ We say that $f$ is differentiable at $(a,b)$ if
 \lim_{(x_1, x_2) \to (a,b)} \frac{f(x_1, x_2) - J(x_1, x_2)}{||(x_1, x_2) - (a,b)||} = 0.
 ```
 
-If either of the partial derivatives do not exist, or the above limit does not exist or is not 0, then $f$ is not differentiable at $(a,b)$.
+If either of the partial derivatives do not exist, or the above limit does not exist or is not 0, then $f$ is not differentiable at $(a,b)$. 
 
 ````
+
+As we will see later, the gradient plays a crucial role in many of the optimisation methods that we will use. This is precisely because it serves as an indicator of how the fnction behaves locally, by serving as the normal vector of the tangent plane at that point. We will return to that point in part two. For the purpose of our  discussion, let us now focus on how to use the gradient to find minima and maxima. 
 
 
 ## Function shapes, convexity and its role in optimisation
 
-- Define the notion of convexity from an intuitive standpoint
-- Discuss that if a function is convex one only need to find THE point where nabla f = 0 to find the optimum
+One crucial feature about gradients is that they can be used to identify points that are candidate to being optimal. To see that, assume taht $f$ is differentiable, in line with {ref:prf}`differentiability_multi`. Assume that $f : \reals^2 \to \reals$ for simplicity and that we are at point $(a,b)$. For a sufficiently small step away from $(a,b)$ towards any point $(x_1, x_2)$, we seen that $J(a, b) = f(a , b) + \nabla f(a,b)^\top (x_1 - a, x_2 - b)$ is a arbitrarily good approximation for $f(x_1,x_2)$. We can use this to realise something about optimality: if $(a,b)$ is to be an optimal point (say, a minimum point), we must have
+
+```{math}
+f(a,b) \le f(x_1, x_2), \text{ for all } (x_1,x_2) \in X,
+```
+
+which, can only be true if $\nabla f(a,b) = 0$. Thus, having zero gradients is a necessary condition for a point to be optimal. Cleary, verifying that the gradient is zero is not sufficient for one to state that $(a,b)$ is an optimal point, because one must also that into account curvature.  Figure XXX below illustrates some alternative cases. Noticer that in two of them we can trust the zero-gradient condition to be the indication of optimality, while it is not the case in the others.
+
+%TODO: Draw this: have a couple of functions, where one is concave and the other is convex. 
+
+The next natural step after identifying points with zero gradient would be further analysing the function curvature, which can be done using second-order derivatives (i.e., the derivatives of derivatives). However, it turns out that most optimisation algorithms do not consider second-order information, simply because it is too expensive from a computational standpoint.
+
+However, not all is lost. Indeed, for a particular class of problems, it turns out that we can rely on the zero-gradient condition as a sufficient certificate to atest optimality. These are so-called convex problems, which are optimisation problems involving convex functions. Let us first define a convex function.
+
+````{prf:definition}
+:label: convex_function
+
+A function is convex if for all $x, y \in \reals^n$ and $\lambda \in [0,1]$ we have that
+
+```{math}
+ f(\lambda x + (1-\lambda)y) \le \lambda f(x) + (1-\lambda) f(y).
+```
+
+````
+
+```{attention}
+Notice we have defined it considering $n$ dimensions instead of one or two, as before. This is simply to make our notation more compact (and our results more general).
+```
+
+According to definition {ref:prf}`convex_function`, a convex function is such that, if we take any two points and connect with a line, the line should sit above $f$ between these two points. This simple technique can be to classify the functions from Figure XXX. 
+%TODO: use this idea to classify the example functions above which are convex and which are not.
+
+To say why the zero-gradient condition is sufficient for optimality, notice that, from the definition of convexity we have:
+
+```{math}
+\begin{align*}
+  & f(\lambda x + (1-\lambda)y) \le \lambda f(x) + (1-\lambda) f(y) \\
+  \Rightarrow  & f(x + \lambda(y-x)) \le \lambda (f(y) - f(x)) \\
+  \Rightarrow  & f(y) - f(x) \ge \frac{f(x + \lambda(y-x)) - f(x)}{\lambda}, \text{ for } \lambda \in (0,1]
+  \Rightarrow  & f(y) - f(x) \ge \lim_{\lambda \to 0} \frac{f(x + \lambda(y-x)) - f(x)}{\lambda}, \text{ for } \lambda \in (0,1]
+  \Rightarrow  & f(y) - f(x) \ge \nabla f(x)(y-x).
+\end{align* }  
+```
+
+From the last line we can conclude that, if $\nabla f(x) = 0$, that implies that $f(x) \le f(y)$ for all $y$, which is precisely the definition of optimality.
+
+<!-- - Define the notion of convexity from an intuitive standpoint
+- Discuss that if a function is convex one only need to find THE point where nabla f = 0 to find the optimum -->
 
 
 ## Function domains
 
-- Describe the notion of for what values it makes sense to evaluate the function (done)
+<!-- - Describe the notion of for what values it makes sense to evaluate the function (done)
 - Define domain formally
 - Define subdomains, i.e., subsets of the domain that are of interest
-- Discuss open and closed domains
+- Discuss open and closed domains -->
 
 Going back to the population of Finland example, we may not know some values of the function, since the year 2100 has not happened yet.
-However, if we were to limit our years of interest to the range 1990-2024, then we could get all the data from [Statistics Finland](https://stat.fi) and have a fully defined function.
-This illustrates the importance of the set of input values, called the **domain**, of a function {math}`f`, or the set {math}`X` in {prf:ref}`def-function`.
-Similarly, the set {math}`Y`, called the **codomain**, represents where the outputs {math}`f(x)` are located. With these two sets, a function can be formally described as {math}`f: X \to Y`.
+However, if we were to limit our years of interest to the range 1990-2024, then we could get all the data from [Statistics Finland](https://stat.fi) and have a fully defined function. This illustrates the importance of the set of input values, called the **domain**, of a function {math}`f`, or the set {math}`X` in {prf:ref}`def-function`. Similarly, the set {math}`Y`, called the **codomain**, represents where the outputs {math}`f(x)` are located. With these two sets, a function can be formally described as {math}`f: X \to Y`.
+
+As we will see in our future lectures, often we are interested in optimising functions within **subdomains**, that is, subsets of its original domain. In mathematical programming, these subsets are typically generated by functions as well. We will defer the discussion on how functions can generate subdomains, but one critical point must be made about these sets: subdomains make everything more difficult! 
+
+For example, even if $f$ is convex, it may be that the point $x$ for which $\nabla f(x) = 0$ is not part of the subdomain. In this case, we need a more comprehensive analysis that take into account the structure of the subdomain. We will come back to this point later. 
