@@ -19,28 +19,109 @@ kernelspec:
 
 We now turn our focus to the assumption of linearity we have been carrying so far. Earlier, we have stated that we would stick with models that can be stated as linear functions, both in the objective function and in the constraints. The reason for that is purely algorithmic, and there is nothing that, from a conceptual point, prevents the use of nonlinear functions.
 
-However, if one were to consider computational aspects, then there are several important issues to take into account. The reason why mathematical programming modellers go beyond their means to obtain (mixed-integer) linear programming models is because the simplex method, the algorithm underlying the solution of such problems is a practical success. Since its conception in the 50's, it has seem a myriad of developments that has turned it into a robust and reliable algorithm for solving mathematical programming problems.
+In general, by assuming linearity in our optimisation models as we have been doing so far, we are assuming that:
+
+- Returns and/ or costs are constant and not affected by scale;
+- The use of resources by an activity is proportional to the level of activity;
+- The total use of resource by a number of activities is the sum of the uses by the individual activity.
+
+Clearly, these are simplifying but still reasonably good approximations in many settings. However the are a couple of settings where one cannot simply ignore how quantities and properties interact with each other, which is exactly what leads us to dealing with nonlinear models.
+
+If one were to consider computational aspects, then there are several important issues to take into account. The reason why mathematical programming modellers go beyond their means to obtain (mixed-integer) linear programming models is because the simplex method, the algorithm underlying the solution of such problems is a practical success. Since its conception in the 50's, it has seem a myriad of developments that has turned it into a robust and reliable algorithm for solving mathematical programming problems.
 
 The issue is that, with the exception of a few special cases, if there is any nonlinearity in the model, we cannot use simplex-method based algorithms, and departing from them can be scary in many ways. For problems with continuous variables only, the alternative is to use a interior point (or barrier) method. These methods, developed in the 90's based on much earlier results, have seen significant developments in terms of their implementation, and have become, in many cases, almost as common as the algorithm of choice to solve continuous mathematical programming models, including strictly nonlinear. We will discuss their differences in detail later on in the course.
 
-For now, what you need to keep in mind is this: the line that separates mathematical programming models that can be comfortably treated and those that cannot has nothing to do with nonlinearity, but rather, with convexity. Interior point methods (and the simplex method too) are first-order methods, meaning that they are engineered to converge to points where first-order optimality conditions hold. But these can only be guaranteed to be optimal points if the problem at hand is convex; otherwise, nothing stronger can be said about the solution found without more specialised way to search for the feasible region.
+For now, what you need to keep in mind is this: the barrier that separates mathematical programming models that can be comfortably treated and those that cannot has nothing to do with nonlinearity, but rather, with convexity. Interior point methods (and the simplex method too) are first-order methods, meaning that they are engineered to converge to points where first-order optimality conditions hold. But these can only be guaranteed to be optimal points if the problem at hand is convex; otherwise, nothing stronger can be said about the solution found without more specialised way to search for the feasible region.
 
-Add a remark about mixed integer problems, who are nonconvex problems whose linear relaxation is convex. That is sort of the reason why whether they are tractable sometimes, but sometimes they suck. It is about how much the "nonconvex part" dominates the convex part (or how strong or weak the relaxation is -- too much?)
+%Add a remark about mixed integer problems, who are nonconvex problems whose linear relaxation is convex. That is sort of the reason why whether they are tractable sometimes, but sometimes they suck. It is about how much the "nonconvex part" dominates the convex part (or how strong or weak the relaxation is -- too much?)
 
 
 ## Convex problems
 
+We say that an optimisation problem is a convex if it has
+
+  - A convex objective function to be minimised or a concave objective function to be maximised;
+  - A convex feasibility set.
+
+More formally, let our optimisation problem be defined in the following general way:
+
+```{math}
+:label: opt-problem
+\begin{equation}
+  \begin{aligned} 
+  \mini & f(x) \\
+  \st   & g(x) \le 0 \\
+        & h(x) = 0.
+  \end{aligned}      
+\end{equation}
+```
+
+```{prf:def}
+The mathematical optimisation problem {eqref}`opt-problem` is a convex optimisation problem if and only if:
+  1. $f(x)$ is a convex function;
+  2. $g(x)$ is a convex function;
+  3. $h(x)$ is a linear (or affine) function.
+```
+
+We discussed the notion of convexity in Lecture 1, and concluded that for convex functions, first-order optimality (zero-gradient) conditions are sufficient to certify the optimality of a candidate solution. It turns out that, if the subdomain (in in our case, the feasibility set) is a convex set, a generalisation of these first-order conditions (known as Karush-Kuhn-Tucker, or KKT conditions) exist and are also necessary and sufficient for optimality. Interior point methods, the flagship method for nonlinear optimisation problems, are engineered to search for points that satisfy KKT conditions.
+
+```{warning}
+Interior point methods, or any other optimisation methods vcan be very well used to solve nonconvex optimisation problems. The issue is that, for these problems, the KKT conditions are necessary (i.e., they have to hold) but not sufficient to certificate optimality of the solution found. It is up to the user to know whether that solution can be certified as a global optimal solution.  
+```
+
+```{note}
+Linear functions are convex, and thus, linear programming problems are convex problems. That is why both interior point method and the simplex method, which is also a zero-gradient solution seeking method, can be safely employed.
+
+```
+
+
 ### Objective function as a convex function
 
-We say a problem is convex if...
+There are few functions that are convex functions and frequently appear as objective functions in mathematical programmes. Next, we list a few of them.
+
+#### Quadratic functions
+
+Quadratic functions are functions that involve the multiplication of two decision variables. A typical example is illustrated in {ref}`p1l10:agricultural_pricing` below, where a price, which is dependent of the quantity produced, is multiplied by the actual quantity produced. Another common setting is when some sort of _regularisation_ is imposed to decision variables, which is typically achieved by minimising their squared value.
+
+The general form of a quadratic function can be stated as
+
+```{math}
+f(x) = c^\top x + x^\top Qx,
+```
+
+where $x$ represents our decision variables (a $n$-dimensional vector assuming we have $n$ decision variables), $c$ is an $n$-dimensional vector of parameters and $Q$ is the matrix of the quadratic form.
+
+```{note}
+The matrix of the quadratic form $ax_1 + bx_1x_2 + cx_2$ is given by: {math}```\begin{equation} \begin{bmatrix} a & \frac{b}{2} \\ \frac{b}{2} c \end{bmatrix} \end{equation}```. This generalises for $n$ dimensions: the main diagonal has the coefficient of the quadratic terms and for the $q_{ij}x_ix_j$ we have $q_{ij} / 2$ in= the $i^\text{th}$ row and $j^\text{th}$ column as well as the $j^\text{th}$ row and $i^\text{th}$ column.
+```
+
+The quadratic function $f$ is convex depending on the matrix $Q$. The technical term is that $Q$ needs to be positive semidefinite (PSD), which roughly means that when we multiply $Q$ by a vector $x$, it does not flip the sign of any of the coordinates of $x$. There are many ways one can attest whether the matrix $Q$ is PSD, but perhaps the simpler is to use a linear algebra package to check if its eigenvalues are non-negative (i.e., positive or zero).
+
+#### Polynomials, exponential and logarithms 
+
+More seldom, one may see the need of using other functions that quadratic. Somme other common convex functions include:
+
+   - *Powers*: $x^a$ is concave for $ 0 \le a \le 1$ and convex for $a \ge 1$ or $a \le 0$;
+   - *Exponential*: $e^{ax}$ is convex for any $x \in \reals$;
+   - *Logarithms:* $\log_x$ is concave and $xlogx$ is convex for $x > 0$;
+   - *Nonnegative weighted sums*: the some of convex functions, when weighted by non-negative terms is convex. 
+
+There are a few other functions that are convex. Also, there are a few operations (such as the non-negative weighted sum) that preserve convexity. Typically, to verify whether a function is convex or not, we must break it into parts and verify whether they are convex functions and if they have been combined by convexity preserving operations.
 
 ### Constraints as convex sets
 
+We now focus on the terms $g$ and $h$. Whenever impose an image to a function (or a set of them, via an inequality), we are implicitly defining a set. For example, when we state that $h(x) = 0$ this creates a set of all $x$ that when inputted in $h$ return zero; likewise $g(x) \le 0$ represents the set of all solutions $x$ that when inputted to $g$, return a negative number or zero. 
+
+We can infer the convexity of these set of solutions by analysing the convexity of the functions:
+
+- For equality constraints, the only way in which $h(x)=0$ can generate a convex set is if $h$ is linear;
+- For inequalities, the set of constraints will be convex g(x) is a convex function in $g(x) \le 0$.
+
+```{note}
+Remember that if $g$ is convex, $-g$ is concave. Thus we can infer that, by multiplying $g(x) \le 0$ by -1, we see that for greater-or-equal-than constraints, we obtain convex sets whenever the function is concave. 
+```
 
 ## Examples of convex problems
-
-- Fitting a regression with regularisation
-- Quadratic problem from the book of models
 
 ### Classification as an optimisation problem
 
@@ -48,6 +129,7 @@ One of the most classical problems in machine learning is that of binary classif
 Specifically, we will now focus on linear classification, where we seek an affine function $f(x)=a^\top x - b$, or equivalently the parameters $a$ and $b$, that gives us an appropriate classifier, i.e.
 ```{math}
 f(x_i) = \begin{cases} 
+
 1&\text{if } a^\top x_i - b > 0 \\
 -1&\text{if } a^\top x_i - b < 0 \\
 \end{cases}
@@ -168,12 +250,14 @@ fig
 Note that in the above, the diamond point we added manually is within the margin because it was not included in the training data.
 However, the fact that it is correctly classified by the maximum-margin classifier is testament to the robustness of this method.
 
+=(p1l10:agricultural_pricing)
 ### Agricultural pricing
 
 This example is from {cite}`williams_model_2013`.
 
 We are consulted by the government of a country to help with pricing their dairy products.
 There are four products for us to consider:
+
 - milk,
 - butter, and
 - two varieties of cheese: Cheese 1 and Cheese 2.
