@@ -39,20 +39,29 @@ A **function** {math}`f` is a rule that assigns each element {math}`x` in a set,
 
 On the other hand, {prf:ref}`def-function` is also very general and flexible, making functions a powerful conceptual tool in mathematics. The formula {math}`f(x)=(x+2)^2` is clearly a function. We can also have functions in multiple variables, such as {math}`f(x,y)=x+y`, as long as we don't violate the unique outputs rule. This would only require that every element of the set {math}`X` is an ordered pair {math}`(x,y)` instead of a single number. Alternatively, we can define functions that are difficult to describe as algebraic formulas. Recall the example with the population of Finland at year {math}`t`, we cannot write a formula for this for multiple reasons, one of which is that we don't yet know many of its values, for example at {math}`t=2100`.
 
+In mathematical optimisation, our main objective will be searching for points in the function domain $X$ that yield the maximum (or minimum) value $f(x)$. And, as we will see, the ways of achieving this objective is deeply intertwined with "how the function looks like", i.e., its analytical properties. For the purpose of optimisation tasks, three properties stand out. They are:
+  1. **Continuity**
+  2. **Differentiability**
+  3. **Convexity**  
+
+We will next provide formal definitions of all these, but for now, we can visualise some functions to see what they mean. 
+
 % TODO not sure why this doesn't seem to work https://mystmd.org/guide/reuse-jupyter-outputs#label-a-notebook-cell
 ```{code-cell} julia
 :tags: ["remove-input"]
 
 using CairoMakie
-CairoMakie.activate!()
 
-x = range(-π, π, 100)
+x = range(-π, π, 101)
 xlims = (-π, π)
 
 function sigmoid(x)
     t = exp(-abs(x))
     ifelse(x ≥ 0, inv(1 + t), t / (1 + t))
 end
+
+f1 = x -> x/π
+f2 = x -> 2x/π
 
 fig = Figure(size = (1200, 800))
 
@@ -61,24 +70,27 @@ ax2 = Axis(fig[1,2], limits = (xlims, nothing))
 ax3 = Axis(fig[2,1], limits = (xlims, nothing))
 ax4 = Axis(fig[2,2], limits = (xlims, nothing))
 
-lines!(ax1, x[51:end], repeat([1], 50); linewidth = 3, color = 1, colormap = :tab10, colorrange = (1, 10))
-lines!(ax1, x[begin:50], repeat([0], 50); linewidth = 3, color = 1, colormap = :tab10, colorrange = (1, 10))
-lines!(ax2, x, abs.(x); linewidth = 3)
+lines!(ax1, x[51:end], repeat([1], 51); linewidth = 3, color = 1, colormap = :tab10, colorrange = (1, 10))
+lines!(ax1, x[begin:51], repeat([0], 51); linewidth = 3, color = 1, colormap = :tab10, colorrange = (1, 10))
+lines!(ax2, x[begin:50], f1.(x[begin:50]); linewidth = 3)
+lines!(ax2, x[50:end], f2.(x[50:end]); linewidth = 3, color = 1, colormap = :tab10, colorrange = (1, 10))
 lines!(ax3, x, sigmoid.(x); linewidth = 3)
-scatter!(ax4, -3:3, [1,2,3,4,3,2,1], markersize = 10)
+lines!(ax4, x, exp.(x); linewidth = 3)
 
 fig
 ```
 
-In mathematical optimisation, our main objective will be searching for points in the function domain $X$ that yield the maximum (or minimum) value $f(x)$. And, as we will see, the ways of achieving this objective is deeply intertwined with "how the function looks like", i.e., its analytical properties. For the purpose of optimisation tasks, three properties stand out. They are:
-  1. **Continuity**
-  2. **Differentiability**
-  3. **Convexity**  
+In the above figure, four functions are illustrated.
+- On the top left, the function
+```{math}
+f(x) = \begin{cases}0&x<0\\1&x\geq 1\end{cases}
+```
+is continuous and differentiable, except at $x=0$ where it is neither.
+- On the top right, the function is continuous everywhere and differentiable except at $x=0$. It is also convex.
+- Bottom left function is $\sigma(x)$, which is continuous and differentiable everywhere, but not convex.
+- Bottom right function $e^x$ is continuous, differentiable and convex.
 
-We will next provide formal definitions of all these, but for now, we can visualise some functions to see what they mean. 
-% TODO: relate the above concepts to the example. 
-
-Being able to say whether functions are continuous, smooth, and/or convex allows us to choose the appropriate way to search for optimum points $x \in X$. There are essentially two ways that we can go about searching for optima:
+Being able to say whether functions are continuous, differentiable, and/or convex allows us to choose the appropriate way to search for optimum points $x \in X$. There are essentially two ways that we can go about searching for optima:
 
   1. Analytically, by posing the mathematical conditions that a point need to satisfy and using basic algebraic techniques to find such point, or
   2. Use optimisation methods, which are algorithms that are designed to, starting from a initial point $x_0$, move (most of the time) towards a point that satisfy the analytical conditions that we know a optimal solution would.
@@ -121,7 +133,7 @@ to guide our search. For example, suppose we would like to find $x \in X$ that m
   1. if $d > 0$ we know that going in the direction of $x_{k+1}$ is a good idea,
   2. whereas if $d < 0$, going in the direction of $x_{k+1}$ is not.
 
-If we take this idea to the limit, i.e., make $\Delta x \to 0$, we recover the *derivative* of the function at $x$, which is precisely an indication of how the function behaves locally in terms of its value. If we can be sure that derivatives are unique and available everywhere in the domain of $f$, we say that the function is *differentiable* (or smooth).
+If we take this idea to the limit, i.e., make $\Delta x \to 0$, we recover the *derivative* of the function at $x$, which is precisely an indication of how the function behaves locally in terms of its value. If we can be sure that derivatives are unique and available everywhere in the domain of $f$, we say that the function is *differentiable*.
 
 ````{prf:definition}
 :label: differentiability
@@ -164,6 +176,54 @@ where $J(x) = f(a) + f'(a)(x - a)$ is the linear approximation of $f(x)$ at $x =
 
 % TODO: Add an numerical example where we do a series of steps towards the an extrema using derivative information. We will need to use a decaying step size for 
 % it to make sense
+```{code-cell} julia
+:tags: ["remove-input"]
+
+using WGLMakie, Bonito
+WGLMakie.activate!()
+
+xlims = (-π, π)
+
+app = App() do session
+    slider = Bonito.Slider(x)
+    fig, ax, lplot = lines(x, sin.(x); linewidth = 3)
+    xlims!(ax, xlims)
+
+    p = @lift(Point($slider[], sin($slider[])))
+    splot = scatter!(ax, p; color = 2, colormap = :tab10, colorrange = (1, 10))
+
+    slope = cos(slider[])
+    intercept = sin(slider[]) - slope*slider[]
+    abplot = ablines!(ax, [intercept], [slope]; color = 3, colormap = :tab10, colorrange = (1, 10))
+
+    onjs(session, slider.value, js"""function on_update(new_val) {
+        $(splot).then(plots=>{
+            const scatter = plots[0]
+            scatter.geometry.attributes.pos.array[0] = new_val
+            scatter.geometry.attributes.pos.array[1] = Math.sin(new_val)
+            scatter.geometry.attributes.pos.needsUpdate = true
+        })
+    }
+    """)
+    onjs(session, slider.value, js"""function on_update(new_val) {
+        const slope = Math.cos(new_val);
+        const intercept = Math.sin(new_val) - slope*new_val;
+        const start_y = slope*(-Math.PI) + intercept;
+        const end_y = slope*Math.PI + intercept;
+
+        $(abplot).then(plots=>{
+            const abplot = plots[0]
+            // change the y coord for the (start/end)points of the line
+            abplot.geometry.attributes.linepoint_end.data.array[3] = start_y
+            abplot.geometry.attributes.linepoint_end.data.array[5] = end_y
+            abplot.geometry.attributes.linepoint_end.needsUpdate = true
+        })
+    }
+    """)
+
+    return DOM.div(slider, fig)
+end
+```
 
 <!-- As an example, suppose we want to minimize a quadratic function {math}`f(x)=ax^2+bx+c` with {math}`a> 0`.
 Since this is a quadratic function, we can infer some global information, i.e. {math}`f` is a parabola, which means it has a single (global) minimum.
@@ -199,7 +259,59 @@ J(a, b) = f(a , b) + \nabla f(a,b)^\top (x_1 - a, x_2 - b),
 
 where $\nabla f(a, b)$ is the *gradient* of $f$ at $(a, b)$.
 
-%TODO: Add an example visualisation showing the tangent hyperplane on a parabola
+```{code-cell} julia
+:tags: ["remove-input"]
+
+f(x,y) = -x^2-y^2
+z = [f(i,j) for i in x, j in x]
+# restrict slider_range to nicely behaving tangent planes, easier than fixing the visual otherwise
+m = 0.5
+slider_range = filter(x->x<m && x>-m, x)
+
+app = App() do session
+    x_slider = Bonito.Slider(slider_range)
+    y_slider = Bonito.Slider(slider_range)
+    x_slider[] = 0
+    y_slider[] = 0
+    fig, ax, plot = surface(x, x, z)
+
+    p = @lift(Point($x_slider[], $y_slider[], f($x_slider[], $y_slider[])))
+    splot = scatter!(ax, p; color = 2, colormap = :tab10, colorrange = (1, 10))
+
+    z2 = [0 for i in x, j in x]
+    surplot = surface!(ax, x, x, z2)
+
+    evaljs(session, js"""
+        const observables = $([x_slider.value, y_slider.value])
+        const f = (x,y) => -(x**2)-(y**2)
+        const der = (x) => -2*x
+
+        function update(args) {
+            const [x, y] = args;
+            $(splot).then(plots=>{
+                const scatter = plots[0]
+                scatter.geometry.attributes.pos.array[0] = x
+                scatter.geometry.attributes.pos.array[1] = y
+                scatter.geometry.attributes.pos.array[2] = f(x,y)
+                scatter.geometry.attributes.pos.needsUpdate = true
+            });
+            $(surplot).then(plots=>{
+                const surface = plots[0]
+                for (let i = 0; i<=101*101; i++){
+                    const x0 = surface.geometry.attributes.position.array[3*i]
+                    const y0 = surface.geometry.attributes.position.array[3*i+1]
+                    surface.geometry.attributes.position.array[3*i+2] = der(x)*(x0-x) + der(y)*(y0-y) + f(x,y)
+                    surface.geometry.attributes.position.needsUpdate = true
+                }
+            });
+        }
+        Bonito.onany(observables, update)
+        update(observables.map(x=> x.value))
+        """)
+    
+    return DOM.div(x_slider, y_slider, fig)
+end
+```
 
 With that, we are ready to define differentiability for the multidimensional case.
 
