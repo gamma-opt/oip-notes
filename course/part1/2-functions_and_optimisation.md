@@ -13,7 +13,7 @@ kernelspec:
   name: julia-1.10
 ---
 
-%TODO: Identify a good reference material to build upon. 
+
 
 # Functions and optimisation
 

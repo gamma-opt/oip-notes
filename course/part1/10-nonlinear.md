@@ -40,13 +40,13 @@ For now, what you need to keep in mind is this: the barrier that separates mathe
 
 We say that an optimisation problem is a convex if it has
 
-  - A convex objective function to be minimised or a concave objective function to be maximised;
-  - A convex feasibility set.
+- A convex objective function to be minimised or a concave objective function to be maximised;
+- A convex feasibility set.
 
 More formally, let our optimisation problem be defined in the following general way:
 
 ```{math}
-:label: opt-problem
+:name: opt-problem
 \begin{equation}
   \begin{aligned} 
   \mini & f(x) \\
@@ -56,8 +56,8 @@ More formally, let our optimisation problem be defined in the following general 
 \end{equation}
 ```
 
-```{prf:def}
-The mathematical optimisation problem {eqref}`opt-problem` is a convex optimisation problem if and only if:
+```{prf:definition}
+The mathematical optimisation problem {numref}`opt-problem` is a convex optimisation problem if and only if:
   1. $f(x)$ is a convex function;
   2. $g(x)$ is a convex function;
   3. $h(x)$ is a linear (or affine) function.
@@ -73,7 +73,6 @@ Interior point methods, or any other optimisation methods vcan be very well used
 Linear functions are convex, and thus, linear programming problems are convex problems. That is why both interior point method and the simplex method, which is also a zero-gradient solution seeking method, can be safely employed.
 
 ```
-
 
 ### Objective function as a convex function
 
@@ -101,16 +100,16 @@ The quadratic function $f$ is convex depending on the matrix $Q$. The technical 
 
 More seldom, one may see the need of using other functions that quadratic. Somme other common convex functions include:
 
-   - *Powers*: $x^a$ is concave for $ 0 \le a \le 1$ and convex for $a \ge 1$ or $a \le 0$;
-   - *Exponential*: $e^{ax}$ is convex for any $x \in \reals$;
-   - *Logarithms:* $\log_x$ is concave and $xlogx$ is convex for $x > 0$;
-   - *Nonnegative weighted sums*: the some of convex functions, when weighted by non-negative terms is convex. 
+- *Powers*: $x^a$ is concave for $ 0 \le a \le 1$ and convex for $a \ge 1$ or $a \le 0$;
+- *Exponential*: $e^{ax}$ is convex for any $x \in \reals$;
+- *Logarithms:* $\log_x$ is concave and $xlogx$ is convex for $x > 0$;
+- *Nonnegative weighted sums*: the some of convex functions, when weighted by non-negative terms is convex. 
 
 There are a few other functions that are convex. Also, there are a few operations (such as the non-negative weighted sum) that preserve convexity. Typically, to verify whether a function is convex or not, we must break it into parts and verify whether they are convex functions and if they have been combined by convexity preserving operations.
 
 ### Constraints as convex sets
 
-We now focus on the terms $g$ and $h$. Whenever impose an image to a function (or a set of them, via an inequality), we are implicitly defining a set. For example, when we state that $h(x) = 0$ this creates a set of all $x$ that when inputted in $h$ return zero; likewise $g(x) \le 0$ represents the set of all solutions $x$ that when inputted to $g$, return a negative number or zero. 
+We now focus on the terms $g$ and $h$. Whenever impose an image to a function (or a set of them, via an inequality), we are implicitly defining a set. For example, when we state that $h(x) = 0$ this creates a set of all $x$ that when inputted in $h$ return zero; likewise $g(x) \le 0$ represents the set of all solutions $x$ that when inputted to $g$, return a negative number or zero.
 
 We can infer the convexity of these set of solutions by analysing the convexity of the functions:
 
@@ -127,9 +126,9 @@ Remember that if $g$ is convex, $-g$ is concave. Thus we can infer that, by mult
 
 One of the most classical problems in machine learning is that of binary classification, where given some data that is partitioned into two classes, the goal is to obtain a function $f$ that separates the partitions.
 Specifically, we will now focus on linear classification, where we seek an affine function $f(x)=a^\top x - b$, or equivalently the parameters $a$ and $b$, that gives us an appropriate classifier, i.e.
+
 ```{math}
 f(x_i) = \begin{cases} 
-
 1&\text{if } a^\top x_i - b > 0 \\
 -1&\text{if } a^\top x_i - b < 0 \\
 \end{cases}
@@ -139,6 +138,7 @@ For example, our problem may be of detecting spam in emails, where we'd like to 
 Our features then may be the word count, count of repeated word stems and/or others.
 
 Suppose we have the following data we would like to classify, based on two features and with the colors indicating the true classification $y_i, i\in I$.
+
 ```{code-cell}
 :tags: [remove-output]
 using Random
@@ -175,14 +175,17 @@ fig
 ```
 
 Many lines classify this set of data correctly, including the one defined by $a=\begin{bmatrix}5\\1\end{bmatrix}, b=30$.
+
 ```{code-cell}
 :tags: [remove-input]
 ablines!(ax, [30], [-5]; color=:red)
 fig
 ```
+
 But arguably this one is not the best classifier.
 Suppose we had another datapoint at $(5,4)$. Intuitively, we may guess that this point belongs to the orange class, since it is much closer there.
 However, our line classifies this point otherwise.
+
 ```{code-cell}
 :tags: [remove-input]
 temp = scatter!(ax, [(5,4)], color=DEF_COLORS[2], marker=:diamond)
@@ -197,6 +200,7 @@ The width of the margin is $\frac{2}{\|a\|}$ ([see why here](#margin_width)), th
 \st & a^\top x_i - b \geq 1, \forall i\in I, \text{ if } y_i = 1\\
 & a^\top x_i - b \leq -1, \forall i\in I, \text{ if } y_i = -1.
 ```
+
 Here, we minimise $\|a\|^2$ instead as a small shortcut, since the minimum won't change by omitting the square root (this property is called _monotonicity_).
 The constraints ensure that the points are classified correctly, for example if $y_i=1$ for some $i\in I$, then the point should be above the top margin, i.e. $a^\top x_i-b\geq 1$.
 Similarly, if $y_i=-1$, then the point should be below the bottom margin, i.e. $a^\top x_i-b \leq -1$.
@@ -213,6 +217,7 @@ A proof is [here](https://youtu.be/_PwhiWxHK8o?t=1020).
 ```
 
 To solve this programatically, we can create a model as
+
 ```{code-cell}
 using JuMP, Ipopt
 
@@ -250,7 +255,7 @@ fig
 Note that in the above, the diamond point we added manually is within the margin because it was not included in the training data.
 However, the fact that it is correctly classified by the maximum-margin classifier is testament to the robustness of this method.
 
-=(p1l10:agricultural_pricing)
+(p1l10:agricultural_pricing)=
 ### Agricultural pricing
 
 This example is from {cite}`williams_model_2013`.
@@ -278,11 +283,14 @@ The compositions of the products in terms of the ingredients are provided in {nu
 
 In addition, we are given the _price elasticities_ of demand in {numref}`agri:elasticity`.
 The price elasticity of a product is a measure of the sensitivity of the demand for the product to its price and is defined as
+
 ```{math}
 E = \frac{\text{\% decrease in demand}}{\text{\% increase in price}}.
 ```
+
 Similarly, the substitution effect between two types of cheese is measured by cross-elasticity of demand.
 The cross-elasticity from a product A to product B is given by
+
 ```{math}
 E_{AB} = \frac{\text{\% decrease in demand for A}}{\text{\% increase in price of B}}.
 ```
@@ -317,17 +325,21 @@ Our goal is to maximize profit
 Since both $p_i$ and $x_i$ are variables, this is a nonlinear problem.
 
 We are constrainted by the limited supply of fat and dry matter
+
 ```{math}
 0.04 x_m + 0.8 x_b + 0.35 x_{c1} + 0.25 x_{c2} \leq 600 \\
 0.09 x_m + 0.02 x_b + 0.3 x_{c1} + 0.4 x_{c2} \leq 750.
 ```
+
 Note that since $x_i$ are in the units 1000 tons, we divide the right hand side to match.
 In addition, the consumption costs  of last year should not be larger with the new prices
+
 ```{math}
 4820 p_m + 320 p_b + 210 p_{c1} + 70 p_{c2} \leq 1939.49.
 ```
 
 Lastly, we need to relate the quantity variables to the price variables using the elasticity information
+
 ```{math}
 \newcommand{\dx}[1]{\frac{d#1}{#1}}
 \dx{x_m} &= -E_m\dx{p_m}, \\
@@ -338,6 +350,7 @@ Lastly, we need to relate the quantity variables to the price variables using th
 
 These equations are not ideal, solving them will result in non-convex functions in our constraints.
 In order to avoid this, we approximate them linearly
+
 ```{math}
 \newcommand{\lx}[2]{\frac{#1_{#2}-\bar{#1}_{#2}}{\bar{#1}_{#2}}}
 \lx{x}{m} &= -E_m\lx{p}{m} \\
@@ -345,6 +358,7 @@ In order to avoid this, we approximate them linearly
 \lx{x}{c1} &= -E_{c1}\lx{p}{c1}+E_{c1c2}\lx{p}{c2} \\
 \lx{x}{c2} &= -E_{c2}\lx{p}{c2}+E_{c2c1}\lx{p}{c1}
 ```
+
 where $\bar{x}_m$ and $\bar{p}_m$ are the quantity and price for milk from the last year, and similarly for other variables and products.
 As long as $x_i$ and $p_i$ don't differ significantly from $\bar{x}_i$ and $\bar{p}_i$, these approximations should work reasonably well.
 
@@ -367,6 +381,7 @@ As long as $x_i$ and $p_i$ don't differ significantly from $\bar{x}_i$ and $\bar
 %```
 
 With that, our full model is
+
 ```{math}
 \maxi &\sum p_i x_i \\
 \st & 0.04 x_m + 0.8 x_b + 0.35 x_{c1} + 0.25 x_{c2} \leq 600 \\
@@ -379,6 +394,7 @@ With that, our full model is
 ```
 
 We can implement this in `JuMP` as follows.
+
 ```{code-cell}
 using JuMP, Ipopt
 
@@ -415,6 +431,7 @@ is_solved_and_feasible(model)
 ```
 
 To summarize the results, we compare to the last year.
+
 ```{code-cell}
 :tags: [remove-input]
 new_cons = value.(x)
