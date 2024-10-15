@@ -13,9 +13,14 @@ kernelspec:
   name: julia-1.10
 ---
 
-# Lecture 7
 
-## Knapsack Problem
+# Metaheuristics
+
+## Evolutionary methods
+
+## Particle swarm
+
+## Example: Knapsack Problem
 
 Should there be a problem example here or should it be left for Workshop 3?
 I think it may be easier to have an example, so we can exemplify/illustrate solution construction, neighbour search, mutation etc.

@@ -13,7 +13,7 @@ kernelspec:
   name: julia-1.10
 ---
 
-# Lecture 2
+# Unconstrained optimisation methods
 
 ## Gradient descent and variants
 
@@ -424,7 +424,7 @@ function draw_path(path_data, type, path_g) {
 </script>
 ```
 
-## Second order methods
+## Second-order methods: Newton and variants
 
 The above gradient descent and its variants are all _first-order methods_, in that they use gradient information.
 In addition to the derivative, one can also use the second derivative (or the Hessian in multivariate contexts) to end up with _second-order methods_.

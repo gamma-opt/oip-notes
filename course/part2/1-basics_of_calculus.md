@@ -13,7 +13,20 @@ kernelspec:
   name: julia-1.10
 ---
 
-# Lecture 1
+# Basics of calculus for optimisation
+
+## Revisit unconstrained optimality conditions (and gradients)
+
+## Second-order optimality condition and Hessians
+
+## Taylor approximation
+
+
+## Constrained optimality conditions: Karush-Kuhn-Tucker
+
+## Interpretations of the KKt conditions
+
+
 
 Adapted from [Michael Schlottke-Lakemper's code](https://gist.github.com/sloede/a680cf36245e1794801a6bcd4530487a).
 
