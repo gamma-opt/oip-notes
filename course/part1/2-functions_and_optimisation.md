@@ -335,7 +335,7 @@ As we will see later, the gradient plays a crucial role in many of the optimisat
 
 ## Function shapes, convexity and its role in optimisation
 
-One crucial feature about gradients is that they can be used to identify points that are candidate to being optimal. To see that, assume taht $f$ is differentiable, in line with {ref:prf}`differentiability_multi`. Assume that $f : \reals^2 \to \reals$ for simplicity and that we are at point $(a,b)$. For a sufficiently small step away from $(a,b)$ towards any point $(x_1, x_2)$, we seen that $J(a, b) = f(a , b) + \nabla f(a,b)^\top (x_1 - a, x_2 - b)$ is a arbitrarily good approximation for $f(x_1,x_2)$. We can use this to realise something about optimality: if $(a,b)$ is to be an optimal point (say, a minimum point), we must have
+One crucial feature about gradients is that they can be used to identify points that are candidate to being optimal. To see that, assume taht $f$ is differentiable, in line with {prf:ref}`differentiability_multi`. Assume that $f : \reals^2 \to \reals$ for simplicity and that we are at point $(a,b)$. For a sufficiently small step away from $(a,b)$ towards any point $(x_1, x_2)$, we seen that $J(a, b) = f(a , b) + \nabla f(a,b)^\top (x_1 - a, x_2 - b)$ is a arbitrarily good approximation for $f(x_1,x_2)$. We can use this to realise something about optimality: if $(a,b)$ is to be an optimal point (say, a minimum point), we must have
 
 ```{math}
 f(a,b) \le f(x_1, x_2), \text{ for all } (x_1,x_2) \in X,
@@ -364,7 +364,7 @@ A function is convex if for all $x, y \in \reals^n$ and $\lambda \in [0,1]$ we h
 Notice we have defined it considering $n$ dimensions instead of one or two, as before. This is simply to make our notation more compact (and our results more general).
 ```
 
-According to definition {ref:prf}`convex_function`, a convex function is such that, if we take any two points and connect with a line, the line should sit above $f$ between these two points. This simple technique can be to classify the functions from Figure XXX. 
+According to definition {prf:ref}`convex_function`, a convex function is such that, if we take any two points and connect with a line, the line should sit above $f$ between these two points. This simple technique can be to classify the functions from Figure XXX. 
 %TODO: use this idea to classify the example functions above which are convex and which are not.
 
 To say why the zero-gradient condition is sufficient for optimality, notice that, from the definition of convexity we have:

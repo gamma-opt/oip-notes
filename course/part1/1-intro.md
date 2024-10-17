@@ -25,7 +25,7 @@ But instead or cardboard and styrofoam, these models are built using **mathemati
 A comparison between the scientific method (on the left) and the process of developing mathematical programming models to support decision making
 ```
 
-Figure {ref}`scientific-method` illustrates the parallels between the scientific method (on the left) and the process of devising optimisation models to support decision making. The colours are meant to indicate which step relate to which. The extra line on the right relates to the fact that often, as it is the case of most other applied sciences, a few iterations reflecting on whether the model represents sufficiently well the problem might take course. 
+{numref}`scientific-method` illustrates the parallels between the scientific method (on the left) and the process of devising optimisation models to support decision making. The colours are meant to indicate which step relate to which. The extra line on the right relates to the fact that often, as it is the case of most other applied sciences, a few iterations reflecting on whether the model represents sufficiently well the problem might take course. 
  
 ## What is mathematical optimisation?  
 
@@ -37,7 +37,7 @@ Mathematical optimisation is an area of applied mathematics interested in unders
 
 Animation representing the process of looking for the optimal solution of a function within a specific domain
 ```
-Figure {numref}`optimisation-gif` shows an example, where the function we are trying to optimise is represented by level curves, like in a map, with lighter colours representing regions with larger values, and darker colours lower values. The algorithm is being employed to find a point with minimum value while guaranteeing that the search returns a solution within the blue boundaries.
+{numref}`optimisation-gif` shows an example, where the function we are trying to optimise is represented by level curves, like in a map, with lighter colours representing regions with larger values, and darker colours lower values. The algorithm is being employed to find a point with minimum value while guaranteeing that the search returns a solution within the blue boundaries.
 
 ```{note}
 The algorithm used in this animation is called projected gradient. We will cover gradient methods later on in our course. 
@@ -51,4 +51,4 @@ Turns out that we can use a really powerful analogy to connect decision making a
 
 This analogy is broadly known as **mathematical programming**, which is one of the main topic of our course. Simply put, mathematical programming is a language in which we use this analogy to build mathematical models representing the problem we have at hand, posing it in a form of a mathematical optimisation problem that, in turn, allows us to understand what are the optimal decisions that can be made for that system.
 
-This course is precisely about being able to represent real-world problems via mathematical porgramming, so they can be optimised accordingly. This is a powerful paradigm that builds upon several mathematical concepts. Let us start by covering the most fundamental of them, but it will not be long before we are able to pose and solve our first optimisation model.
+This course is precisely about being able to represent real-world problems via mathematical programming, so they can be optimised accordingly. This is a powerful paradigm that builds upon several mathematical concepts. Let us start by covering the most fundamental of them, but it will not be long before we are able to pose and solve our first optimisation model.

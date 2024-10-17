@@ -17,7 +17,7 @@ kernelspec:
 
 ## Gradient descent and variants
 
-We have seen in [](lecture01.md) that the gradient {math}`\nabla f(x_0)` describes the direction of steepest ascent at some point {math}`x_0`.
+We have seen in [Lec. 1](1-basics_of_calculus.md) that the gradient {math}`\nabla f(x_0)` describes the direction of steepest ascent at some point {math}`x_0`.
 A consequence of this is that the negative gradient {math}`-\nabla f(x_0)` corresponds to the direction of the steepest descent at {math}`x_0`.
 
 ````{admonition} Why? Linearity of Differentiation

@@ -25,7 +25,7 @@ In general, by assuming linearity in our optimisation models as we have been doi
 - The use of resources by an activity is proportional to the level of activity;
 - The total use of resource by a number of activities is the sum of the uses by the individual activity.
 
-Clearly, these are simplifying but still reasonably good approximations in many settings. However the are a couple of settings where one cannot simply ignore how quantities and properties interact with each other, which is exactly what leads us to dealing with nonlinear models.
+Clearly, these are simplifying but still reasonably good approximations in many settings. However there are a couple of settings where one cannot simply ignore how quantities and properties interact with each other, which is exactly what leads us to dealing with nonlinear models.
 
 If one were to consider computational aspects, then there are several important issues to take into account. The reason why mathematical programming modellers go beyond their means to obtain (mixed-integer) linear programming models is because the simplex method, the algorithm underlying the solution of such problems is a practical success. Since its conception in the 50's, it has seem a myriad of developments that has turned it into a robust and reliable algorithm for solving mathematical programming problems.
 
@@ -46,7 +46,7 @@ We say that an optimisation problem is a convex if it has
 More formally, let our optimisation problem be defined in the following general way:
 
 ```{math}
-:name: opt-problem
+:label: opt-problem
 \begin{equation}
   \begin{aligned} 
   \mini & f(x) \\
@@ -57,7 +57,7 @@ More formally, let our optimisation problem be defined in the following general 
 ```
 
 ```{prf:definition}
-The mathematical optimisation problem {numref}`opt-problem` is a convex optimisation problem if and only if:
+The mathematical optimisation problem {eq}`opt-problem` is a convex optimisation problem if and only if:
   1. $f(x)$ is a convex function;
   2. $g(x)$ is a convex function;
   3. $h(x)$ is a linear (or affine) function.
@@ -98,23 +98,23 @@ The quadratic function $f$ is convex depending on the matrix $Q$. The technical 
 
 #### Polynomials, exponential and logarithms 
 
-More seldom, one may see the need of using other functions that quadratic. Somme other common convex functions include:
+More seldom, one may see the need of using other functions that quadratic. Somm other common convex functions include:
 
 - *Powers*: $x^a$ is concave for $ 0 \le a \le 1$ and convex for $a \ge 1$ or $a \le 0$;
 - *Exponential*: $e^{ax}$ is convex for any $x \in \reals$;
-- *Logarithms:* $\log_x$ is concave and $xlogx$ is convex for $x > 0$;
-- *Nonnegative weighted sums*: the some of convex functions, when weighted by non-negative terms is convex. 
+- *Logarithms:* $\log x$ is concave and $x \log x$ is convex for $x > 0$;
+- *Nonnegative weighted sums*: the sum of convex functions, when weighted by non-negative terms is convex. 
 
 There are a few other functions that are convex. Also, there are a few operations (such as the non-negative weighted sum) that preserve convexity. Typically, to verify whether a function is convex or not, we must break it into parts and verify whether they are convex functions and if they have been combined by convexity preserving operations.
 
 ### Constraints as convex sets
 
-We now focus on the terms $g$ and $h$. Whenever impose an image to a function (or a set of them, via an inequality), we are implicitly defining a set. For example, when we state that $h(x) = 0$ this creates a set of all $x$ that when inputted in $h$ return zero; likewise $g(x) \le 0$ represents the set of all solutions $x$ that when inputted to $g$, return a negative number or zero.
+We now focus on the terms $g$ and $h$. Whenever we impose an image to a function (or a set of them, via an inequality), we are implicitly defining a set. For example, when we state that $h(x) = 0$, this creates a set of all $x$ that when inputted in $h$ return zero; likewise $g(x) \le 0$ represents the set of all solutions $x$ that when inputted to $g$, return a negative number or zero.
 
 We can infer the convexity of these set of solutions by analysing the convexity of the functions:
 
 - For equality constraints, the only way in which $h(x)=0$ can generate a convex set is if $h$ is linear;
-- For inequalities, the set of constraints will be convex g(x) is a convex function in $g(x) \le 0$.
+- For inequalities, the set of constraints will be convex if $g(x)$ is a convex function in $g(x) \le 0$.
 
 ```{note}
 Remember that if $g$ is convex, $-g$ is concave. Thus we can infer that, by multiplying $g(x) \le 0$ by -1, we see that for greater-or-equal-than constraints, we obtain convex sets whenever the function is concave. 
