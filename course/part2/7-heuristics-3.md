@@ -14,6 +14,12 @@ kernelspec:
 ---
 
 
+## Randomised methods
+
+### GRASP 
+
+### simulated annealing
+
 # Metaheuristics
 
 ## Evolutionary methods

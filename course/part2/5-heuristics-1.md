@@ -1,11 +1,20 @@
 # Heuristics
 
-## Motivation for heuristics (less science, more engineering)
+## Introduction
+### Motivation for heuristics (less science, more engineering)
 
-## Black-box, derivative-free, simulation
+### Black-box, derivative-free, simulation
 
-## What is optimality anyway?
+### What is optimality anyway?
 
-## Exploration v. exploitation
+### Exploration v. exploitation
 
-## Solution construction v. improvement
+### Solution construction v. improvement
+
+
+## A selection of methods
+
+### Bisection and variants (univariate)
+
+## Nelder-mead? (multi-dimensional)
+

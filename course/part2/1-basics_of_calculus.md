@@ -21,13 +21,6 @@ kernelspec:
 
 ## Taylor approximation
 
-
-## Constrained optimality conditions: Karush-Kuhn-Tucker
-
-## Interpretations of the KKt conditions
-
-
-
 Adapted from [Michael Schlottke-Lakemper's code](https://gist.github.com/sloede/a680cf36245e1794801a6bcd4530487a).
 
 ```{code-cell}
@@ -129,3 +122,7 @@ App() do session::Session
                                     ))
 end
 ```
+
+## Constrained optimality conditions: Karush-Kuhn-Tucker
+
+## Interpretations of the KKt conditions

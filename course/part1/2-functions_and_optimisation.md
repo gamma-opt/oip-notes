@@ -25,7 +25,7 @@ kernelspec:
 
 % _Maybe have a faster intro, "You may be familiar with the concept of functions, here we review the key parts of it" etc._
 
-For using mathematics as a framework for explaining the world around us to express problems of our interest, the need for relating one group of quantities to another quickly arises. For example, we may be interested in purchasing a certain number {math}`n` of items and wonder about the associated cost {math}`c`, or given a certain year {math}`t` we may be interested in the population {math}`p` of Finland at the start of that year.
+For using mathematics as a framework for explaining the world around us to express problems of our interest, the need for relating one group of quantities to another quickly arises. For example, we may be interested in purchasing a certain number {math}`n` of items and wonder about the associated cost {math}`c`, or given a certain year {math}`t` we may be interested in the population {math}`p` of Finland at the start of that year. 
 
 There are multiple ways of thinking about functions, for example one may imagine an algebraic formula or a graph, but one general definition is the following (cite Stewart Calculus 9th ed):
 
