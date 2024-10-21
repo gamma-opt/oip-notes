@@ -63,7 +63,7 @@ The mathematical optimisation problem {eq}`opt-problem` is a convex optimisation
 We discussed the notion of convexity in Lecture 1, and concluded that for convex functions, first-order optimality (zero-gradient) conditions are sufficient to certify the optimality of a candidate solution. It turns out that, if the subdomain (in in our case, the feasibility set) is a convex set, a generalisation of these first-order conditions (known as Karush-Kuhn-Tucker, or KKT conditions) exist and are also necessary and sufficient for optimality. Interior point methods, the flagship method for nonlinear optimisation problems, are engineered to search for points that satisfy KKT conditions.
 
 ```{warning}
-Interior point methods, or any other optimisation methods vcan be very well used to solve nonconvex optimisation problems. The issue is that, for these problems, the KKT conditions are necessary (i.e., they have to hold) but not sufficient to certificate optimality of the solution found. It is up to the user to know whether that solution can be certified as a global optimal solution.  
+Interior point methods, or any other optimisation methods can be very well used to solve nonconvex optimisation problems. The issue is that, for these problems, the KKT conditions are necessary (i.e., they have to hold) but not sufficient to certificate optimality of the solution found. It is up to the user to know whether that solution can be certified as a global optimal solution.  
 ```
 
 ```{note}
