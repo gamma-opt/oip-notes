@@ -13,20 +13,23 @@ kernelspec:
   name: julia-1.10
 ---
 
+# Title
 
-## Randomised methods
+## Randomized methods
 
-### GRASP 
+### Randomised methods
 
-### simulated annealing
+#### GRASP 
 
-# Metaheuristics
+#### simulated annealing
 
-## Evolutionary methods
+## Metaheuristics
 
-## Particle swarm
+### Evolutionary methods
 
-## Example: Knapsack Problem
+### Particle swarm
+
+### Example: Knapsack Problem
 
 Should there be a problem example here or should it be left for Workshop 3?
 I think it may be easier to have an example, so we can exemplify/illustrate solution construction, neighbour search, mutation etc.

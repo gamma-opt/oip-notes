@@ -47,13 +47,10 @@ More formally, let our optimisation problem be defined in the following general 
 
 ```{math}
 :label: opt-problem
-\begin{equation}
-  \begin{aligned} 
-  \mini & f(x) \\
-  \st   & g(x) \le 0 \\
-        & h(x) = 0.
-  \end{aligned}      
-\end{equation}
+
+\mini & f(x) \\
+\st   & g(x) \le 0 \\
+      & h(x) = 0.
 ```
 
 ```{prf:definition}
@@ -91,7 +88,7 @@ f(x) = c^\top x + x^\top Qx,
 where $x$ represents our decision variables (a $n$-dimensional vector assuming we have $n$ decision variables), $c$ is an $n$-dimensional vector of parameters and $Q$ is the matrix of the quadratic form.
 
 ```{note}
-The matrix of the quadratic form $ax_1 + bx_1x_2 + cx_2$ is given by: {math}```\begin{equation} \begin{bmatrix} a & \frac{b}{2} \\ \frac{b}{2} c \end{bmatrix} \end{equation}```. This generalises for $n$ dimensions: the main diagonal has the coefficient of the quadratic terms and for the $q_{ij}x_ix_j$ we have $q_{ij} / 2$ in= the $i^\text{th}$ row and $j^\text{th}$ column as well as the $j^\text{th}$ row and $i^\text{th}$ column.
+The matrix of the quadratic form $ax_1 + bx_1x_2 + cx_2$ is given by: {math}`\begin{bmatrix} a & \frac{b}{2} \\ \frac{b}{2} c \end{bmatrix}`. This generalises for $n$ dimensions: the main diagonal has the coefficient of the quadratic terms and for the $q_{ij}x_ix_j$ we have $q_{ij} / 2$ in= the $i^\text{th}$ row and $j^\text{th}$ column as well as the $j^\text{th}$ row and $i^\text{th}$ column.
 ```
 
 The quadratic function $f$ is convex depending on the matrix $Q$. The technical term is that $Q$ needs to be positive semidefinite (PSD), which roughly means that when we multiply $Q$ by a vector $x$, it does not flip the sign of any of the coordinates of $x$. There are many ways one can attest whether the matrix $Q$ is PSD, but perhaps the simpler is to use a linear algebra package to check if its eigenvalues are non-negative (i.e., positive or zero).
@@ -341,18 +338,21 @@ In addition, the consumption costs  of last year should not be larger with the n
 Lastly, we need to relate the quantity variables to the price variables using the elasticity information
 
 ```{math}
+:nowrap:
 \newcommand{\dx}[1]{\frac{d#1}{#1}}
+\newcommand{\lx}[2]{\frac{#1_{#2}-\bar{#1}_{#2}}{\bar{#1}_{#2}}}
+\begin{align*}
 \dx{x_m} &= -E_m\dx{p_m}, \\
 \dx{x_b} &= -E_b\dx{p_b}, \\
 \dx{x_{c1}} &= -E_{c1}\dx{p_{c1}} + E_{c1c2}\dx{p_{c2}}, \\
 \dx{x_{c2}} &= -E_{c2}\dx{p_{c2}} + E_{c2c1}\dx{p_{c1}}.
+\end{align*}
 ```
 
 These equations are not ideal, solving them will result in non-convex functions in our constraints.
 In order to avoid this, we approximate them linearly
 
 ```{math}
-\newcommand{\lx}[2]{\frac{#1_{#2}-\bar{#1}_{#2}}{\bar{#1}_{#2}}}
 \lx{x}{m} &= -E_m\lx{p}{m} \\
 \lx{x}{b} &= -E_b\lx{p}{b} \\
 \lx{x}{c1} &= -E_{c1}\lx{p}{c1}+E_{c1c2}\lx{p}{c2} \\

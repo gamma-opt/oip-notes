@@ -111,7 +111,7 @@ In optimisation, we are interested in finding the maxima or the minima of functi
 The key point is that, in the presence of structure, we may be able to make inferences about the function. Take, for example, continuity, which roughly means that the graph of the function is an uninterrupted line. One formal definition is the following:
 
 ````{prf:definition}
-:label: continuity
+:label: continuity_def
 
 A function {math}`f:X\to \reals` is continuous at point {math}`a\in X` if 
 ```{math}
@@ -119,7 +119,7 @@ A function {math}`f:X\to \reals` is continuous at point {math}`a\in X` if
 ```
 ````
 
-Intuitively, {prf:ref}`continuity` means that for sufficiently nearby inputs, a continuous function outputs nearby values. Continuity is a useful property for it removes concerns related to whether the function is defined for a given input or not and whether we can rely on neighbouring evaluations to estimate whether its value is increasing or decreasing.
+Intuitively, {prf:ref}`continuity_def` means that for sufficiently nearby inputs, a continuous function outputs nearby values. Continuity is a useful property for it removes concerns related to whether the function is defined for a given input or not and whether we can rely on neighbouring evaluations to estimate whether its value is increasing or decreasing.
 
 ### Differentiability
 
@@ -136,7 +136,7 @@ to guide our search. For example, suppose we would like to find $x \in X$ that m
 If we take this idea to the limit, i.e., make $\Delta x \to 0$, we recover the *derivative* of the function at $x$, which is precisely an indication of how the function behaves locally in terms of its value. If we can be sure that derivatives are unique and available everywhere in the domain of $f$, we say that the function is *differentiable*.
 
 ````{prf:definition}
-:label: differentiability
+:label: differentiability_def
 
 A function {math}`f:X\to \reals` is differentiable at {math}`a \in X \subseteq \reals` if the derivative
 ```{math}
@@ -148,7 +148,7 @@ exists.
 ````{admonition} Why is differentiability stronger than continuity?
 :class: seealso, dropdown
 
-Suppose {math}`f` is differentiable at {math}`a`. Then, the limit in {prf:ref}`differentiability` exists and so
+Suppose {math}`f` is differentiable at {math}`a`. Then, the limit in {prf:ref}`differentiability_def` exists and so
 ```{math}
 \lim_{h\to 0} f(a+h)-f(a) &= \lim_{h\to 0}(f(a+h)-f(a))\frac{h}{h} \\
 &=  \lim_{h\to 0}\frac{f(a+h)-f(a)}{h}h \\
@@ -164,12 +164,10 @@ For example, the function {math}`|x|` is continuous at {math}`x=0` but not diffe
 The derivative {math}`f'(x)` tells us the instantaneous rate of change at a given point {math}`x`, it is equal to the slope of the tangent line going through the point {math}`f(x)`. To see that, notice the following
 
 ```{math}
-\begin{align}
   & f'(a) = \lim_{x \to a}\frac{f(x) - f(a)}{x - a} \\
   & \Leftrightarrow \lim_{x \to a} \left(\frac{f(x)-f(a)}{x - a} - f'(a)\right) = 0 \\
   & \Leftrightarrow \lim_{\Delta x \to 0} \frac{f(x) - f(a) - f'(a)(x-a)}{x-a} = 0 \\
   & \Leftrightarrow \lim_{\Delta x \to 0} \frac{f(x) - J(x)}{x - a} = 0
-\end{align}
 ```
 
 where $J(x) = f(a) + f'(a)(x - a)$ is the linear approximation of $f(x)$ at $x = a$, i.e., the tangent line to $f$ going through $f(a)$. Clearly, this information is useful in our search for extrema, although we also must take into account how further we move in the direction of interest.
@@ -231,7 +229,7 @@ If we had a guess {math}`x_0`, we could improve it by calculating the derivative
 We could even note that the derivative is 0 at the minimum, and thus solve this equation to record the minimum at {math}`-\frac{b}{2a}`. -->
 
 So far, we have been talking about functions of a single variable, but similar ideas extend to multivariate functions.
-In fact, {prf:ref}`continuity` for continuity applies as written, assuming now {math}`X=\reals^n` for {math}`n\in\mathbb{N}^+`.
+In fact, {prf:ref}`continuity_def` for continuity applies as written, assuming now {math}`X=\reals^n` for {math}`n\in\mathbb{N}^+`.
 
 Differentiability in higher dimensions is somewhat analogous. First, we must define the multidimensional equivalent to the tangent line. For that, we need to first the notion of partial derivatives, which is essentially taking derivatives with one of the components of $f$.
 
@@ -370,13 +368,11 @@ According to definition {prf:ref}`convex_function`, a convex function is such th
 To say why the zero-gradient condition is sufficient for optimality, notice that, from the definition of convexity we have:
 
 ```{math}
-\begin{align*}
   & f(\lambda x + (1-\lambda)y) \le \lambda f(x) + (1-\lambda) f(y) \\
   \Rightarrow  & f(x + \lambda(y-x)) \le \lambda (f(y) - f(x)) \\
-  \Rightarrow  & f(y) - f(x) \ge \frac{f(x + \lambda(y-x)) - f(x)}{\lambda}, \text{ for } \lambda \in (0,1]
-  \Rightarrow  & f(y) - f(x) \ge \lim_{\lambda \to 0} \frac{f(x + \lambda(y-x)) - f(x)}{\lambda}, \text{ for } \lambda \in (0,1]
+  \Rightarrow  & f(y) - f(x) \ge \frac{f(x + \lambda(y-x)) - f(x)}{\lambda}, \text{ for } \lambda \in (0,1] \\
+  \Rightarrow  & f(y) - f(x) \ge \lim_{\lambda \to 0} \frac{f(x + \lambda(y-x)) - f(x)}{\lambda}, \text{ for } \lambda \in (0,1] \\
   \Rightarrow  & f(y) - f(x) \ge \nabla f(x)(y-x).
-\end{align* }  
 ```
 
 From the last line we can conclude that, if $\nabla f(x) = 0$, that implies that $f(x) \le f(y)$ for all $y$, which is precisely the definition of optimality.
