@@ -42,6 +42,7 @@ sphinx:
         load: 
           - "[tex]/textmacros"  # For ~ to work as non-breaking space
           - "[tex]/mathtools"   # For rcases
+          - "output/svg"        # Change mathjax renderer to prevent clipping on the top in some equations
       tex:
         packages:
           "[+]": 
@@ -80,6 +81,8 @@ sphinx:
           "brackets": ["\\left[ #1 \\right]", 1]
           "floor": ["\\lfloor #1 \\rfloor", 1]
           "ceil": ["\\lceil #1 \\rceil", 1]
+          "dx": ["\\frac{d#1}{#1}", 1]
+          "lx": ["\\frac{#1_{#2}-\\bar{#1}_{#2}}{\\bar{#1}_{#2}}", 2]
     latex_elements:
       pointsize: '11pt'
       
@@ -180,3 +183,5 @@ sphinx:
         \newcommand{\brackets}[1]{\left[ #1 \right]}
         \newcommand{\floor}[1]{\lfloor #1 \rfloor}
         \newcommand{\ceil}[1]{\lceil #1 \rceil}
+        \newcommand{\dx}[1]{\frac{d#1}{#1}}
+        \newcommand{\lx}[2]{\frac{#1_{#2}-\bar{#1}_{#2}}{\bar{#1}_{#2}}}

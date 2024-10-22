@@ -374,26 +374,38 @@ One crucial feature about gradients is that they can be used to identify points 
 f(a,b) \le f(x_1, x_2), \text{ for all } (x_1,x_2) \in X,
 ```
 
-which, can only be true if $\nabla f(a,b) = 0$. Thus, having zero gradients is a necessary condition for a point to be optimal. Cleary, verifying that the gradient is zero is not sufficient for one to state that $(a,b)$ is an optimal point, because one must also that into account curvature.  Figure XXX below illustrates some alternative cases. Notice that in two of them we can trust the zero-gradient condition to be the indication of optimality, while it is not the case in the others.
+which, can only be true if $\nabla f(a,b) = 0$. Thus, having zero gradients is a necessary condition for a point to be optimal. Cleary, verifying that the gradient is zero is not sufficient for one to state that $(a,b)$ is an optimal point, because one must also that into account curvature.  The function plotted below illustrates some alternative cases. Notice that in two of the cases (purple and red) we can trust the zero-gradient condition to be the indication of optimality, while it is not the case for the saddle point in orange.
 
 ```{code-cell}
+:tags: [skip-execution, remove-cell]
+# This cell produces the video below, but needs manual running
 x = range(-π, π, 101)
 foo2(x,y) = sin(x)*sin(y)
 z = [foo2(i,j) for i in x, j in x]
-fig = Figure()
-#ax = Axis3(fig[1,1], azimuth=0.6*pi)
-ax = LScene(fig[1,1])
-surface!(ax, x, x, z)
-scatter!(ax, [-π/2, 0, π/2], [π/2, 0, π/2], [-1, 0, 1]; color = 2, colormap = :tab10, colorrange = (1, 10), markersize=20)
+fig = Figure(size=(800, 450))
+ax = Axis3(fig[1,1], viewmode=:fit)
+hidespines!(ax)
+hidedecorations!(ax)
+#ax = LScene(fig[1,1])
 
-fig
+surface!(ax, x, x, z)
+scatter!(ax, [-π/2, pi/2, 0, π/2, -pi/2], [π/2, -pi/2, 0, π/2, -pi/2], [-1, -1, 0, 1, 1]; color = [4,4,2,5,5], colormap = :tab10, colorrange = (1, 10), markersize=20)
+
+azimuth_it = range(0, 2*pi, 300)
+record(fig, "course/_static/critical_points.mp4", azimuth_it) do az
+  ax.azimuth = az
+end
 ```
+
+<video width="800" controls loop autoplay>
+    <source src="../_static/critical_points.mp4" type="video/mp4">
+</video>
 
 %TODO: Draw this: have a couple of functions, where one is concave and the other is convex. 
 
 The next natural step after identifying points with zero gradient would be further analysing the function curvature, which can be done using second-order derivatives (i.e., the derivatives of derivatives). However, it turns out that most optimisation algorithms do not consider second-order information, simply because it is too expensive from a computational standpoint.
 
-However, not all is lost. Indeed, for a particular class of problems, it turns out that we can rely on the zero-gradient condition as a sufficient certificate to atest optimality. These are so-called convex problems, which are optimisation problems involving convex functions. Let us first define a convex function.
+However, not all is lost. Indeed, for a particular class of problems, it turns out that we can rely on the zero-gradient condition as a sufficient certificate to test optimality. These are so-called convex problems, which are optimisation problems involving convex functions. Let us first define a convex function.
 
 ````{prf:definition}
 :label: convex_function
@@ -410,8 +422,30 @@ A function is convex if for all $x, y \in \reals^n$ and $\lambda \in [0,1]$ we h
 Notice we have defined it considering $n$ dimensions instead of one or two, as before. This is simply to make our notation more compact (and our results more general).
 ```
 
-According to definition {prf:ref}`convex_function`, a convex function is such that, if we take any two points and connect with a line, the line should sit above $f$ between these two points. This simple technique can be to classify the functions from Figure XXX. 
-%TODO: use this idea to classify the example functions above which are convex and which are not.
+According to definition {prf:ref}`convex_function`, a convex function is such that, if we take any two points and connect with a line, the line should sit above $f$ between these two points. This simple technique can be used to classify the functions plotted below, where the left column contains convex functions and the right non-convex.
+
+% In (old) jupyter-book, we can't wrap code outputs in a figure
+% There is a way in the new one though https://mystmd.org/guide/reuse-jupyter-outputs#outputs-as-figures
+```{code-cell}
+:tags: [remove-input]
+:label: test
+x = range(-pi, pi, 100)
+f(x,y) = (x^2-y^2)/2
+fig = Figure(size=(800,600))
+ax1 = Axis(fig[1,1])
+lines!(ax1, range(1,10,100), exp)
+
+ax2 = Axis(fig[1,2])
+lines!(ax2, x, sin)
+
+ax3 = Axis3(fig[2,1])
+surface!(ax3, x, x, (x,y) -> x^2 + y^2)
+
+ax4 = Axis3(fig[2,2])
+surface!(ax4, x, x, f)
+
+fig
+```
 
 To say why the zero-gradient condition is sufficient for optimality, notice that, from the definition of convexity we have:
 

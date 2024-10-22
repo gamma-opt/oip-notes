@@ -31,7 +31,7 @@ Notice that this is equivalent to finding the minimal cost permutation of {math}
 An example collection of cities (or points) for which we'd like to find the minimum cost tour for.
 ```
 
-TODO: Add interactive visualization? or just solved graph at the end?
+% TODO: Add interactive visualization? or just solved graph at the end?
 
 To pose the problem as an integer programming model, let us define {math}`x_{ij}=1` if city {math}`j` is visited directly after city {math}`i`, and {math}`x_{ij}=0` otherwise.
 Let {math}`N=\{1,\dots,n\}` be the set of cities.
@@ -67,23 +67,23 @@ The first is called _cut-set constraints_ and is defined as
 \sum_{i\in S}\sum_{j\in N\setminus S} x_{ij}\geq 1,~\forall S\subset N, 2\leq |S|\leq n-1.
 ```
 
-The cut-set constraints act by guaranteeing that among any subset of nodes {math}`\subseteq N` there is always at least one arc {math}`(i,j)` connecting one of the nodes in {math}`S` and a node not in {math}`S`.
+The cut-set constraints act by guaranteeing that among any subset of nodes {math}`S \subseteq N` there is always at least one arc {math}`(i,j)` connecting one of the nodes in {math}`S` and a node not in {math}`S`.
 
 An alternative type of constraint is called _sub-tour elimination_ constraint and is of the form
 ```{math}
 \sum_{i\in S}\sum_{j\in S}x_{ij}\leq |S|-1,~\forall S\subset N,2\leq |S|\leq n-1.
 ```
 
-Differently from the cutset constraints, the sub-tour elimination constraints prevent the cardinality of the nodes in each subset from matching the cardinality of arcs within the same subset.
+Differently from the cut-set constraints, the sub-tour elimination constraints prevent the cardinality of the nodes in each subset from matching the cardinality of arcs within the same subset.
 
-There are some differences between these two constraints and, typically cutset, constraints are preferred for being stronger.
+There are some differences between these two constraints and, typically cut-set constraints are preferred for being stronger.
 In any case, either of them suffers from the same problem: the number of such constraints quickly becomes computationally prohibitive as the number of nodes increases. 
 This is because one would have to generate a constraint to each possible node subset combination from sizes 2 to n − 1.
 
 A possible remedy to this consists of relying on delayed constraint generation. 
-In this case, one can start from the naive formulation T SP and from the solution, observe whether there are any sub-tours formed.
+In this case, one can start from the naive formulation TSP and from the solution, observe whether there are any sub-tours formed.
 That being the case, only the constraints eliminating the observed sub-tours need to be generated, and the problem can be warm-started.
-This procedure typically terminates far earlier than having all of the possible cutset or sub-tour elimination constraints generated.
+This procedure typically terminates far earlier than having all of the possible cut-set or sub-tour elimination constraints generated.
 
 ```{figure} ../figures/tsp_feasible.svg
 :name: feasible
