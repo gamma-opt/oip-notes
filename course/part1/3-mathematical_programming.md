@@ -22,7 +22,7 @@ In this lecture we will discuss the idea of using the notion of *functions* and 
 \mini~f(x) ~\st x \in X.
 ```
 
-In the above, $x$ represents a $n$-component real-valued vector (i.e., $x \in \reals^n$), $\mathop{\text{s.t.}}$ stands for "such that" or "subject to", and $X$ represents the subset of the domain of $f(x)$ that is of our interest (that is, $X \subset \reals$). For the time being, we will focus on how to obtain a *mathematical representation* of the problem at hand that then can be *optimised*. In our context, to optimise a problem means finding a solution $x \in X$ at which $f(x)$ attains its minimum value. Later, we will touch upon how such representations can be used by specialised algorithms to find optimal solutions.
+In the above, $x$ represents a $n$-component real-valued vector (i.e., $x \in \reals^n$), $\mathop{\text{s.t.}}$ stands for "such that" or "subject to", and $X$ represents the subset of the domain of $f(x)$ that is of our interest (that is, $X \subset \reals^n$). For the time being, we will focus on how to obtain a *mathematical representation* of the problem at hand that then can be *optimised*. In our context, to optimise a problem means finding a solution $x \in X$ at which $f(x)$ attains its minimum value. Later, we will touch upon how such representations can be used by specialised algorithms to find optimal solutions.
 
 ```{note}
 We will assume *minimisation* as a reference, but clearly, maximisation can be used in our derivations interchangeably.
@@ -38,7 +38,7 @@ A mathematical programming model comprises four key ingredients:
 
 1. **Parameters**, which represent the input data and information that defines the problem statement. These are typically elements in the problem that are beyond our control, such as costs, revenues, efficiency rates, limits, and so forth.  
 2. **Decision variables** $x$, which represent the elements of the problem that we control. These can represent production amounts, flows in a network, dimensions of a structure, or any other element that is part of the decisions we wish to make.
-3. **Objective function** $f$ represents a measure of performance associated with a candidate solution $x$. Examples include maximizing profits, utility, return on investment, or satisfaction, and minimize costs, redundancy, waste, or risk.
+3. **Objective function** $f$ represents a measure of performance associated with a candidate solution $x$. Examples include maximising profits, utility, return on investment, or satisfaction, and minimising costs, redundancy, waste, or risk.
 4. **Constraints** $X$, which express the rules or conditions that a solution must satisfy for it to be considered valid.
 
 Notice that these are presented in a deliberate order. As a rule of thumb, whenever we start the process of modelling a problem, we will follow this list in this particular order.
@@ -51,7 +51,7 @@ As the name suggests, the objective function is the function that describes our 
 %- The relation can be =, >=, or <=
 %- Show that they generate a set that can be used as a subdomain
 
-One important concept in mathematical programming is how can we define sets $X$ using functions. This is possible by relating functions with particular levels of its codomain by means of (in)equalities. In particular, suppose we are given a functions $g(x) : \reals^n \to \reals$ such that $g(x) \le 0 $ describes a relationship between decisions that make them feasible to be implemented.  Then, we have that
+One important concept in mathematical programming is how can we define sets $X$ using functions. This is possible by relating functions with particular levels of its codomain by means of (in)equalities. In particular, suppose we are given a function $g(x) : \reals^n \to \reals$ such that $g(x) \le 0 $ describes a relationship between decisions that make them feasible.  Then, we have that
 
 ```{math}
     X = \braces{x \in \reals^n : g(x) \le 0},
@@ -73,9 +73,9 @@ It is perfectly fine to write $X = \braces{[x,y]\in \reals^2 : x \le C, x + y = 
 (p1l4:first-model)=
 ## Our first mathematical programming model
 
-Let us consider a first example. A carpenter wants to plan his production of tables and chairs such that his income is maximised. Every table produced is sold for 1000\$ and every chair produced is sold for 500\$.
+Let us consider an example. A carpenter wants to plan his production of tables and chairs such that his income is maximised. Every table produced is sold for 1000\$ and every chair produced is sold for 500\$.
 
-To produce one table, the carpenter needs 3h of work and 7 units of wood. To produce one chair, the carpenter requires 5h of work and 4 units of wood. Weekly, the carpenter has 40h of labour available and 60 units of wood. Our task is to formulate a mathematical program that maximises the carpenter's weekly outcome.
+To produce one table, the carpenter needs 3 hours of work and 7 units of wood. To produce one chair, the carpenter requires 5 hours of work and 4 units of wood. Weekly, the carpenter has 40 hours of labour available and 60 units of wood. Our task is to formulate a mathematical program that maximises the carpenter's weekly outcome.
 
 Following our list of steps, we first must identify the problem's parameters. They are summarised in the table below:
 
@@ -146,7 +146,10 @@ m = Model(HiGHS.Optimizer) # Creates a model and informs the solver to be used.
 @constraint(m, 7*x_t + 4*x_c <= 60) # Wood availability constraint
 
 optimize!(m) # Solve the model
+```
 
-print("\nSOLUTION!!!\n")
-print("\nTotal of tables: ", value(x_t), "\nTotal of chairs: ", value(x_c), "\n")
+```{code-cell}
+:tags: [remove-input]
+using DataFrames
+display(DataFrame("Tables to produce" => value(x_t), "Chairs to produce" => value(x_c), "Profit" => objective_value(m)))
 ```

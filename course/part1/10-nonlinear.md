@@ -63,7 +63,7 @@ The mathematical optimisation problem {eq}`opt-problem` is a convex optimisation
 We discussed the notion of convexity in Lecture 1, and concluded that for convex functions, first-order optimality (zero-gradient) conditions are sufficient to certify the optimality of a candidate solution. It turns out that, if the subdomain (in in our case, the feasibility set) is a convex set, a generalisation of these first-order conditions (known as Karush-Kuhn-Tucker, or KKT conditions) exist and are also necessary and sufficient for optimality. Interior point methods, the flagship method for nonlinear optimisation problems, are engineered to search for points that satisfy KKT conditions.
 
 ```{warning}
-Interior point methods, or any other optimisation methods vcan be very well used to solve nonconvex optimisation problems. The issue is that, for these problems, the KKT conditions are necessary (i.e., they have to hold) but not sufficient to certificate optimality of the solution found. It is up to the user to know whether that solution can be certified as a global optimal solution.  
+Interior point methods, or any other optimisation methods can be very well used to solve nonconvex optimisation problems. The issue is that, for these problems, the KKT conditions are necessary (i.e., they have to hold) but not sufficient to certificate optimality of the solution found. It is up to the user to know whether that solution can be certified as a global optimal solution.  
 ```
 
 ```{note}
@@ -95,12 +95,26 @@ The quadratic function $f$ is convex depending on the matrix $Q$. The technical 
 
 #### Polynomials, exponential and logarithms 
 
-More seldom, one may see the need of using other functions that quadratic. Somm other common convex functions include:
+More seldom, one may see the need of using other functions that are not quadratic. Some other common convex functions include:
 
 - *Powers*: $x^a$ is concave for $ 0 \le a \le 1$ and convex for $a \ge 1$ or $a \le 0$;
 - *Exponential*: $e^{ax}$ is convex for any $x \in \reals$;
 - *Logarithms:* $\log x$ is concave and $x \log x$ is convex for $x > 0$;
 - *Nonnegative weighted sums*: the sum of convex functions, when weighted by non-negative terms is convex. 
+
+```{code-cell}
+using CairoMakie
+x = range(0, 4, 100)
+fig = Figure()
+ax = Axis(fig[1,1])
+
+lines!(ax, x, exp, label=L"e^x")
+lines!(ax, x, x->x^2, label=L"x^2")
+lines!(ax, x, x->x*log(x), label=L"x \log x")
+axislegend(labelsize=20)
+
+fig
+```
 
 There are a few other functions that are convex. Also, there are a few operations (such as the non-negative weighted sum) that preserve convexity. Typically, to verify whether a function is convex or not, we must break it into parts and verify whether they are convex functions and if they have been combined by convexity preserving operations.
 
@@ -338,15 +352,10 @@ In addition, the consumption costs  of last year should not be larger with the n
 Lastly, we need to relate the quantity variables to the price variables using the elasticity information
 
 ```{math}
-:nowrap:
-\newcommand{\dx}[1]{\frac{d#1}{#1}}
-\newcommand{\lx}[2]{\frac{#1_{#2}-\bar{#1}_{#2}}{\bar{#1}_{#2}}}
-\begin{align*}
 \dx{x_m} &= -E_m\dx{p_m}, \\
 \dx{x_b} &= -E_b\dx{p_b}, \\
 \dx{x_{c1}} &= -E_{c1}\dx{p_{c1}} + E_{c1c2}\dx{p_{c2}}, \\
 \dx{x_{c2}} &= -E_{c2}\dx{p_{c2}} + E_{c2c1}\dx{p_{c1}}.
-\end{align*}
 ```
 
 These equations are not ideal, solving them will result in non-convex functions in our constraints.

@@ -19,7 +19,7 @@ Next, we focus on extending the types of variables we can consider in our optimi
 
 ## Considering integer valued decision variables
 
-Conceptually, this is a somewhat small change in the model formulation, but one with major consequences to how difficult the optimisation model is to solve. Let us return to our example in {numref}`p1l4:first-model`. One point we raised is that the problem was modelled considering that the number of tables and chairs, represented by decision variables $x_t$ and $x_c$ could take fractional values. Now, let us assume that we require the number of tables and chairs to be integer. Thus, we can modify our model formulation as 
+Conceptually, this is a somewhat small change in the model formulation, but one with major consequences to how difficult the optimisation model is to solve. Let us return to our example in {numref}`p1l4:first-model`. One point we raised was that the problem was modelled considering that the number of tables and chairs, represented by decision variables $x_t$ and $x_c$ could take fractional values. Now, let us assume that we require the number of tables and chairs to be integer. Thus, we can modify our model formulation as 
 
 ```{math}
 \text{maximise}_{x_t,x_c} \ &1000x_t + 500x_c \\
@@ -50,11 +50,9 @@ m = Model(HiGHS.Optimizer)
 
 optimize!(m)
 
-print("\nSOLUTION!!!\n")
-print("\nTotal of tables: ", value(x_t), "\nTotal of chairs: ", value(x_c), "\n")
-print("Profit: ", objective_value(m))
+using DataFrames, PrettyTables
+df = DataFrame("Tables to produce" => value(x_t), "Chairs to produce" => value(x_c), "Profit" => objective_value(m))
 ```
-
 
 ## Modelling true/false statements using binary variables
 
@@ -137,10 +135,7 @@ M = 100
 @constraint(m, x_c <= M*y_c)
 
 optimize!(m)
-
-print("\nSOLUTION!!!\n")
-print("\nTotal of tables: ", value(x_t), "\nTotal of chairs: ", value(x_c), "\n")
-print("Profit: ", objective_value(m))
+df = DataFrame("Tables to produce" => value(x_t), "Chairs to produce" => value(x_c), "Profit" => objective_value(m))
 ```
 
 Previously, the optimal solution produced as many tables as possible and made a single chair with leftover materials.
@@ -292,9 +287,7 @@ M = 100
 
 optimize!(m)
 
-print("\nSOLUTION!!!\n")
-print("\nTotal of tables: ", value(x_t), "\nTotal of chairs: ", value(x_c), "\n")
-print("Profit: ", objective_value(m))
+df = DataFrame("Tables to produce" => value(x_t), "Chairs to produce" => value(x_c), "Profit" => objective_value(m))
 ```
 
 Turns out the table tools are both too expensive to warrant their purchase.

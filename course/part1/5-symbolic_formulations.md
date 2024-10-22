@@ -29,8 +29,8 @@ To achieve that, we must rely on abstract entities that represent the elements o
 
 The model data, or input data, is represented by *indices* and their *sets* and *parameters*.
 
-- **Indices and sets**: these represent entities in the problem that are discrete and can be grouped by what they represent in the model.
-- **Parameters**: are numerical values representing quantities that are associate to indices or combinations of indices.
+- **Indices and sets**: represent entities in the problem that are discrete and can be grouped by what they represent in the model.
+- **Parameters**: are numerical values representing quantities that are associated with indices or combinations of indices.
 
 We have come across these before. For example, in the transportation problem, we defined the plants as $i = 1, 2, 3$. If we define the set $I = \braces{1,2,3}$, then we can say that the cities are defined as $i \in I$. Now, we can represent the production capacity of each plant as $C_i$ for $i \in I$.
 
@@ -433,3 +433,8 @@ Legend(f[1:2,3], [PolyElement(polycolor = i, polycolormap=:viridis, polycolorran
 resize_to_layout!(f)
 f
 ```
+
+On the top right, we can see that every month, the production capacity is used fully, which makes sense, and the composition of the blends vary.
+On the bottom graph, we see that the last month storage is filled, since there is a constraint to ensure a certain level of stocks.
+And the storing pattern is linked to the buying pattern as it should be: in the first months, production relies on stored oils, so stocks decrease.
+Eventually, more oil is being bought and the ingredient stocks are rebuilt.
