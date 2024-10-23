@@ -1,6 +1,7 @@
 # Heuristics
 
 ## Introduction
+
 ### Motivation for heuristics (less science, more engineering)
 
 ### Black-box, derivative-free, simulation

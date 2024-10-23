@@ -21,9 +21,9 @@ parts:
   - file: part2/2-unconstrained_optimisation
   - file: part2/3-constrained_optimisation-linear
   - file: part2/4-constrained_optimisation-nonlinear-barrier
-  - file: part2/5-heuristics-1
-  - file: part2/6-heurisitics-2
-  - file: part2/7-heuristics-3
+  - file: part2/5-combinatorial_optimisation
+  - file: part2/6-heuristics-1
+  - file: part2/7-heuristics-2
   - file: part2/8-deployment-model_governance
   - file: part2/9-using_optimisation_models
   - file: part2/10-optimisation_solvers
