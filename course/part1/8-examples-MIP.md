@@ -17,6 +17,7 @@ kernelspec:
 
 In this lecture, we expand on the paradigm of (mixed-)integer programming, first by introducing the famous _Travelling Salesperson Problem_, then expanding previous problems from [](4-examples_LP-1.md) to those that will use this paradigm.
 
+(tsp-mip)=
 ## Travelling Salesperson Problem
 
 The travelling salesperson problem (TSP) is one of the most famous combinatorial optimisation problems, perhaps due to its interesting mix os simplicity while being computationally challenging.
