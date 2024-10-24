@@ -11,6 +11,7 @@
 ### Exploration v. exploitation
 
 ### Solution construction v. improvement
+- Greedy
 
 
 ## A selection of methods
