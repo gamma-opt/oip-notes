@@ -14,7 +14,7 @@ kernelspec:
 ---
 
 
-
+(p1l2:lecture)=
 # Functions and optimisation
 
 ## What is a function?
@@ -113,10 +113,11 @@ The key point is that, in the presence of structure, we may be able to make infe
 ````{prf:definition}
 :label: continuity_def
 
-A function {math}`f:X\to \reals` is continuous at point {math}`a\in X` if 
+Let {math}`f:X \to \reals` be a function. We say that {math}`lim_{x \to a} f(x) = c` if, as $x$ becomes closer to $a$, $f(x)$ becomes closer to $c$ (i.e., asymptotically). Moreover, a function {math}`f:X\to \reals` is continuous at point {math}`a\in X` if 
 ```{math}
 \lim_{x \to a}f(x) = f(a).
 ```
+If {math}`\lim_{x \to a}f(x) = f(a)` for all $a \in X$, we say that the function is continuos in its domain $X$.
 ````
 
 Intuitively, {prf:ref}`continuity_def` means that for sufficiently nearby inputs, a continuous function outputs nearby values. Continuity is a useful property for it removes concerns related to whether the function is defined for a given input or not and whether we can rely on neighbouring evaluations to estimate whether its value is increasing or decreasing.
