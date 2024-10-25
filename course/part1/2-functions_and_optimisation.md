@@ -118,7 +118,7 @@ A function {math}`f:X\to \reals` is continuous at point {math}`a\in X` if
 ```
 ````
 
-Intuitively, {prf:ref}`continuity_def` means that for sufficiently nearby inputs, a continuous function gives nearby outputs. Continuity is a useful property sunce it removes concerns related to whether the function is defined for a given input or not and allows us to rely on neighbouring evaluations to estimate whether the function's value is increasing or decreasing.
+Intuitively, {prf:ref}`continuity_def` means that for sufficiently nearby inputs, a continuous function gives nearby outputs. Continuity is a useful property since it removes concerns related to whether the function is defined for a given input or not and allows us to rely on neighbouring evaluations to estimate whether the function's value is increasing or decreasing.
 
 ### Differentiability
 
@@ -363,7 +363,7 @@ If either of the partial derivatives do not exist, or the above limit does not e
 
 ````
 
-As we will see later, the gradient plays a crucial role in many of the optimisation methods that we will use. This is precisely because it serves as an indicator of how the function behaves locally, by serving as the normal vector of the tangent plane at that point. We will return to that point in part two. For the purpose of our  discussion, let us now focus on how to use the gradient to find minima and maxima. 
+As we will see later, the gradient plays a crucial role in many of the optimisation methods that we will use. This is precisely because the gradient vector serves as an indicator of how the function behaves locally, pointing towards the direction of of "fastest" value increase. We will return to that point in part two. For the purpose of our discussion, let us now focus on how to use the gradient to find minima and maxima. 
 
 
 ## Function shapes, convexity and its role in optimisation
