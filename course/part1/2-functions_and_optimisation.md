@@ -403,9 +403,26 @@ end
 
 %TODO: Draw this: have a couple of functions, where one is concave and the other is convex. 
 
-The next natural step after identifying points with zero gradient would be further analysing the function curvature, which can be done using second-order derivatives (i.e., the derivatives of derivatives). However, it turns out that most optimisation algorithms do not consider second-order information, simply because it is too expensive from a computational standpoint.
+The next natural step after identifying points with zero gradient would be further analysing the function curvature, which can be done using second-order derivatives (i.e., the derivatives of derivatives). For example, consider the functions plotted below, where $x^2$ is convex and $-x^2$ is concave. Their derivatives are $2x$ and $-2x$ respectively, both of which are 0 when $x=0$. Yet their second derivatives are $2$ and $-2$, where the difference in the sign indicates exactly the difference in curvature. However, it turns out that most optimisation algorithms do not consider second-order information, simply because it is too expensive from a computational standpoint.
 
-However, not all is lost. Indeed, for a particular class of problems, it turns out that we can rely on the zero-gradient condition as a sufficient certificate to test optimality. These are so-called convex problems, which are optimisation problems involving convex functions. Let us first define a convex function.
+```{code-cell}
+:tags: ["remove-input"]
+
+fig = Figure(size = (800, 300))
+
+ax1 = Axis(fig[1,1], limits = (xlims, nothing))
+ax2 = Axis(fig[1,2], limits = (xlims, nothing))
+
+lines!(ax1, x, x -> x^2; linewidth = 3, label = L"x^2")
+lines!(ax2, x, x -> -x^2; linewidth = 3, label=L"-x^2")
+
+axislegend(ax1)
+axislegend(ax2)
+
+fig
+```
+
+Still, not all is lost. Indeed, for a particular class of problems, it turns out that we can rely on the zero-gradient condition as a sufficient certificate to test optimality. These are so-called convex problems, which are optimisation problems involving convex functions. Let us first define a convex function.
 
 ````{prf:definition}
 :label: convex_function
