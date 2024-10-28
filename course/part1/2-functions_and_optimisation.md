@@ -25,9 +25,9 @@ kernelspec:
 
 % _Maybe have a faster intro, "You may be familiar with the concept of functions, here we review the key parts of it" etc._
 
-For using mathematics as a framework for explaining the world around us to express problems of our interest, the need for relating one group of quantities to another quickly arises. For example, we may be interested in purchasing a certain number {math}`n` of items and wonder about the associated cost {math}`c`, or given a certain year {math}`t` we may be interested in the population {math}`p` of Finland at the start of that year. 
+For using mathematics as a framework for explaining the world around us in order to express problems of our interest, the need for relating one group of quantities to another quickly arises. For example, we may be interested in purchasing a certain number {math}`n` of items and wonder about the associated cost {math}`c`, or given a certain year {math}`t` we may be interested in the population {math}`p` of Finland at the start of that year. 
 
-There are multiple ways of thinking about functions, for example one may imagine an algebraic formula or a graph, but one general definition is the following (cite Stewart Calculus 9th ed):
+There are multiple ways of thinking about functions, for example one may imagine an algebraic formula or a graph, but one general definition is the following {cite}`stewart_calculus_2021`:
 
 ```{prf:definition}
 :label: def-function
@@ -62,6 +62,7 @@ end
 
 f1 = x -> x/π
 f2 = x -> 2x/π
+foo = x -> if x < 0 f1(x) else f2(x) end
 
 fig = Figure(size = (1200, 800))
 
@@ -72,10 +73,9 @@ ax4 = Axis(fig[2,2], limits = (xlims, nothing))
 
 lines!(ax1, x[51:end], repeat([1], 51); linewidth = 3, color = 1, colormap = :tab10, colorrange = (1, 10))
 lines!(ax1, x[begin:51], repeat([0], 51); linewidth = 3, color = 1, colormap = :tab10, colorrange = (1, 10))
-lines!(ax2, x[begin:50], f1.(x[begin:50]); linewidth = 3)
-lines!(ax2, x[50:end], f2.(x[50:end]); linewidth = 3, color = 1, colormap = :tab10, colorrange = (1, 10))
-lines!(ax3, x, sigmoid.(x); linewidth = 3)
-lines!(ax4, x, exp.(x); linewidth = 3)
+lines!(ax2, x, foo; linewidth = 3)
+lines!(ax3, x, sigmoid; linewidth = 3)
+lines!(ax4, x, exp; linewidth = 3)
 
 fig
 ```
@@ -87,7 +87,7 @@ f(x) = \begin{cases}0&x<0\\1&x\geq 1\end{cases}
 ```
 is continuous and differentiable, except at $x=0$ where it is neither.
 - On the top right, the function is continuous everywhere and differentiable except at $x=0$. It is also convex.
-- Bottom left function is $\sigma(x)$, which is continuous and differentiable everywhere, but not convex.
+- Bottom left function is the standard logistic function $\sigma(x)$, which is continuous and differentiable everywhere, but not convex.
 - Bottom right function $e^x$ is continuous, differentiable and convex.
 
 Being able to say whether functions are continuous, differentiable, and/or convex allows us to choose the appropriate way to search for optimum points $x \in X$. There are essentially two ways that we can go about searching for optima:
@@ -105,10 +105,9 @@ For most practical cases, we rely on the second idea. That is, we rely on algori
 %- Using gradients to "feel" how the function behaves locally
 %- Find points where minimum or maximum function evaluation happen using gradients
 
-In optimisation, we are interested in finding the maxima or the minima of functions. If the function does not have a nice structure but rather is a mere collection of points, it may be difficult to figure out the extrema without looking at every single value the function can take. For example, consider the number of people going into a shop throughout days of a given year. It may be possible that on June 15th there were 5 customers and on June 16th there were 0. This information does not necessarily indicate anything about June 17th.
-
 ### Continuity
-The key point is that, in the presence of structure, we may be able to make inferences about the function. Take, for example, continuity, which roughly means that the graph of the function is an uninterrupted line. One formal definition is the following:
+How the optimisation methods move towards optimal points is determined by inferences we can make about the function based on structure that it may have.
+Take, for example, continuity, which roughly means that the graph of the function is an uninterrupted line. One formal definition is the following:
 
 ````{prf:definition}
 :label: continuity_def
@@ -119,11 +118,11 @@ A function {math}`f:X\to \reals` is continuous at point {math}`a\in X` if
 ```
 ````
 
-Intuitively, {prf:ref}`continuity_def` means that for sufficiently nearby inputs, a continuous function outputs nearby values. Continuity is a useful property for it removes concerns related to whether the function is defined for a given input or not and whether we can rely on neighbouring evaluations to estimate whether its value is increasing or decreasing.
+Intuitively, {prf:ref}`continuity_def` means that for sufficiently nearby inputs, a continuous function gives nearby outputs. Continuity is a useful property since it removes concerns related to whether the function is defined for a given input or not and allows us to rely on neighbouring evaluations to estimate whether the function's value is increasing or decreasing.
 
 ### Differentiability
 
-This idea of using function evaluations to infer how a function behaves around a given point $x \in X$ is central for computational optimisation methods. Let $x_k$ and $x_{k+1} = x_k + \Delta x$, with $\Delta x > 0$ represent two close-by points in the domain $X$ of $f$. We can then use the rate $d$
+This idea of using function evaluations to infer how a function behaves around a given point $x \in X$ is central for computational optimisation methods. Let $x_k$ and $x_{k+1} = x_k + \Delta x$, with $\Delta x > 0$, represent two close-by points in the domain $X$ of $f$. We can then use the rate $d$
 
 ```{math}
 d = \frac{f(x_{k+1}) - f(x_k)}{x_{k+1} - x_{k}}
@@ -172,6 +171,9 @@ The derivative {math}`f'(x)` tells us the instantaneous rate of change at a give
 
 where $J(x) = f(a) + f'(a)(x - a)$ is the linear approximation of $f(x)$ at $x = a$, i.e., the tangent line to $f$ going through $f(a)$. Clearly, this information is useful in our search for extrema, although we also must take into account how further we move in the direction of interest.
 
+
+The figure below shows the sine function, along with the tangent line.
+You can move the slider to see the line at different points.
 % TODO: Add an numerical example where we do a series of steps towards the an extrema using derivative information. We will need to use a decaying step size for 
 % it to make sense
 ```{code-cell} julia
@@ -183,16 +185,16 @@ WGLMakie.activate!()
 xlims = (-π, π)
 
 app = App() do session
-    slider = Bonito.Slider(x)
-    fig, ax, lplot = lines(x, sin.(x); linewidth = 3)
+    slider = Bonito.Slider(x; style=Styles("grid-column" => "2"))
+    fig, ax, lplot = lines(x, sin; linewidth = 3)
     xlims!(ax, xlims)
 
     p = @lift(Point($slider[], sin($slider[])))
-    splot = scatter!(ax, p; color = 2, colormap = :tab10, colorrange = (1, 10))
+    splot = scatter!(ax, p; color = 3, colormap = :tab10, colorrange = (1, 10), markersize=20)
 
     slope = cos(slider[])
     intercept = sin(slider[]) - slope*slider[]
-    abplot = ablines!(ax, [intercept], [slope]; color = 3, colormap = :tab10, colorrange = (1, 10))
+    abplot = ablines!(ax, [intercept], [slope]; color = 2, colormap = :tab10, colorrange = (1, 10), linewidth=2)
 
     onjs(session, slider.value, js"""function on_update(new_val) {
         $(splot).then(plots=>{
@@ -218,8 +220,17 @@ app = App() do session
         })
     }
     """)
+    grid = Grid(
+      slider, 
+      DOM.div(fig; style=Styles("grid-column" => "1 / 4", "justify-self" => "center")); 
+      width="800px", 
+      height="500px", 
+      justify_content="center",
+      rows = "25px 1fr",
+      columns = "145px 1fr 100px"
+    )
 
-    return DOM.div(slider, fig)
+    return grid
 end
 ```
 
@@ -257,8 +268,15 @@ J(a, b) = f(a , b) + \nabla f(a,b)^\top (x_1 - a, x_2 - b),
 
 where $\nabla f(a, b)$ is the *gradient* of $f$ at $(a, b)$.
 
+Here is how it may look like for a function $f(x,y) = -x^2 - y^2$.
+```{margin}
+This plot can be rotated with left-click and moved with Ctrl+left-click.
+```
+
 ```{code-cell} julia
 :tags: ["remove-input"]
+
+x = range(-π/2, π/2, 101)
 
 f(x,y) = -x^2-y^2
 z = [f(i,j) for i in x, j in x]
@@ -267,11 +285,13 @@ m = 0.5
 slider_range = filter(x->x<m && x>-m, x)
 
 app = App() do session
-    x_slider = Bonito.Slider(slider_range)
-    y_slider = Bonito.Slider(slider_range)
+    x_slider = Bonito.Slider(slider_range; style=Styles("grid-column" => "2"))
+    y_slider = Bonito.Slider(slider_range; style=Styles("grid-column" => "2"))
     x_slider[] = 0
     y_slider[] = 0
-    fig, ax, plot = surface(x, x, z)
+    fig = Figure(size = (600, 600))
+    ax = LScene(fig[1,1])
+    plot = surface!(ax, x, x, z)
 
     p = @lift(Point($x_slider[], $y_slider[], f($x_slider[], $y_slider[])))
     splot = scatter!(ax, p; color = 2, colormap = :tab10, colorrange = (1, 10))
@@ -306,8 +326,23 @@ app = App() do session
         Bonito.onany(observables, update)
         update(observables.map(x=> x.value))
         """)
-    
-    return DOM.div(x_slider, y_slider, fig)
+
+    x_label = DOM.div("x:", style=Styles("justify-self" => "end", "grid-column" => "1", "grid-row" => "1"))
+    y_label = DOM.div("y:", style=Styles("justify-self" => "end", "grid-column" => "1", "grid-row" => "2"))
+    grid = Grid(
+      x_label,
+      y_label,
+      x_slider,
+      y_slider, 
+      DOM.div(fig; style=Styles("grid-column" => "1 / 4", "justify-self" => "center")); 
+      width="800px", 
+      height="700px", 
+      justify_content="center",
+      rows = "25px 25px 1fr",
+      columns = "145px 1fr 100px"
+    )
+
+    return grid
 end
 ```
 
@@ -328,24 +363,66 @@ If either of the partial derivatives do not exist, or the above limit does not e
 
 ````
 
-As we will see later, the gradient plays a crucial role in many of the optimisation methods that we will use. This is precisely because it serves as an indicator of how the fnction behaves locally, by serving as the normal vector of the tangent plane at that point. We will return to that point in part two. For the purpose of our  discussion, let us now focus on how to use the gradient to find minima and maxima. 
+As we will see later, the gradient plays a crucial role in many of the optimisation methods that we will use. This is precisely because the gradient vector serves as an indicator of how the function behaves locally, pointing towards the direction of of "fastest" value increase. We will return to that point in part two. For the purpose of our discussion, let us now focus on how to use the gradient to find minima and maxima. 
 
 
 ## Function shapes, convexity and its role in optimisation
 
-One crucial feature about gradients is that they can be used to identify points that are candidate to being optimal. To see that, assume taht $f$ is differentiable, in line with {prf:ref}`differentiability_multi`. Assume that $f : \reals^2 \to \reals$ for simplicity and that we are at point $(a,b)$. For a sufficiently small step away from $(a,b)$ towards any point $(x_1, x_2)$, we seen that $J(a, b) = f(a , b) + \nabla f(a,b)^\top (x_1 - a, x_2 - b)$ is a arbitrarily good approximation for $f(x_1,x_2)$. We can use this to realise something about optimality: if $(a,b)$ is to be an optimal point (say, a minimum point), we must have
+One crucial feature about gradients is that they can be used to identify points that are candidate to being optimal. To see that, assume that $f$ is differentiable, in line with {prf:ref}`differentiability_multi`. Assume that $f : \reals^2 \to \reals$ for simplicity and that we are at point $(a,b)$. For a sufficiently small step away from $(a,b)$ towards any point $(x_1, x_2)$, we have seen that $J(a, b) = f(a , b) + \nabla f(a,b)^\top (x_1 - a, x_2 - b)$ is an arbitrarily good approximation for $f(x_1,x_2)$. We can use this to realise something about optimality: if $(a,b)$ is to be an optimal point (say, a minimum point), we must have
 
 ```{math}
 f(a,b) \le f(x_1, x_2), \text{ for all } (x_1,x_2) \in X,
 ```
 
-which, can only be true if $\nabla f(a,b) = 0$. Thus, having zero gradients is a necessary condition for a point to be optimal. Cleary, verifying that the gradient is zero is not sufficient for one to state that $(a,b)$ is an optimal point, because one must also that into account curvature.  Figure XXX below illustrates some alternative cases. Noticer that in two of them we can trust the zero-gradient condition to be the indication of optimality, while it is not the case in the others.
+which, can only be true if $\nabla f(a,b) = 0$. Thus, having zero gradients is a necessary condition for a point to be optimal. Cleary, verifying that the gradient is zero is not sufficient for one to state that $(a,b)$ is an optimal point, because one must also that into account curvature.  The function plotted below illustrates some alternative cases. Notice that in two of the cases (purple and red) we can trust the zero-gradient condition to be the indication of optimality, while it is not the case for the saddle point in orange.
+
+```{code-cell}
+:tags: [skip-execution, remove-cell]
+# This cell produces the video below, but needs manual running
+x = range(-π, π, 101)
+foo2(x,y) = sin(x)*sin(y)
+z = [foo2(i,j) for i in x, j in x]
+fig = Figure(size=(800, 450))
+ax = Axis3(fig[1,1], viewmode=:fit)
+hidespines!(ax)
+hidedecorations!(ax)
+#ax = LScene(fig[1,1])
+
+surface!(ax, x, x, z)
+scatter!(ax, [-π/2, pi/2, 0, π/2, -pi/2], [π/2, -pi/2, 0, π/2, -pi/2], [-1, -1, 0, 1, 1]; color = [4,4,2,5,5], colormap = :tab10, colorrange = (1, 10), markersize=20)
+
+azimuth_it = range(0, 2*pi, 300)
+record(fig, "course/_static/critical_points.mp4", azimuth_it) do az
+  ax.azimuth = az
+end
+```
+
+<video width="800" controls loop autoplay>
+    <source src="../_static/critical_points.mp4" type="video/mp4">
+</video>
 
 %TODO: Draw this: have a couple of functions, where one is concave and the other is convex. 
 
-The next natural step after identifying points with zero gradient would be further analysing the function curvature, which can be done using second-order derivatives (i.e., the derivatives of derivatives). However, it turns out that most optimisation algorithms do not consider second-order information, simply because it is too expensive from a computational standpoint.
+The next natural step after identifying points with zero gradient would be further analysing the function curvature, which can be done using second-order derivatives (i.e., the derivatives of derivatives). For example, consider the functions plotted below, where $x^2$ is convex and $-x^2$ is concave. Their derivatives are $2x$ and $-2x$ respectively, both of which are 0 when $x=0$. Yet their second derivatives are $2$ and $-2$, where the difference in the sign indicates exactly the difference in curvature. However, it turns out that most optimisation algorithms do not consider second-order information, simply because it is too expensive from a computational standpoint.
 
-However, not all is lost. Indeed, for a particular class of problems, it turns out that we can rely on the zero-gradient condition as a sufficient certificate to atest optimality. These are so-called convex problems, which are optimisation problems involving convex functions. Let us first define a convex function.
+```{code-cell}
+:tags: ["remove-input"]
+
+fig = Figure(size = (800, 300))
+
+ax1 = Axis(fig[1,1], limits = (xlims, nothing))
+ax2 = Axis(fig[1,2], limits = (xlims, nothing))
+
+lines!(ax1, x, x -> x^2; linewidth = 3, label = L"x^2")
+lines!(ax2, x, x -> -x^2; linewidth = 3, label=L"-x^2")
+
+axislegend(ax1)
+axislegend(ax2)
+
+fig
+```
+
+Still, not all is lost. Indeed, for a particular class of problems, it turns out that we can rely on the zero-gradient condition as a sufficient certificate to test optimality. These are so-called convex problems, which are optimisation problems involving convex functions. Let us first define a convex function.
 
 ````{prf:definition}
 :label: convex_function
@@ -362,8 +439,30 @@ A function is convex if for all $x, y \in \reals^n$ and $\lambda \in [0,1]$ we h
 Notice we have defined it considering $n$ dimensions instead of one or two, as before. This is simply to make our notation more compact (and our results more general).
 ```
 
-According to definition {prf:ref}`convex_function`, a convex function is such that, if we take any two points and connect with a line, the line should sit above $f$ between these two points. This simple technique can be to classify the functions from Figure XXX. 
-%TODO: use this idea to classify the example functions above which are convex and which are not.
+According to definition {prf:ref}`convex_function`, a convex function is such that, if we take any two points and connect with a line, the line should sit above $f$ between these two points. This simple technique can be used to classify the functions plotted below, where the left column contains convex functions and the right non-convex.
+
+% In (old) jupyter-book, we can't wrap code outputs in a figure
+% There is a way in the new one though https://mystmd.org/guide/reuse-jupyter-outputs#outputs-as-figures
+```{code-cell}
+:tags: [remove-input]
+:label: test
+x = range(-pi, pi, 100)
+f(x,y) = (x^2-y^2)/2
+fig = Figure(size=(800,600))
+ax1 = Axis(fig[1,1])
+lines!(ax1, range(1,10,100), exp)
+
+ax2 = Axis(fig[1,2])
+lines!(ax2, x, sin)
+
+ax3 = Axis3(fig[2,1])
+surface!(ax3, x, x, (x,y) -> x^2 + y^2)
+
+ax4 = Axis3(fig[2,2])
+surface!(ax4, x, x, f)
+
+fig
+```
 
 To say why the zero-gradient condition is sufficient for optimality, notice that, from the definition of convexity we have:
 
