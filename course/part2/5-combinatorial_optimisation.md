@@ -1,3 +1,18 @@
+---
+jupytext:
+  cell_metadata_filter: -all
+  formats: md:myst
+  text_representation:
+    extension: .md
+    format_name: myst
+    format_version: 0.13
+    jupytext_version: 1.16.2
+kernelspec:
+  display_name: Julia 1.10.5
+  language: julia
+  name: julia-1.10
+---
+
 # Combinatorial optimisation
 
 So far, we have discussed a few, sometimes overlapping, varieties of mathematical programming: linear optimisation, mixed-integer optimisation, and convex optimisation.
@@ -30,6 +45,8 @@ with a constraint to not exceed the budget
 \sum_{i=1}^n c_ix_i \leq b.
 ```
 
+% TODO: Add knapsack illustration
+
 Modeling a choice like selecting an item is exactly what binary variables are for, so one may wonder how are these problems special enough to warrant their own category.
 It is true that combinatorial optimisation problems can be formulated and solved as integer problems.
 But recall that going from linear to mixed-integer problems introduced difficulty due to losing the continuity of variables.
@@ -48,6 +65,29 @@ In the case of the Knapsack problem, the number of possible selections is $2^n$.
 For a budget that would accept half of these selections, there would be $2^{n-1}$ feasible solutions.
 
 While for small $n$ these numbers may not pose a problem, very quickly they exceed the realm of what is computable in a reasonable amount of time.
+Some common functions are plotted below.
+Note that the $y$-axis is on a $\log_2$ scale, so the difference between the lines is very large.
+
+```{code-cell}
+:tags: [remove-input]
+using CairoMakie
+
+x = 2:20
+xlims = (1, π)
+
+fig = Figure(size = (1200, 800), fontsize=24)
+
+ax1 = Axis(fig[1,1], xlabel=L"n", ylabel=L"\log_2 ~f(n)", yscale=log2)
+
+lines!(ax1, x, factorial; linewidth = 3, label=L"n!")
+lines!(ax1, x, exp; linewidth = 3, label=L"e^n")
+lines!(ax1, x, x -> x^2; linewidth = 3, label=L"n^2")
+lines!(ax1, x, log2; linewidth = 3, label=L"\log_2(n)")
+
+axislegend(position=:lt)
+
+fig
+```
 
 ```{admonition} Runtime of algorithms and computational complexity
 :class: dropdown
@@ -80,8 +120,13 @@ In such a scheme, there may be some inputs where our algorithm may behave badly,
 But as long as for "most" inputs we get sufficiently good solutions, these disadvantages may be acceptable.
 We will discuss such _heuristic_ algorithms in the next lecture.
 
-## More
+## Exact Solution Examples
 
-Add more in-depth discussion of an exact/approximate solution to a combinatorial problem?
-Add code
-Add some visuals to the above?
+### TSP
+
+Example with Held-Karp
+
+### Minimum Spanning Trees
+
+Example with Kruskal's
+(next lecture, tie this in to greedy)

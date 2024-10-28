@@ -17,11 +17,9 @@ kernelspec:
 
 ## Randomized methods
 
-### Randomised methods
+### GRASP 
 
-#### GRASP 
-
-#### simulated annealing
+### simulated annealing
 
 ## Metaheuristics
 
