@@ -15,3 +15,8 @@
 table thead tr th.text-center {
   text-align: center!important;
 }
+
+#critical_points {
+  transform: scale(1.5) translate(-20px, -20px);
+  clip-path: rect(20% 30% 85% 80%);
+}
