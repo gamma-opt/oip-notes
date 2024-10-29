@@ -46,7 +46,9 @@ In mathematical optimisation, our main objective will be searching for points in
 
 We will next provide formal definitions of all these, but for now, we can visualise some functions to see what they mean. 
 
-% TODO not sure why this doesn't seem to work https://mystmd.org/guide/reuse-jupyter-outputs#label-a-notebook-cell
+% In myst there is a way of capturing the code output and wrapping it in a figure
+% https://mystmd.org/guide/reuse-jupyter-outputs#label-a-notebook-cell
+% But it doesn't work in jupyter-book v1
 ```{code-cell} julia
 :tags: ["remove-input"]
 
@@ -169,13 +171,31 @@ The derivative {math}`f'(x)` tells us the instantaneous rate of change at a give
   & \Leftrightarrow \lim_{\Delta x \to 0} \frac{f(x) - J(x)}{x - a} = 0
 ```
 
-where $J(x) = f(a) + f'(a)(x - a)$ is the linear approximation of $f(x)$ at $x = a$, i.e., the tangent line to $f$ going through $f(a)$. Clearly, this information is useful in our search for extrema, although we also must take into account how further we move in the direction of interest.
+where $J(x) = f(a) + f'(a)(x - a)$ is the linear approximation of $f(x)$ at $x = a$, i.e., the tangent line to $f$ going through $f(a)$. Clearly, this information is useful in our search for extrema, although we also must take into account how far we move in the direction of interest.
 
+An example of using the derivative information for finding an optimum is plotted below. Notice that this process is not perfect and different starting locations may lead to different optima.
+
+```{code-cell}
+:tags: [remove-input]
+f(x) = x^4 - 3*x^3 + x^2 + x
+xs = range(-1, 3, 100)
+
+fig, ax, plot = lines(xs, f)
+limits!(-1, 3, -2.5, 2)
+x1 = [2.5, 1.1, 2.3, 1.5, 2.08, 1.8, 2]
+x2 = [-0.6, 0.3, -0.4, 0, -0.2]
+
+for (i, x) in enumerate([x1,x2])
+  points = collect(zip(x, map(f,x)))
+  scatter!(ax, points, color=1+i, colormap=:tab10, colorrange=(1,10))
+  lines!(ax, points, color=1+i, colormap=:tab10, colorrange=(1,10))
+end
+
+fig
+```
 
 The figure below shows the sine function, along with the tangent line.
 You can move the slider to see the line at different points.
-% TODO: Add an numerical example where we do a series of steps towards the an extrema using derivative information. We will need to use a decaying step size for 
-% it to make sense
 ```{code-cell} julia
 :tags: ["remove-input"]
 
@@ -400,8 +420,6 @@ end
 <video id="critical_points" width="800" controls loop autoplay>
     <source src="../_static/critical_points.mp4" type="video/mp4">
 </video>
-
-%TODO: Draw this: have a couple of functions, where one is concave and the other is convex. 
 
 The next natural step after identifying points with zero gradient would be further analysing the function curvature, which can be done using second-order derivatives (i.e., the derivatives of derivatives). For example, consider the functions plotted below, where $x^2$ is convex and $-x^2$ is concave. Their derivatives are $2x$ and $-2x$ respectively, both of which are 0 when $x=0$. Yet their second derivatives are $2$ and $-2$, where the difference in the sign indicates exactly the difference in curvature. However, it turns out that most optimisation algorithms do not consider second-order information, simply because it is too expensive from a computational standpoint.
 
