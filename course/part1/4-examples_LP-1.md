@@ -1,9 +1,45 @@
-# LP model examples 1
+# Mathematical programming models: examples
 
-The examples below are based on {cite}`williams_model_2013`.
+Let us practice the idea of posing problems as mathematical programming models. Before we do so let us discuss a fundamental aspect associated with mathematical programming models: the notion of linearity.
+
+## Why linear models? 
+
+As you familiarise yourself with mathematical programming, you may notice that modellers dedicate a considerable amount of effort to make sure that mathematical optimisation models are linear whenever it is possible. First, let us define what me mean by a linear model. Let 
+
+```{math}
+:label: eq-linear-model
+
+\begin{aligned}
+\mini & f(x) \\
+\st & g(x) \le 0 \\
+    & h(x) = 0
+\end{aligned}
+```
+
+be our optimisation model. We say that {eq}`eq-linear-model` is **linear** if $f$ is a linear function in $x$ and $g$ are affine functions in $x$.
+
+```{note}
+Let $a$ and $b$ be nonzeros scalars. The function $f(x) = ax$ is *linear* in $x$ while $g(x) = ax + b$ is *affine* in $x$. The difference is that $f$ touches the origin $(0,0)$ while $g$ does not.
+```
+
+The reason why we should model our problems using linear equations is purely practical (or computational). It stems from the combination of two mathematical facts:
+
+1. **Linear problems are convex.** As such, any solution that can identify a local optimum automatically retrieves a global optimum.
+2. **Linear problems have a very particular structure.** That structure can be exploited to define optimality conditions that allow for "jumping" between candidate solutions until identifying a locally optimal one.
+
+The most successful method for solving linear problems, the **simplex method**, combine both ideas in its design, resulting in a widely used and robust optimisation algorithm that is the algorithm of choice in most practical applications of mathematical programming. Detaching from linear optimisation is, therefore, avoided whenever possible.
+
+```{note}
+More recently, the obsession for linearity has been a little "less" justified due to the development progress of an alternative solution framework called **interior-point (or barrier) methods**, which naturally accommodates for nonlinear functions without considerable increments in computational burden. In the words of Prof. Tyrrell Rockafellar, "...in fact, the great watershed in optimization isn't between linearity and nonlinearity, but convexity and nonconvexity." {cite}`rockafellar_lagrange_1993`
+
+```
+
+## Examples
+
+Modelling using mathematical programming requires practice in identifying the elements that compose the problem and stating the equations that correctly capture the relationship between these elements. Next, we work through a few "realistic" examples. These examples below are based on {cite}`williams_model_2013`.
 
 (p1l5:food)=
-## Food Manufacture
+### Food Manufacture
 
 Suppose that we are at the helm of a food production company, where our main product is manufactured by the blending of vegetable and non-vegetable oils.
 We can purchase oils either for immediate delivery or for delivery in a later month.
@@ -48,7 +84,7 @@ Assume that at the start of January, we have a stock of 500 tons of each raw oil
 We need to ensure that these stocks will exist at the end of June.
 What 6-month production policy should we pursue to maximize profit?
 
-### Solution
+#### Solution
 
 Recall our set of steps for modelling optimisation problems:
 
@@ -215,7 +251,7 @@ Putting it all together, the optimisation model that provides the maximum profit
 ```
 
 (p1l5:production)=
-## Factory Planning
+### Factory Planning
 
 In this example, we are at an engineering factory that makes seven different products.
 The production processes of these involve the following machines:
@@ -283,7 +319,7 @@ Assume that the production process can use the machines in any order.
 
 Our objective is to determine a production schedule that maximises total profit.
 
-### Solution
+#### Solution
 
 Once again, our list guides us.
 
@@ -517,7 +553,7 @@ Putting this all together, the optimisation model for the maximum profit product
 ```
 
 (p1l5:distribution)=
-## Distribution Problem
+### Distribution Problem
 
 In this problem, we are searching for a minimum cost distribution routing from two factories, in Helsinki and Jyväskylä, to depots and customers.
 More specifically, there are four depots where we can store our product: in Turku, Tampere, Kuopio and Oulu.
@@ -582,7 +618,7 @@ Lastly, each customer has a montly demand that must be met exactly:
 
 What distribution pattern would minimize total cost?
 
-### Solution
+#### Solution
 
 % Add note about solving this as a minimum cost flow problem?
 
