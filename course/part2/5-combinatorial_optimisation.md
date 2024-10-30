@@ -124,7 +124,97 @@ We will discuss such _heuristic_ algorithms in the next lecture.
 
 ### TSP
 
-Example with Held-Karp
+The Held-Karp algorithm is a dynamic programming algorithm to solve TSP exactly.
+The key idea underlying the algorithm is that given a set of cities $S=\{s_1,\dots,s_k\}$, suppose the shortest path $P$ from an origin $o$ through $S$ to a destination $e$ has $s_i$ as the penultimate city.
+Then, it must be the case that the shortest path from 1 to $s_i$ going through $S\setminus \{s_i\}$ must be $P$ with the last edge removed.
+
+This observation means that the solution of larger instances of a problem is directly related to smaller subproblems, which is exactly the kind of structure dynamic programming can exploit.
+
+An implementation of the algorithm is presented below for completeness, but we will not discuss it in depth since it is still too slow for larger instances of the problem. 
+{numref}`tsp_heldkarp` displays the output of an algorithm for a managable size of $n=20$.
+
+```{figure} ../figures/tsp_heldkarp.svg
+:name: tsp_heldkarp
+Output of the Held-Karp algorithm in a TSP instance with $n=20$.
+```
+
+```julia
+using Combinatorics
+
+function held_karp(d)
+    n = size(d)[1]
+
+    # entries are tuples of 
+    #  - S: bitstring (int) representing subsets of cities and
+    #  - k: int representing the final city (is in S)
+    # mapping to
+    #  - cost of shortest path from city 1 through S ending at k
+    #  - city visited before k (needed for reconstructing the path)
+    g = Dict()  
+
+    # initialize with basic distances
+    for k in 2:n
+        g[(1<<k, k)] = (d[1,k], 1)
+    end
+
+    # upper bound is n-1 since city 1 is not counted in the subset
+    for subset_size in 2:(n-1)
+        for subset in Combinatorics.combinations(2:n, subset_size)
+
+            # the first bit is always unused, but we don't need to optimize for space
+            subset_in_bits = 0
+            for city in subset
+                subset_in_bits |= 1<<city
+            end
+
+            # for every possible final city
+            for k in subset
+                # solve smaller problem S' = S \ {k}
+                prev = subset_in_bits & ~(1<<k)
+                
+                # go through all final cities for S'
+                costs = []
+                for m in subset
+                    if m == k
+                        continue
+                    end
+                    push!(costs, (g[(prev, m)][1] + d[m,k], m) )
+                end
+                
+                g[(subset_in_bits, k)] = argmin(first, costs)
+            end
+        end
+    end
+
+    # Recover the best result
+    # which is given by the subset containing everything except city 1
+    # since city 2 is represented 1<<2 (and the rest is larger), we have the first two bits not used
+    # so the subset is given by 2^(n+1)-1 to get first n bits as 1 and -3 to remove the first two bits
+    full_subset = 2^(n+1) - 4
+
+    # find the best final city
+    costs = []
+    for k in 2:n
+        push!(costs, (g[(full_subset, k)][1] + d[k,1], k))
+    end
+
+    opt, prev_city = argmin(first, costs)
+
+    # reconstruct best path
+    opt_path = []
+    subset = full_subset
+    for i in 1:(n-1)
+        push!(opt_path, prev_city)
+        prev = subset & ~(1<<prev_city)
+        _, prev_city = g[(subset, prev_city)]
+        subset = prev
+    end
+
+    push!(opt_path, 1)
+
+    return opt, reverse(opt_path)
+end
+```
 
 ### Minimum Spanning Trees
 
