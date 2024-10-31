@@ -26,6 +26,7 @@ Make reference to previous section about Kruskal's being greedy, but more often 
 
 For TSP, we can write a greedy algorithm as
 ```{prf:algorithm} Greedy Traveling Salesperson Problem Algorithm
+:label: greedy_tsp
 **Inputs:** vertices and a distance matrix
 1. Choose a vertex at random (uniformly)
 2. While there are still vertices we have not visited

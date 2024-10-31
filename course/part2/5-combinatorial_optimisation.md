@@ -218,5 +218,72 @@ end
 
 ### Minimum Spanning Trees
 
-Example with Kruskal's
-(next lecture, tie this in to greedy)
+A _graph_ is a pair $G=(V,E)$ where $V$ is a set of _nodes_ (or _vertices_) and $E$ is a set of _edges_ connecting two nodes.
+Graphs are a very flexible mathematical structure that can be used in a variety of contexts. A graph is called _connected_ if every node is reachable from other nodes through some series of edges.
+
+A _weighted graph_ is a graph $G=(V,E,w)$ where every edge has an associated weight given by some function $w$.
+For example, the cities and roads of Finland could be considered as a weighted graph, where the cities are nodes, edges are present in between directly-connected cities, and edge-weights could be the distance in between the two cities.
+
+```{figure} ../figures/graph.svg
+:name: graphs
+A non-connected graph and a connected, weighted graph.
+```
+
+
+A _minimum spanning tree_ (MST) of a connected, weighted graph $G=(V,E,w)$ is a subset of the edges $E'\subseteq E$ such that
+- $G'=(V,E')$ is connected,
+- $G'$ does not contain any cycles, and
+- $\sum_{e\in E'} w(e)$ is minimal.
+
+Finding minimum spanning trees is desirable in a variety of contexts.
+For example, when building some sort of a network like an electrical grid or a computer network, MSTs can correspond to subsets that provide connectivity at the lowest cost. One algorithm for obtaining MSTs is provided by Kruskal.
+
+```{prf:algorithm} Kruskal's algorithm
+:label: kruskal
+**Inputs** A graph $G=(V,E, w)$.
+1. Set $E'=\emptyset$.
+2. Sort $E$ in ascending order of weights.
+3. For each edge $e=(u,v)$ in $E'$
+    1. Add $e$ to $E'$ if $G'=(V,E' \cup \{e\})$ doesn't contain any cycles
+4. Output $E'$ 
+```
+
+Suppose for example we would like to obtain the MST for the below nodes.
+
+% TODO consider changing this example to cities in Finland
+% using GeoMakie and NaturalEarth?
+```{code-cell}
+:tags: [remove-input]
+using Random
+
+function generate_distance_matrix(n; random_seed = 1)
+    rng = Random.MersenneTwister(random_seed)
+    X_coord = 100 * rand(rng, n)
+    Y_coord = 100 * rand(rng, n)
+    d = [sqrt((X_coord[i] - X_coord[j])^2 + (Y_coord[i] - Y_coord[j])^2) for i in 1:n, j in 1:n]
+    return d, X_coord, Y_coord
+end
+
+n = 100
+d, xs, ys = generate_distance_matrix(n)
+
+fig,ax,plot = scatter(xs, ys)
+```
+
+An implementation of {prf:ref}`kruskal` in Julia is provided by the [`Graphs.jl`](https://juliagraphs.org/Graphs.jl/stable/) package.
+
+```{code-cell}
+:tags: [remove-output]
+using Graphs
+
+g = complete_graph(n)  # complete graph since we want to pick over any possible node
+mst_edges = kruskal_mst(g, d) # d is the distance matrix
+```
+
+```{code-cell}
+:tags: [remove-input]
+for e in mst_edges
+    lines!(ax, xs[[e.src, e.dst]], ys[[e.src, e.dst]], color = 1, colormap = :tab10, colorrange = (1, 10))
+end
+fig
+```
