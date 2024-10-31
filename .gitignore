@@ -1,3 +1,5 @@
 .*
 course/_build
 Manifest.toml
+course/manim/__pycache__
+course/manim/media
