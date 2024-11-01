@@ -13,14 +13,14 @@ kernelspec:
   name: julia-1.10
 ---
 
-# LP model examples 2
+# Mathematical programming models: more examples
 
-In this lecture, we revisit the production and combined problem from [](4-examples_LP-1.md) and implement them in
+In this lecture, we revisit more of our previous examples and implement them with the objective of exercising the process of modelling and implementing optimisation models. Our objective with this is to create familiarity with mathematical programming modelling while introducing problems whose structure frequently appears in practice.
 
 ## Production Planning
 
-Now, we revisit the example in {numref}`p1l5:production`.
-Our goal is to make a factory production plan over a period of six months, so that we maximize profits. In {numref}`production_variables`, the relevant symbols are defined, where the indexing sets are 
+Now, we revisit the example in {numref}`p1l5:production`. Our goal is to make a factory production plan over a period of six months, so that we maximize profits. In {numref}`production_variables`, the relevant symbols are defined, where the indexing sets are
+
 - $I$ - set of products,
 - $J$ - set of months, and
 - $K$ - set of machine types.
@@ -43,12 +43,15 @@ Our goal is to make a factory production plan over a period of six months, so th
 ```
 
 ```{note}
-Note the symbols and the variable names in the above table.
-In writing mathematical models, it may be desirable to keep equations shorter and neater by using symbols.
-When it comes to writing code however, there is a lot of value in using informative variable names, especially if you'd like to use the code again a while after writing it or if other people will use it as well.
+Note the symbols and the (code) variable names in the above table. In writing mathematical models, it is often desirable to keep equations shorter and neater by using symbols. However, When it comes to writing code, there is a great deal of value in using **informative** variable names, especially in terms of readability and interpretability of the model in code form.
 ```
 
-We also present the model in summary.
+```{attention}
+We adopt the convention of using **capital letters** for symbols referring to **parameters** and **lowercase** letters for symbol representing **decision variables**. In the code, we use the original symbol to represent decision variables and descriptive names to represent parameters. This are personal choices, with no convention firmly established. 
+```
+
+
+Given the definitions in {numref}`production_variables`, the statement of the symbolic formulation for the example in {numref}`p1l5:production` is given by
 
 ```{math}
 \maxi & \sum_{i,j} P_i s_{ij} - \sum_{i,j} C_H h_{ij} \\
@@ -60,10 +63,10 @@ We also present the model in summary.
 & h_{ij} \leq L_H, \forall i\in I, j\in J \\
 & m_{ij} \geq 0, \forall i\in I, j\in J \\
 & h_{ij} \geq 0, \forall i\in I, j\in J \\
-& s_{ij} \geq 0, \forall i\in I, j\in J
+& s_{ij} \geq 0, \forall i\in I, j\in J.
 ```
 
-Now, we implement the problem in code.
+Now, we implement the above model using Julia and `JuMP`.
 
 ```{code-cell}
 :tags: [remove-output]
@@ -123,7 +126,7 @@ These cannot be negative, and there are upper limits to storing and selling.
 @variable(model, 0 <= s[i in 1:I, j in 1:J] <= market_limits[j,i])
 ```
 
-The objective is to maximize profit after holding costs.
+The objective is to maximise profit whilst minimising holding costs.
 
 ```{code-cell}
 :tags: ["remove-output"]
@@ -131,15 +134,15 @@ The objective is to maximize profit after holding costs.
 @objective(model, Max, sum(s[i,j]*profit[i] for i in 1:I, j in 1:J) - holding_cost*sum(h))
 ```
 
-We have a couple of constraints.
-First is to meet the target inventory at the end of June.
+We have a couple of constraints that must be implemented. The first represents meeting the target inventory at the end of June (period 6).
 ```{code-cell}
 :tags: ["remove-output"]
 
 @constraint(model, holding_jun[i in 1:I], h[i,6] == holding_target)
 ```
 
-Another is the continuity of the product variables.
+The next one states the conservation of inventory between periods, that is that the amount manufactured plus in period $j$ the amount in stock from the previous period $j-1$ must be equal to the amount sold plus the amount of products that remain in stock in period $j$. Notice that for January ($j=1$) we need a specific constraint as the variable`h[i,0]` is not defined.
+
 ```{code-cell}
 :tags: ["remove-output"]
 
@@ -147,7 +150,8 @@ Another is the continuity of the product variables.
 @constraint(model, continuity[i in 1:I, j in 2:J], h[i,j-1]+m[i,j]-s[i,j]-h[i,j] == 0)
 ```
 
-Lastly, we need constraints about machine usage.
+Lastly, we need constraints correctly limiting machine usage.
+
 ```{code-cell}
 :tags: ["remove-output"]
 
@@ -160,14 +164,15 @@ Having specified the model, we can ask `JuMP` to show it to us.
 :tags: ["hide-output"]
 print(model)
 ```
-And we solve it.
+
+Finally, we solve the model.
 
 ```{code-cell}
 optimize!(model)
 is_solved_and_feasible(model)
 ```
 
-Great, we have a feasible solution. Let’s see what it entails.
+Once the optimisation has found an optimal solution, we can analyse it.
 
 ```{code-cell}
 println("Objective value: ", objective_value(model))
@@ -188,10 +193,13 @@ display(c)
 
 ## Distribution Problem
 
-Finally, we cover the distribution problem presented in {numref}`p1l5:distribution`.The indexing sets are 
+Next, we present the implementation of the (symbolic) mathematical programming model for the distribution problem presented in {numref}`p1l5:distribution`.The index sets are
+
 - $I$ - set of factories
 - $J$ - set of depots
 - $K$ - set of customers.
+
+In {numref}`distribution_variables` we present the list of parameters and variables used in the model.
 
 ```{table} Variables in the Distribution problem
 :name: distribution_variables
@@ -208,7 +216,8 @@ Finally, we cover the distribution problem presented in {numref}`p1l5:distributi
 | $D_{k}$    | Demand of city $k$                             | `demands[k]`        |
 ```
 
-The summarised model is
+The model formulation is given by
+
 ```{math}
 \mini & \sum_{i,j, f2d_{ij}\neq 0} f2d_{ij}x_{ij} + \sum_{i,k, f2c_{ik}\neq 0} f2c_{ik}y_{ik} + \sum_{j,k, d2c_{jk}\neq 0} d2c_{jk}z_{jk} \\
 \st & \sum_{j} x_{ij} + \sum_{k} x_{ik} \leq C_i, \forall i \in I \\
@@ -235,6 +244,7 @@ K = 6 # number of customers
 # need to be careful that the zeros here are not free, but impossible routes
 fac2dep = [0.5 0.5 1.0 0.2;
            0.0 0.3 0.5 0.2]
+
 fac2c = [1.0 0.0 1.5 2.0 0.0 1;
          2.0 0.0 0.0 0.0 0.0 0.0]
 
@@ -251,6 +261,7 @@ model = Model(HiGHS.Optimizer)
 ```
 
 % Remove the solver printed statement
+
 ```{code-cell}
 :tags: [remove-cell]
 
@@ -258,6 +269,7 @@ set_attribute(model, "output_flag", false)
 ```
 
 Then we define our variables.
+
 ```{code-cell}
 :tags: [remove-output]
 
@@ -266,8 +278,8 @@ Then we define our variables.
 @variable(model, z[1:J,1:K] >= 0)
 ```
 
-Given the above variables, our objective is to minimize distribution costs.
-Since we chose to use zeros for impossible routes, they will automatically disappear in element-wise multiplication.
+Given the above variables, our objective is to minimise distribution costs.
+Since we chose to use zeros for impossible routes, they will automatically disappear in element-wise multiplication (indicated by the `.` in `.*`).
 
 ```{code-cell}
 :tags: [remove-output]
@@ -276,6 +288,7 @@ Since we chose to use zeros for impossible routes, they will automatically disap
 ```
 
 There are a few constraints we need to impose on the model.
+
 ```{code-cell}
 :tags: [remove-output]
 
@@ -304,7 +317,8 @@ optimize!(model)
 is_solved_and_feasible(model)
 ```
 
-Great, we have a feasible solution. Let’s see what it entails.
+Once again, we obtained an optimal solution. Let us see what it entails.
+
 ```{code-cell}
 println("Objective value: ", objective_value(model))
 ```
@@ -325,31 +339,37 @@ display(c)
 ```
 
 ````{note}
-It is worth taking a second look at how we dealt with impossible routes in the code.
-Our solution uses `0.0`s to represent them in the data, which is arguably not the best choice as they may easily be mistaken with "free" routes.
-This way, we can form the objective easily using element-wise multiplication
+It is worth taking a second look at how we dealt with impossible routes in the code. Our solution uses `0.0`s to represent them in the data, which is arguably not the best choice as they may easily be mistaken with "free" (i.e., no cost) routes. This way, we can form the objective easily using element-wise multiplication
+
 ```julia
 @objective(model, Min, sum(fac2dep.*x) + sum(fac2c.*y) + sum(dep2c.*z))
 ```
+
 but we need to make sure the routes are not actually used
+
 ```julia
 fix.(x[findall(iszero, fac2dep)], 0.0; force=true)
 fix.(y[findall(iszero, fac2c)], 0.0; force=true)
 fix.(z[findall(iszero, dep2c)], 0.0; force=true).
 ```
+
 [`JuMP.fix`](https://jump.dev/JuMP.jl/stable/api/JuMP/#fix) ensures that the given variable is constrained to the specified value, with the `force` flag being necessary since we are overwriting the lower-bound that we made in the creation of the variable.
 
-An alternative approach would be to filter out the variables representing impossible routes
+An alternative approach would be to filter out of the model the variables representing impossible routes
+
 ```julia
 @variable(model, x[i in 1:I, j in 1:J; !iszero(fac2dep[i,j])] >= 0)
 ```
+
 This way, we have less variables, but we need to be more careful in using the ones we have since the container `x` is now a different shape.
 For example,
+
 ```julia
 @objective(model, Min, sum(fac2dep.*x) + sum(fac2c.*y) + sum(dep2c.*z))
 ```
-errors.
-We would need to repeat the if conditions to write it properly
+
+would lead to errors. For this to work, We would need to repeat the if conditions to write it properly
+
 ```julia
 @objective(model, Min, 
     sum(fac2dep[i,j]*x[i,j] for i in 1:I, j in 1:J, if !iszero(fac2dep[i,j]))
