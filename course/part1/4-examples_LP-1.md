@@ -2,6 +2,7 @@
 
 Let us practice the idea of posing problems as mathematical programming models. Before we do so let us discuss a fundamental aspect associated with mathematical programming models: the notion of **linearity**.
 
+(p1l4-linear_models)=
 ## Why linear models? 
 
 As you familiarise yourself with mathematical programming, you may notice that modellers dedicate a considerable amount of effort to make sure that mathematical optimisation models are linear whenever it is possible. First, let us define what me mean by a linear model. Let
@@ -84,9 +85,7 @@ Hardness blends linearly with the input oils, which have the hardness values
   - 5.0
 ```
 
-Assume that at the start of January, we have a stock of 500 tons of each raw oil in storage.
-We need to ensure that these stocks will exist at the end of June.
-What 6-month production policy should we pursue to maximize profit?
+Assume that all production in a given month is sold. Also, at the start of January, we have a stock of 500 tons of each raw oil in storage. We need to ensure that these stocks will exist at the end of June. What 6-month production policy should we pursue to maximise profit?
 
 #### Solution
 
@@ -114,13 +113,13 @@ Once the variables have been defined, we can pose our objective function. In thi
 
 ```{math}
 \maxi & f(b_{ij}, u_{ij}, s_{ij}, p_j) = \\ 
+      & 150(p_1+p_2+p_3+p_4+p_5+p_6) \\
       & -110b_{11} -130b_{12} -110b_{13} -120b_{14} -100b_{15} - 90b_{16} \\
       & -120b_{21} -130b_{22} -140b_{23} -110b_{24} -120b_{25} -100b_{26} \\
       & -130b_{31} -110b_{32} -130b_{33} -120b_{34} -150b_{35} -140b_{36} \\
       & -110b_{41} - 90b_{42} -100b_{43} -120b_{44} -110b_{45} - 80b_{46} \\
       & -115b_{51} -115b_{52} - 95b_{53} -125b_{54} -105b_{55} -135b_{56} \\
-      & -5(s_{11}+\dots+s_{56}) \\
-      & +150(y_1+y_2+y_3+y_4+y_5+y_6).
+      & -5(s_{11}+\dots+s_{56}).
 ```
 which is composed of costs of purchasing the oil, storage costs, and income from selling the blended product.
 
@@ -179,13 +178,13 @@ Putting it all together, the optimisation model that provides the maximum profit
 :nowrap:
 \begin{align*}
 \maxi & f(b_{ij}, u_{ij}, s_{ij}, p_j) = \\ 
+      & 150(p_1+p_2+p_3+p_4+p_5+p_6) \\
       & -110b_{11} -130b_{12} -110b_{13} -120b_{14} -100b_{15} - 90b_{16} \\
       & -120b_{21} -130b_{22} -140b_{23} -110b_{24} -120b_{25} -100b_{26} \\
       & -130b_{31} -110b_{32} -130b_{33} -120b_{34} -150b_{35} -140b_{36} \\
       & -110b_{41} - 90b_{42} -100b_{43} -120b_{44} -110b_{45} - 80b_{46} \\
       & -115b_{51} -115b_{52} - 95b_{53} -125b_{54} -105b_{55} -135b_{56} \\
       & -5(s_{11}+\dots+s_{56}) \\
-      & +150(y_1+y_2+y_3+y_4+y_5+y_6) \\
 \st & u_{11}+u_{21}+u_{31}+u_{41}+u_{51} = p_1 \\
 & u_{12}+u_{22}+u_{32}+u_{42}+u_{52} = p_2 \\
 & u_{13}+u_{23}+u_{33}+u_{43}+u_{53} = p_3 \\

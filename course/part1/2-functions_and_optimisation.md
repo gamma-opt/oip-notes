@@ -119,8 +119,9 @@ d = \frac{f(x_{k+1}) - f(x_k)}{x_{k+1} - x_{k}}
 ```
 
 to guide our search. For example, suppose we would like to find $x \in X$ that maximises $f$. We can use $d$ by looking at its sign:
-  1. if $d > 0$ we know that going in the direction of $x_{k+1}$ is a good idea,
-  2. whereas if $d < 0$, going in the direction of $x_{k+1}$ is not.
+
+1. if $d > 0$ we know that going in the direction of $x_{k+1}$ is a good idea,
+2. whereas if $d < 0$, going in the direction of $x_{k+1}$ is not.
 
 If we take this idea to the limit, i.e., make $\Delta x \to 0$, we recover the **derivative** of the function at $x$, which is precisely an indication of how the function behaves locally in terms of its value. If we can be sure that derivatives are unique and available everywhere in the domain of $f$, we say that the function is *differentiable*.
 

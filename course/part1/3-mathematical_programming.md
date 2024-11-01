@@ -30,8 +30,6 @@ We will assume *minimisation* as a reference, but clearly, maximisation can be u
 
 ## Optimisation modelling
 
-%- Explain how functions can represent real-world interactions between inputs and outputs
-
 The modelling of real-world problems as optimisation problems is, in general, using **mathematical programming**. Mathematical programming is in its core a language to pose problems as {eq}`eq-optimisation_problem`, which in turn can be optimised taking into account properties that $f$ and $X$ possess.
 
 A mathematical programming model comprises four key ingredients:
@@ -46,10 +44,6 @@ Notice that these are presented in a deliberate order. As a rule of thumb, whene
 As the name suggests, the objective function is the function that describes our objective, which is to maximise or minimise some quantity that represents a measurement of performance. Thus, in mathematical programming, objective functions always comprise an objective (maximise or minimise) and a function $f$. For the majority of our models, the function to be optimised will be defined as $f : X \subseteq \reals^n \to \reals$.
 
 ## Defining domains by posing constraints
-
-%- Show that functions can be also be used to state logical relations of the problem we are modelling
-%- The relation can be =, >=, or <=
-%- Show that they generate a set that can be used as a subdomain
 
 One important concept in mathematical programming is how can we define sets $X$ using functions. This is possible by relating functions with particular levels of its codomain by means of (in)equalities. In particular, suppose we are given a function $g(x) : \reals^n \to \reals$ such that $g(x) \le 0 $ describes a relationship between decisions that make them feasible.  Then, we have that
 
