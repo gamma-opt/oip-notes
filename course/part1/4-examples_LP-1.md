@@ -579,28 +579,9 @@ The costs associated with the distribution of the products are given in {numref}
 | **C6**      | 1.0                  | -                    | 1.0             | -                 | 1.5              | 1.5            |
 ```
 
-In addition, some customers prefer to be supplied from certain locations.
-
-```{list-table}
-:header-rows: 0
-
-* - **C1**
-  - Helsinki (factory)
-* - **C2**
-  - Turku (depot)
-* - **C3**
-  - No preferences
-* - **C4**
-  - No preferences
-* - **C5**
-  - Tampere (depot)
-* - **C6**
-  - Kuopio or Oulu (depots)
-```
-
 Each factory has a monthly supply capacity:
 - Helsinki: 150000 tons
-- Brighton: 200000 tons
+- Jväskylä: 200000 tons
 
 Each depot has a monthly throughput limit:
 - Turku: 70000 tons
@@ -656,10 +637,10 @@ x_{14}+x_{24} \leq 40000
 ```
 and in terms of what they are supplying
 ```{math}
-z_{11}+z_{12}+z_{13}+z_{14}+z_{15}+z_{16} = x_{11}+x_{21} \\
-z_{21}+z_{22}+z_{23}+z_{24}+z_{25}+z_{26} = x_{12}+x_{22} \\
-z_{31}+z_{32}+z_{33}+z_{34}+z_{35}+z_{36} = x_{13}+x_{23} \\
-z_{41}+z_{42}+z_{43}+z_{44}+z_{45}+z_{46} = x_{14}+x_{24}.
+z_{11}+z_{12}+z_{13}+z_{14}+z_{15}+z_{16} &= x_{11}+x_{21} \\
+z_{21}+z_{22}+z_{23}+z_{24}+z_{25}+z_{26} &= x_{12}+x_{22} \\
+z_{31}+z_{32}+z_{33}+z_{34}+z_{35}+z_{36} &= x_{13}+x_{23} \\
+z_{41}+z_{42}+z_{43}+z_{44}+z_{45}+z_{46} &= x_{14}+x_{24}.
 ```
 
 The last constraint is to make sure customers receive sufficient supply.
