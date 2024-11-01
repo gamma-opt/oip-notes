@@ -1,10 +1,10 @@
 # Mathematical programming models: examples
 
-Let us practice the idea of posing problems as mathematical programming models. Before we do so let us discuss a fundamental aspect associated with mathematical programming models: the notion of linearity.
+Let us practice the idea of posing problems as mathematical programming models. Before we do so let us discuss a fundamental aspect associated with mathematical programming models: the notion of **linearity**.
 
 ## Why linear models? 
 
-As you familiarise yourself with mathematical programming, you may notice that modellers dedicate a considerable amount of effort to make sure that mathematical optimisation models are linear whenever it is possible. First, let us define what me mean by a linear model. Let 
+As you familiarise yourself with mathematical programming, you may notice that modellers dedicate a considerable amount of effort to make sure that mathematical optimisation models are linear whenever it is possible. First, let us define what me mean by a linear model. Let
 
 ```{math}
 :label: eq-linear-model
@@ -27,16 +27,20 @@ The reason why we should model our problems using linear equations is purely pra
 1. **Linear problems are convex.** As such, any solution that can identify a local optimum automatically retrieves a global optimum.
 2. **Linear problems have a very particular structure.** That structure can be exploited to define optimality conditions that allow for "jumping" between candidate solutions until identifying a locally optimal one.
 
-The most successful method for solving linear problems, the **simplex method**, combine both ideas in its design, resulting in a widely used and robust optimisation algorithm that is the algorithm of choice in most practical applications of mathematical programming. Detaching from linear optimisation is, therefore, avoided whenever possible.
+The most successful method for solving linear problems, the **simplex method**, combine both ideas in its design, resulting in robust, robust, and consequently widely used, optimisation algorithm that holds the place of algorithm of choice in most practical applications of mathematical programming. Detaching from linear optimisation is, therefore, avoided whenever possible.
 
 ```{note}
-More recently, the obsession for linearity has been a little "less" justified due to the development progress of an alternative solution framework called **interior-point (or barrier) methods**, which naturally accommodates for nonlinear functions without considerable increments in computational burden. In the words of Prof. Tyrrell Rockafellar, "...in fact, the great watershed in optimization isn't between linearity and nonlinearity, but convexity and nonconvexity." {cite}`rockafellar_lagrange_1993`
+More recently, the obsession for linearity has been a little "less" justified due to the development progress of an alternative solution framework called **interior-point (or barrier) methods**, which naturally accommodates for nonlinear functions without considerable increments in computational burden. 
+
+In the words of Prof. Tyrrell Rockafellar:
+
+> "...in fact, the great watershed in optimization isn't between linearity and nonlinearity, but convexity and nonconvexity." {cite}`rockafellar_lagrange_1993`
 
 ```
 
 ## Examples
 
-Modelling using mathematical programming requires practice in identifying the elements that compose the problem and stating the equations that correctly capture the relationship between these elements. Next, we work through a few "realistic" examples. These examples below are based on {cite}`williams_model_2013`.
+Modelling using mathematical programming requires practice in identifying the elements that compose the problem and stating the equations that correctly capture the relationship between these elements. Next, we work through a few "realistic" examples. These examples are based on {cite}`williams_model_2013`.
 
 (p1l5:food)=
 ### Food Manufacture
@@ -125,7 +129,7 @@ From our problem statement, we can see that there are five sources of constraint
 Linear production just means that we produce as much product as we use oils in any given month $j$
 
 ```{math}
-u_{1j}+u_{2j}+u_{3j}+u_{4j}+u_{5j} = p_j
+u_{1j}+u_{2j}+u_{3j}+u_{4j}+u_{5j} = p_j.
 ```
 
 The processing limits are easy, for month $j$ we need
@@ -246,15 +250,18 @@ Putting it all together, the optimisation model that provides the maximum profit
 & u_{11}, \dots, u_{56} \geq 0 \\
 & s_{11}, \dots, s_{56} \geq 0 \\
 & p_1, \dots, p_6 \geq 0 \\
-& s_{11}, \dots, s_{56} \leq 1000
+& s_{11}, \dots, s_{56} \leq 1000.
 \end{align*}
 ```
+
+Clearly, this model is far more complex than our {ref}`p1l4:first-model`, which is expected for being a more realistic one. We will hold on how to to solve this for now, and keep practicing the process of modelling itself.
 
 (p1l5:production)=
 ### Factory Planning
 
 In this example, we are at an engineering factory that makes seven different products.
 The production processes of these involve the following machines:
+
 - four grinders,
 - two vertical drills,
 - three horizontal drills,
@@ -263,7 +270,7 @@ The production processes of these involve the following machines:
 
 The process of making every product is different and different products require the use of machines differently.
 Similarly, every product yields a certain net profit.
-The time consumed by machine operations in hours and net profits in € are described in {numref}`p1l5:production_table`, where a dash means that the product doesn't use the indicated machine.
+The time consumed by machine operations in hours and net profits in € are described in {numref}`p1l5:production_table`, where a dash means that the product does not use the indicated machine.
 
 ```{table} Production parameters: net profits (€) and time needed by machines (h)
 :name: p1l5:production_table
@@ -313,11 +320,7 @@ In addition, due to market conditions, there are limits to how much of each prod
 Once again, we can store products, up to 100 of each at a cost of €0.05 per unit per month.
 However, this time we have no initial stock, but we would like to accumulate a one: 50 of each product by the end of June.
 
-The factory works 24 days a month, each day containing two 8 hour shifts.
-
-Assume that the production process can use the machines in any order.
-
-Our objective is to determine a production schedule that maximises total profit.
+The factory works 24 days a month, each day containing two 8 hour shifts. For simplicity, we assume that the production process can use the machines in any order. Our objective is to determine a production schedule that maximises total profit.
 
 #### Solution
 
@@ -355,6 +358,7 @@ There are multiple constraints we need to keep track of.
 The basic one is that none of the decision variables we defined can be negative, imposing a lower bound on each: $m_{ij},h_{ij},s_{ij}\geq 0$.
 In addition, we can store only up to 100 of each product, which means the holding variables need an upper bound $h_{ij}\leq 100$.
 Similarly, the market imposes an upper bound on how much we can sell per month:
+
 ```{math}
 s_{11} \leq 500, s_{21} \leq 1000, &\dots, s_{71} \leq 100 \\
 s_{12} \leq 600, s_{22} \leq 500, &\dots, s_{72} \leq 150 \\
@@ -363,6 +367,7 @@ s_{16} \leq 500, s_{26} \leq 500, &\dots, s_{76} \leq 60
 ```
 
 Another easy one is ensuring that we have a stock of 50 of each product at the end, which we can do via
+
 ```{math}
 :label: p1l5:production_storage
 h_{16}=\dots=h_{76} = 50.
@@ -371,16 +376,20 @@ h_{16}=\dots=h_{76} = 50.
 To model the amount of production, recall that the processes can use machines in any order.
 This means that we can calculate the availability of each machine for every month in hours, and add a constraints to ensure they are not exceeded.
 For example, our factory has four grinders, which multiplied with 24 days a month, 2 shifts a day and 8 hours a shift gives
+
 ```{math}
 4\times 24 \times 2 \times 8 = 1536
 ```
+
 hours available per month.
-However, according to the maintenance schedule, in January and May we will have access to only three grinders, meaning the availability is
+However, according to the maintenance schedule, in January and May we will have access to only three grinders, meaning the availability for these months is
+
 ```{math}
 3\times 24\times 2\times 8 = 1152
 ```
-hours instead.
-Thus we can write the constraints
+
+hours instead. Thus we can write the constraints
+
 ```{math}
 0.5m_{11}+0.7m_{21}+0.3m_{51}+0.2m_{61}+0.5m_{71}\leq 1152 \\
 0.5m_{12}+0.7m_{22}+0.3m_{52}+0.2m_{62}+0.5m_{72}\leq 1536 \\
@@ -389,9 +398,11 @@ Thus we can write the constraints
 0.5m_{15}+0.7m_{25}+0.3m_{55}+0.2m_{65}+0.5m_{75}\leq 1152 \\
 0.5m_{16}+0.7m_{26}+0.3m_{56}+0.2m_{66}+0.5m_{76}\leq 1536
 ```
+
 for the grinders.
 
 Repeating this for the other machines, we obtain
+
 ```{math}
 0.1m_{11} + 0.2m_{21} + 0.3m_{41} + 0.6m_{61} \leq 768 \\
 0.1m_{12} + 0.2m_{22} + 0.3m_{42} + 0.6m_{62} \leq 768 \\
@@ -400,7 +411,9 @@ Repeating this for the other machines, we obtain
 0.1m_{15} + 0.2m_{25} + 0.3m_{45} + 0.6m_{65} \leq 384 \\
 0.1m_{16} + 0.2m_{26} + 0.3m_{46} + 0.6m_{66} \leq 768
 ```
+
 for the vertical drills,
+
 ```{math}
 0.2m_{11} + 0.8m_{31} + 0.6m_{71} &\leq 1152 \\
 0.2m_{12} + 0.8m_{32} + 0.6m_{72} &\leq 384 \\
@@ -409,7 +422,9 @@ for the vertical drills,
 0.2m_{15} + 0.8m_{35} + 0.6m_{75} &\leq 1152 \\
 0.2m_{16} + 0.8m_{36} + 0.6m_{76} &\leq 768
 ```
+
 for the horizontal drills,
+
 ```{math}
 0.05m_{11} + 0.03m_{21} + 0.07m_{41} + 0.1m_{51} + 0.08m_{71} &\leq 384 \\
 0.05m_{12} + 0.03m_{22} + 0.07m_{42} + 0.1m_{52} + 0.08m_{72} &\leq 384 \\
@@ -418,7 +433,9 @@ for the horizontal drills,
 0.05m_{15} + 0.03m_{25} + 0.07m_{45} + 0.1m_{55} + 0.08m_{75} &\leq 384 \\
 0.05m_{16} + 0.03m_{26} + 0.07m_{46} + 0.1m_{56} + 0.08m_{76} &\leq 384
 ```
+
 for the borer, and
+
 ```{math}
 0.01m_{31} + 0.05m_{51} + 0.05m_{71} &\leq 384 \\
 0.01m_{32} + 0.05m_{52} + 0.05m_{72} &\leq 384 \\
@@ -427,11 +444,11 @@ for the borer, and
 0.01m_{35} + 0.05m_{55} + 0.05m_{75} &\leq 384 \\
 0.01m_{36} + 0.05m_{56} + 0.05m_{76} &\leq 0
 ```
+
 for the planer.
 
-Lastly, we need to link the manufacturing, holding and selling variables together.
-We can only sell or store what is already available, either freshly manufactured or from the previous month's inventory, which is 0 in the first month. 
-Thus for Product 1
+Lastly, we need to link the manufacturing, holding and selling variables together. We can only sell or store what is already available, either freshly manufactured or from the previous month's inventory, which is 0 in the first month. Thus for Product 1, we have that
+
 ```{math}
 m_{11}-s_{11}-h_{11} &= 0 \\
 h_{11} + m_{12}-s_{12}-h_{12} &= 0 \\
@@ -440,6 +457,7 @@ h_{13} + m_{14}-s_{14}-h_{14} &= 0 \\
 h_{14} + m_{15}-s_{15}-h_{15} &= 0 \\
 h_{15} + m_{16}-s_{16}-h_{16} &= 0 \\
 ```
+
 and identical constraints govern the other products.
 
 ```{admonition} Do the above constraints look familiar?
