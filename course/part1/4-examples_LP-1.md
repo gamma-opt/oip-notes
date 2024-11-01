@@ -559,11 +559,16 @@ In this problem, we are searching for a minimum cost distribution routing from t
 More specifically, there are four depots where we can store our product: in Turku, Tampere, Kuopio and Oulu.
 In addition, we sell the product to six customers C1 to C6, who can be supplied from either a factory or a depot.
 
+```{figure} ../figures/distribution.drawio.svg
+:name: fig:distribution
+Illustration of the distribution problem.
+```
+
 The costs associated with the distribution of the products are given in {numref}`p1l5:distibution_costs`.
 
 ```{table} Distribution costs (in € per tons delivered)
 :name: p1l5:distibution_costs
-|             | **Helsinki factory** | **Jväskylä factory** | **Turku depot** | **Tampere depot** | **Kuopio depot** | **Oulu depot** |
+|             | **Helsinki factory** | **Jyväskylä factory** | **Turku depot** | **Tampere depot** | **Kuopio depot** | **Oulu depot** |
 |:-----------:|----------------------|----------------------|-----------------|-------------------|------------------|----------------|
 |   _Depots_  |                      |                      |                 |                   |                  |                |
 |  **Turku**  | 0.5                  | -                    |                 |                   |                  |                |
@@ -581,7 +586,7 @@ The costs associated with the distribution of the products are given in {numref}
 
 Each factory has a monthly supply capacity:
 - Helsinki: 150000 tons
-- Jväskylä: 200000 tons
+- Jyväskylä: 200000 tons
 
 Each depot has a monthly throughput limit:
 - Turku: 70000 tons
