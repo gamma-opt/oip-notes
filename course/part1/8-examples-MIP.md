@@ -315,7 +315,7 @@ For the case of grinders as an example, instead of what we had before
 ```
 we now have a uniform number of available hours minus maintenance
 ```{math}
-0.5m_{1j}+0.7m_{2j}+0.3m_{5j}+0.2m_{6j}+0.5m_{7j}\leq 1536 -384\d_{1,j},
+0.5m_{1j}+0.7m_{2j}+0.3m_{5j}+0.2m_{6j}+0.5m_{7j}\leq 1536 -384 d_{1,j},
 ```
 and similarly for the remaining machine types.
 
