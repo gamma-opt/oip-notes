@@ -248,6 +248,8 @@ For example, when building some sort of a network like an electrical grid or a c
 4. Output $E'$ 
 ```
 
+It can be proven that {prf:ref}`kruskal` is optimal, the MSTs outputted are minimal, but the proof is not within the scope of this course.
+But we can see it in action.
 Suppose for example we would like to obtain the MST for the below nodes.
 
 % TODO consider changing this example to cities in Finland

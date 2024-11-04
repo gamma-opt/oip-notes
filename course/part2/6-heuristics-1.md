@@ -20,11 +20,9 @@ kernelspec:
 ## Solution construction v. improvement
 Many heuristics fall under a _constructive_ versus _perturbative_ search duality.
 In constructive search, algorithms make up solutions by iteratively building up one.
-A widely used example is _greedy_ approaches where the algorithm at each iteration selects the smallest cost or largest value addition.
+A widely used example is _greedy_ approaches where the algorithm at each iteration selects the smallest cost or largest value addition. For example, Kruskal's algorithm given in {prf:ref}`kruskal` is a greedy algorithm, because at every iteration the minimum weight edge (that doesn't introduce cycles).
 
-Make reference to previous section about Kruskal's being greedy, but more often than not greedy approaches don't yield optimal solutions.
-
-For TSP, we can write a greedy algorithm as
+For TSP, we can devise a similarly greedy algorithm as follows.
 ```{prf:algorithm} Greedy Traveling Salesperson Problem Algorithm
 :label: greedy_tsp
 **Inputs:** vertices and a distance matrix
@@ -34,12 +32,14 @@ For TSP, we can write a greedy algorithm as
 3. Add the initial vertex to our route to complete the path
 ```
 
-Greedy approaches are popular ...
-- easy to conceive
-- very efficient
-- sometimes optimal
+Greedy approaches are popular because
+- they are easy to conceive and implement, since they involve taking the currently maximal/minimal step, and
+- often more efficient than alternative algorithms, since they don't need to compute the globally best iteration.
 
-Other constructive heuristics? (different problem?)
+In addition, for some problems like MSTs, greedy approaches can even be optimal.
+However, this is more often an exception rather than the rule
+
+In perturbative search, instead of building up a solution, the algorithm starts with some solution and iteratively tweaks it in order to get closer to an optimum.
 
 Perturbative search
 -- introduce
@@ -60,7 +60,55 @@ Something like both greedy and local search will accept choices that improve imm
 
 ### Bisection and variants (univariate)
 
-### Nelder-Mead? (multi-dimensional)
+Suppose we have a univariate function $f$ and an interval $[a,c]$ that we know contains some local minimum $x^*$.
+Now, suppose that this function is _unimodal_, which means that 
+- $x^*$ is the unique minimum of $f$, 
+- $f$ is monotonically decreasing for $x\leq x^*$, and
+- $f$ is monotonically increasing for $x\geq x^*$.
+
+We can infer that all convex functions are unimodal.
+In addition, for differentiable functions, if we are sufficiently close to a local minimum, we can consider that interval as unimodal as well.
+However, unimodality is clearly a more general property than convexity and differentiability.
+Here, we present some methods for minimizing unimodal intervals. These methods can of course be used in any interval, but then there may be no guarantees on finding the best optimum.
+
+The most basic one is _ternary search_, where we continually pick two points within the interval.
+
+```{code-cell}
+function ternary_search(f, a, c; eps=1e-2)
+    while abs(c-a) > eps
+        b1, b2 = pick_two_points(a, c)
+        yb1, yb2 = f(b1), f(b2)
+        if yb1 < yb2
+            c = b2
+        else
+            a = b1
+        end
+    end
+
+    return  (a+c)/2
+end
+```
+
+To see what is happening here, consider the points $b_1$ and $b_2$.
+- If $f(b_1) < f(b_2)$, then it must be the case that $f$ is increasing for $x>b_2$, thus we don't need to look there and can shorten our interval to $[a,b_2]$.
+- If $f(b_1) > f(b_2)$, we have the symmetrical result where $f$ must be decreasing for $x<b_1$, so we shorten the interval to $[b_1,c]$.
+- It may be possible that $f(b_1)=f(b_2)$, in which case the minimum must be in between them, hence we can update the interval to be $[b_1,b_2]$, by adding another case to the if statement.
+
+% TODO: Add graph illustration for the above
+
+An important aspect of how ternary search behaves is dependant on how the two points are selected.
+
+One option is to pick them at equal intervals, which guaranteed removing one-third of the interval.
+% TODO Add illustration.
+
+We could also pick both points around the center to approximately halve our interval.
+% TODO Add illustration
+
+Where to go from here?
+- Hard limit on function evaluations -> Fibonacci -> Limit -> Golden section
+- Less function evaluations (without limit)/efficiency -> Dichotomous search -> Equal spacing -> Golden section
+
+### Nelder-Mead (multi-dimensional)
 
 Nelder-Mead is a derivative-free method to find an optimum of a function.
 In absence of derivative information, Nelder-Mead makes use of only function evaluations and an update heuristic, making it simple and flexible for use in many settings, but unable to provide any optimality guarantees.
