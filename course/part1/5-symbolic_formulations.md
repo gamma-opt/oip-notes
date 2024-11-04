@@ -189,11 +189,12 @@ using JuMP, HiGHS, Parameters
 ```
 
 Since this is a larger problem than what we have seen before, it may be worth being more principled about how we write the code.
-For example, for this problem, we will first solve the instance described in {numre}`p1l5:food`, then randomly generate a larger instance of the problem to solve.
+For example, for this problem, we will first solve the instance described in {numref}`p1l5:food`, then randomly generate a larger instance of the problem to solve.
 We will write our code in a way so that it will work for both (and any other) instances of the problem.
 
-```{admonition}
-:class: seealso, dropdown
+```{seealso}
+:class: dropdown
+
 Some design patterns to make this process easy and robust is described [in this JuMP tutorial](https://jump.dev/JuMP.jl/stable/tutorials/getting_started/design_patterns_for_larger_models/).
 One pattern we make use is to declare a data structure for the parameters.
 ```
