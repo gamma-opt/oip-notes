@@ -127,7 +127,7 @@ which is the familiar big-M method and its counterpart, where $\epsilon > 0$ is 
 
 ```{math}
 u_{ij} &\leq 200 d_{ij} \\
-u_{ij} &\geq 20 d_{ij}/
+u_{ij} &\geq 20 d_{ij}
 ```
 
 Here if $d_{ij}=1$, then $u_{ij}$ cannot exceed 200, but need at least 20. If $d_{ij}=0$, then both right-hand sides are zero, which forces $u_{ij}$ to be zero. Repeating this for every oil and month gives us one of the additional conditions we want like to impose.
