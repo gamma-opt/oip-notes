@@ -50,7 +50,6 @@ Note the symbols and the (code) variable names in the above table. In writing ma
 We adopt the convention of using **capital letters** for symbols referring to **parameters** and **lowercase** letters for symbol representing **decision variables**. In the code, we use the original symbol to represent decision variables and descriptive names to represent parameters. This are personal choices, with no convention firmly established. 
 ```
 
-
 Given the definitions in {numref}`production_variables`, the statement of the symbolic formulation for the example in {numref}`p1l5:production` is given by
 
 ```{math}
@@ -135,6 +134,7 @@ The objective is to maximise profit whilst minimising holding costs.
 ```
 
 We have a couple of constraints that must be implemented. The first represents meeting the target inventory at the end of June (period 6).
+
 ```{code-cell}
 :tags: ["remove-output"]
 

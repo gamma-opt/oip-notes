@@ -13,25 +13,23 @@ kernelspec:
   name: julia-1.10
 ---
 
-# MIP examples
+# Mathematical programming models: (mixed-)integer examples
 
-In this lecture, we expand on the paradigm of (mixed-)integer programming, first by introducing the famous _Travelling Salesperson Problem_, then expanding previous problems from [](4-examples_LP-1.md) to those that will use this paradigm.
+In this lecture, we develop further the notion of modelling problem using integer-valued decision variables. When a model is sucht that both continuous and integer variables are present, we say that it is a mixed-integer programming (MIP) model. 
+
+First, we start by introducing the famous **Travelling Salesperson Problem**, which can be formulated as an integer programming model. Then we expand some of our previous examples from the previous lectures, such that they include additional decisions that can be modelled using integer variables.
 
 ## Travelling Salesperson Problem
 
-The travelling salesperson problem (TSP) is one of the most famous combinatorial optimisation problems, perhaps due to its interesting mix os simplicity while being computationally challenging.
-Assume that we must visit a collection of {math}`n` cities at most once, and return to our initial point, forming a so-called _tour_. When travelling from city {math}`i` to a city {math}`j`, we incur in the cost {math}`C_{ij}`, representing, for example, distance or time. 
-Our objective is to minimise the total cost of our tour.
+The travelling salesperson problem (TSP) is one of the most famous combinatorial optimisation problems, perhaps due to its interesting mix os simplicity while being computationally challenging. Assume that we must visit a collection of {math}`n` cities at most once, and return to our initial point, forming a so-called **tour**. When travelling from city {math}`i` to a city {math}`j`, we incur in the cost {math}`C_{ij}`, representing, for example, distance or travel time. Our objective is to minimise the total cost of our tour.
 Notice that this is equivalent to finding the minimal cost permutation of {math}`n-1` cities, discarding the city which represents our starting and end point.
 
 ```{figure} ../figures/random_graph.svg
 :name: random_graph
 :align: center
 
-An example collection of cities (or points) for which we'd like to find the minimum cost tour for.
+An example collection of cities (or points) for which we would like to find the minimum cost tour for.
 ```
-
-% TODO: Add interactive visualization? or just solved graph at the end?
 
 To pose the problem as an integer programming model, let us define {math}`x_{ij}=1` if city {math}`j` is visited directly after city {math}`i`, and {math}`x_{ij}=0` otherwise.
 Let {math}`N=\{1,\dots,n\}` be the set of cities.
@@ -45,13 +43,11 @@ A naive model for the travelling salesperson problem would be
 \mini_{x} &\sum_{i\in N}\sum_{j\in N} C_{ij}x_{ij} \\
 \st &\sum_{j\in N\setminus\{i\}}x_{ij}=1,~\forall i\in N \\
 &\sum_{i\in N\setminus\{j\}} x_{ij}=1,~\forall j\in N \\
-&x_{ij}\in\{0,1\},~\forall i,\forall j\in N : i\neq j
+&x_{ij}\in\{0,1\},~\forall i,\forall j\in N : i\neq j.
 \end{align*}
 ```
 
-However, this formulation has an issue.
-Although it can guarantee that all cities are only visited once, it cannot enforce an important feature of the problem which is that the tour cannot present disconnections, i.e., contain sub-tours.
-In other words, the salesperson must physically visit from city to city in the tour, and cannot "teleport" from one city to another.
+However, this formulation has an issue. Although it can guarantee that all cities are only visited once, it cannot enforce an important feature of the problem which is that the tour cannot present disconnections, i.e., contain **sub-tours**. In other words, the salesperson must physically visit from city to city in the tour, and cannot "teleport" from one city to another.
 
 ```{figure} ../figures/tsp_subtours.svg
 :name: subtours
@@ -60,125 +56,148 @@ In other words, the salesperson must physically visit from city to city in the t
 A feasible solution for the naive TSP model. Notice the two sub-tours formed.
 ```
 
-In order to prevent sub-tours, we must include constraints that can enforce the full connectivity of the tour.
-There are mainly two types of such constraints.
-The first is called _cut-set constraints_ and is defined as
+In order to prevent sub-tours, we must include constraints that can enforce the full connectivity of the tour. There are mainly two types of such constraints.
+The first is called **cut-set constraints** and is defined as
+
 ```{math}
 \sum_{i\in S}\sum_{j\in N\setminus S} x_{ij}\geq 1,~\forall S\subset N, 2\leq |S|\leq n-1.
 ```
 
 The cut-set constraints act by guaranteeing that among any subset of nodes {math}`S \subseteq N` there is always at least one arc {math}`(i,j)` connecting one of the nodes in {math}`S` and a node not in {math}`S`.
 
-An alternative type of constraint is called _sub-tour elimination_ constraint and is of the form
+An alternative type of constraint is called **sub-tour elimination** constraint and is of the form
+
 ```{math}
 \sum_{i\in S}\sum_{j\in S}x_{ij}\leq |S|-1,~\forall S\subset N,2\leq |S|\leq n-1.
 ```
 
 Differently from the cut-set constraints, the sub-tour elimination constraints prevent the cardinality of the nodes in each subset from matching the cardinality of arcs within the same subset.
 
-There are some differences between these two constraints and, typically cut-set constraints are preferred for being stronger.
-In any case, either of them suffers from the same problem: the number of such constraints quickly becomes computationally prohibitive as the number of nodes increases. 
-This is because one would have to generate a constraint to each possible node subset combination from sizes 2 to n − 1.
+There are some differences between these two constraints and, typically cut-set constraints are preferred for being more effective from a computational standpoint. In any case, either of them suffers from the same problem: the number of such constraints quickly becomes **computationally prohibitive** as the number of nodes increases. This is because one would have to generate a constraint to each possible node subset combination from sizes 2 to n − 1.
 
-A possible remedy to this consists of relying on delayed constraint generation. 
-In this case, one can start from the naive formulation TSP and from the solution, observe whether there are any sub-tours formed.
-That being the case, only the constraints eliminating the observed sub-tours need to be generated, and the problem can be warm-started.
-This procedure typically terminates far earlier than having all of the possible cut-set or sub-tour elimination constraints generated.
+A possible remedy to this consists of relying on delayed constraint generation. In this case, one can start from the naive formulation TSP and from the solution, observe whether there are any sub-tours formed. That being the case, only the constraints eliminating the observed sub-tours need to be generated, and the problem can be warm-started. This procedure typically terminates far earlier than having all of the possible cut-set or sub-tour elimination constraints generated.
 
 ```{figure} ../figures/tsp_feasible.svg
 :name: feasible
 :align: center
 
-A feasible solution without subtours.
+A feasible solution without sub-tours.
 ```
 
-## Food manufacture 2
+% TODO: a JuMP implementation of the TSP with perhaps a few rounds of cuts to generate a valid solution. We have an example like that in LinOpt if needed.
 
-Recall the problem {ref}`p1l5:food`.
-Suppose we want to add some additional conditions on the problem:
-- The food may never be made up of more than three oils in any month.
+
+## Revisiting the food manufacture problem
+
+Recall the  {ref}`p1l5:food` problem. Suppose we want to add some additional conditions on the problem:
+
+- The food produced may never be made up of more than three oils in any month.
 - If an oil is used in a month, at least 20 tons must be used.
 - If either of VEG 1 or VEG 2 are used in a month, then OIL 3 must also be used.
 
-These conditions are not unreasonable, often it may be desirable to not worry about handling too many ingredients or too small amounts.
-Alternatively, some ingredients may interact with each other in certain ways, for example causing an undesirable chemical reaction, leading to us wanting to impose logical conditions in the model.
-How do we extend the previous model to take these restrictions into account?
+Conditions of such nature are not uncommon. Often, it is desirable to avoid handling too many ingredients or having them used in too-small amounts. Alternatively, some ingredients may interact with each other in certain ways, for example causing an undesirable chemical reaction, leading to us wanting to impose logical conditions in the model. That said, how can we extend the previous model to take these restrictions into account?
 
 ### Solution
-All the above conditions depend on whether some oil is used in the blend or not.
-This is a true/false condition, thus we need integer variables to model it:
+
+All the above conditions depend on whether some oil is used in the blend or not. This is a true/false condition, thus we need integer variables to model it. For that, let
+
 - $d_{ij}$ - whether or not oil $i$ is used in month $j$.
 
-The value of $d_{ij}$ should be linked to that of $u_{ij}$, which represents the amount of use.
-If $u_{ij}$ is present in the blend, that is it is positive, then $d_{ij}$ should be 1.
-Logically, this is 
+The value of $d_{ij}$ should be linked to that of $u_{ij}$, which represents the amount of use. If $u_{ij}$ is present in the blend, that is it is positive, then $d_{ij}$ should be 1.
+Logically, this can be stated as
+
 ```{math}
-u_{ij} > 0 \iff d_{ij} = 1
+u_{ij} > 0 \iff d_{ij} = 1,
 ```
-which is logically equivalent to
+
+which is equivalent to
+
 ```{math}
-(u_{ij} > 0 \implies d_{ij} = 1) \land (d_{ij} = 1 \implies u_{ij} > 0)
+(u_{ij} > 0 \implies d_{ij} = 1) \land (d_{ij} = 1 \implies u_{ij} > 0).
 ```
+
 We can model this biconditional using the following constraints
+
 ```{math}
 u_{ij} &\leq M d_{ij} \\
-u_{ij} &\geq \epsilon d_{ij}
+u_{ij} &\geq \epsilon d_{ij},
 ```
-which is the familiar big-M method and its counterpart, where $\epsilon$ should be very small. 
-In fact, since we have limits on what nonzero values $u_{ij}$ can take, we can take this a step further.
-Suppose $i$ is a vegetable oil, so we need it to be at most 200 but at least 20.
-Then we can use
+
+which is the familiar big-M method and its counterpart, where $\epsilon > 0$ is an arbitrarily small constant. In fact, since we have limits on what nonzero values $u_{ij}$ can take, we can take this a step further. Suppose $i$ is a vegetable oil, so we need it to be at most 200 but at least 20. These conditions can be modelled as 
+
 ```{math}
 u_{ij} &\leq 200 d_{ij} \\
-u_{ij} &\geq 20 d_{ij}
+u_{ij} &\geq 20 d_{ij}/
 ```
-Here if $d_{ij}=1$, then $u_{ij}$ cannot exceed 200, but need at least 20.
-If $d_{ij}=0$, then both right-hand sides are zero, which forces $u_{ij}$ to be zero.
-Repeating this for every oil and month gives us one of the additional conditions we'd like to impose.
 
-With $d_{ij}$ defined and linked to $u_{ij}$, the other conditions are very easy to implement.
-To limit the number of ingredients in a blend to three oils, we can just add
+Here if $d_{ij}=1$, then $u_{ij}$ cannot exceed 200, but need at least 20. If $d_{ij}=0$, then both right-hand sides are zero, which forces $u_{ij}$ to be zero. Repeating this for every oil and month gives us one of the additional conditions we want like to impose.
+
+With $d_{ij}$ defined and linked to $u_{ij}$, the other conditions are straightforward to implement. To limit the number of ingredients in a blend to three oils, we can just include the constraint
+
 ```{math}
 \sum_{i}d_{ij} \leq 3, \forall j \in J.
 ```
 
-The last condition logically is
+Finally, the last condition can be logically stated as
+
 ```{math}
-(d_{1j} \lor d_{2j}) \implies d_{5j}
+(d_{1j} \lor d_{2j}) \implies d_{5j},
 ```
-which we can rewrite as 
+
+which we can rewrite as
+
 ```{math}
 (d_{1j} + d_{2j} \geq 1) \implies d_{5j} = 1
 ```
-and
-```{math}
-(d_{1j} + d_{2j} < 1) \lor d_{5j} = 1
-```
-In words, if d_{1j} and d_{2j} are less than 1, i.e. they are 0, we don't care about d_{5j}, the statement is already satisfied.
-If one or both of d_{1j} or d_{2j} are 1, then d_{5j} must be 1.
-What would this look as a mathematical equation?
 
-Let's focus on the first case first.
-On one hand, we have 0, since d_{1j} and d_{2j} are not 1.
-On the other hand, we don't care about d_{5j}, which can only be 0 or 1.
-Thus we have something that must look like
+and
+
+```{math}
+(d_{1j} + d_{2j} < 1) \lor d_{5j} = 1.
+```
+
+In words, the first statement says that if one or both of $d_{1j}$ or $d_{2j}$ are 1, then $d_{5j}$ must be 1. The second statement says that if $d_{1j}$ and $d_{2j}$ are less than 1, i.e., they are 0, the statement is already satisfied and, as such, there is nothing to be stated regarding the value of $d_{5j}$. This can formulated mathematically as follows.
+
+Let us start with the latter case first. On one hand, assuming that $d_{1j}$ or $d_{2j}$ are not 1, we have that the left-hand side is 1. Thus, we do not care about what value $d_{5j}$ would take, other tha it can be 0 or 1. Thus, we would end up with a mathematical statement such as
+
 ```{math}
 0\leq d_{5j}
 ```
-so that it is satisfiable.
 
-In the second case, we may have 1 or 2 at the left-hand side, but now $d_{5j}$ can only be 1.
-For this to fit into the above form, we have to change it a little bit so that the RHS can satisfy $\leq$
+which is trivially satisfied.
+
+In the former case, we may have that the left-hand side takes value 1 or 2, but now $d_{5j}$ can only be 1. For this to fit into the above form, we have to multiply the right-hand side of the constraint by 2, yielding.
+
 ```{math}
-(1\text{ or } 2) \leq 2d_{5j}.
+(1\text{ or } 2) \leq 2d_{5j},
 ```
 
-This gives the constraint
+which yields the constraint
 ```{math}
 d_{1j} + d_{2j} \leq 2d_{5j}, \forall j \in J.
 ```
 
+````{note}
+Alternatively, one may notice that $(d_{1j} + d_{2j} \geq 1) \implies d_{5j} = 1$ may be stated as 
+
+```{math}
+(d_{1j}  \geq 1 \implies d_{5j} = 1) \land (d_{2j} \geq 1) \implies d_{5j} = 1)
+```
+
+which can then be represented by the constraints
+
+```{math}
+\begin{align*}
+  d_{1j} \leq d_{5j}, \forall j \in J \\ 
+  d_{2j} \leq d_{5j}, \forall j \in J.
+\end{align*}  
+```
+
+Notice that if we sum the two constraints, we obtain the $d_{1j} + d_{2j} \leq 2d_{5j}, \forall j \in J$. This example illustrates well the fact that seldom there is only one way of modelling problems as mathematical programming models. 
+````
+
 With all the additional constraints ready, we can now solve the problem
+
 ```{code-cell}
 :tags: [remove-cell]
 using JuMP, HiGHS
@@ -234,6 +253,8 @@ optimize!(model)
 @assert is_solved_and_feasible(model)
 ```
 
+% TODO: let's make this a bit more engaging. One idea is to compare it with the previous version. It should yield a worse solution (since it has more constraints)
+
 ```{code-cell}
 println("Objective value: ", objective_value(model))
 ```
@@ -247,13 +268,13 @@ df_b = DataFrame(transpose(value.(b)), oils)
 df_u = DataFrame(transpose(value.(u)), oils)
 df_s = DataFrame(transpose(value.(s)), oils)
 df_p = DataFrame(transpose([value.(p)])..., months)
-println("Purchasing variables")
+println("Amount purchased (variables b)")
 display(df_b)
-println("Using variables")
+println("Amount used (variables u)")
 display(df_u)
-println("Storing variables")
+println("Amount stored (variables s)")
 display(df_s)
-println("Production amount")
+println("Production amount (variables p)")
 display(df_p)
 ```
 

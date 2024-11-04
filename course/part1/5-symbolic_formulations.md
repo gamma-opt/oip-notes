@@ -333,10 +333,12 @@ and other constraints are replicated similarly.
 ````{warning}
 Note that the above function is not perfectly generalized.
 For example, the fact that there are only two types of oil is hard-coded here
+
 ```julia
 @constraint(model, c_processing_veg[j in 1:J], sum(u[begin:n_veg,j]) <= process_limit_veg)
 @constraint(model, c_processing_non[j in 1:J], sum(u[n_veg+1:end,j]) <= process_limit_non)
 ```
+
 along with the use of the parameter `n_veg`. An alternative for a scenario where we have $A$ different types of oil, each containing $a_1,\dots,a_A$ options, repectively, could have been to specify an array of length $A$ that is made up of $a_1,\dots,a_A$.
 
 This level of generalization is sufficient for our demonstration, but remember and follow consistently your assumptions when you are writing models.
