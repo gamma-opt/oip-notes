@@ -21,7 +21,7 @@ First, we start by introducing the famous **Travelling Salesperson Problem**, wh
 
 ## Travelling Salesperson Problem
 
-The travelling salesperson problem (TSP) is one of the most famous combinatorial optimisation problems, perhaps due to its interesting mix os simplicity while being computationally challenging. Assume that we must visit a collection of {math}`n` cities at most once, and return to our initial point, forming a so-called **tour**. When travelling from city {math}`i` to a city {math}`j`, we incur in the cost {math}`C_{ij}`, representing, for example, distance or travel time. Our objective is to minimise the total cost of our tour.
+The travelling salesperson problem (TSP) is one of the most famous combinatorial optimisation problems, perhaps due to its interesting mix of simplicity while being computationally challenging. Assume that we must visit a collection of {math}`n` cities at most once, and return to our initial point, forming a so-called **tour**. When travelling from city {math}`i` to a city {math}`j`, we incur in the cost {math}`C_{ij}`, representing, for example, distance or travel time. Our objective is to minimise the total cost of our tour.
 Notice that this is equivalent to finding the minimal cost permutation of {math}`n-1` cities, discarding the city which represents our starting and end point.
 
 ```{figure} ../figures/random_graph.svg
@@ -37,6 +37,7 @@ We assume that {math}`x_{ii}` is not defined for {math}`i\in N`.
 A naive model for the travelling salesperson problem would be
 
 ```{math}
+:label: tsp_naive
 :nowrap:
 
 \begin{align*}
@@ -84,8 +85,182 @@ A possible remedy to this consists of relying on delayed constraint generation. 
 A feasible solution without sub-tours.
 ```
 
-% TODO: a JuMP implementation of the TSP with perhaps a few rounds of cuts to generate a valid solution. We have an example like that in LinOpt if needed.
+### Code Example
 
+Let's solve a smaller TSP problem in JuMP.
+We can generate an instance of the problem using the following.
+```{code-cell}
+:tags: [remove-output]
+using Random
+
+function generate_distance_matrix(n; random_seed = 1)
+    rng = Random.MersenneTwister(random_seed)
+    X_coord = 100 * rand(rng, n)
+    Y_coord = 100 * rand(rng, n)
+    d = [sqrt((X_coord[i] - X_coord[j])^2 + (Y_coord[i] - Y_coord[j])^2) for i in 1:n, j in 1:n]
+    return d, X_coord, Y_coord
+end
+```
+
+We pick $n=20$.
+```{code-cell}
+:tags: [remove-output]
+n = 20
+d, X_coord, Y_coord = generate_distance_matrix(n)
+```
+```{code-cell}
+:tags: [remove-input]
+using CairoMakie
+fig, ax, plot = scatter(X_coord, Y_coord)
+fig
+```
+
+As a start, we can implement the naive model in {eq}`tsp_naive`.
+```{code-cell}
+using JuMP, HiGHS
+using LinearAlgebra  # for the dot function
+
+function tsp_naive(d, n::Int; silent=false)
+    # Create a model 
+    m = Model(HiGHS.Optimizer)
+    if silent
+      set_silent(m)
+    end
+    
+    # x[i,j] = 1 if we travel from city i to city j, 0 otherwise.
+    @variable(m, x[1:n,1:n], Bin)
+        
+    # Minimize length of tour
+    @objective(m, Min, dot(d,x))
+    
+    # Ignore self arcs: set x[i,i] = 0  
+    @constraint(m, sar[i = 1:n], x[i,i] == 0)
+
+    # We must enter and leave every city exactly once             
+    @constraint(m, ji[i = 1:n], sum(x[j,i] for j = 1:n if j != i) == 1)
+    @constraint(m, ij[i = 1:n], sum(x[i,j] for j = 1:n if j != i) == 1)
+
+    
+    optimize!(m)
+                                
+    cost = objective_value(m)         # Optimal cost (length)
+    sol_x = round.(Int, value.(x))    # Optimal solution vector
+    
+    return m, sol_x, cost
+end;
+```
+
+And use it on our data.
+```{code-cell}
+m_naive, x_naive, cost_naive = tsp_naive(d, n);
+```
+
+The output `x_naive` is a binary matrix indicating for each city what city is next.
+Converting it into a vector makes its use easier.
+Here, the value of each index $i$ gives the next city after city $i$.
+```{code-cell}
+function gettour(x::Matrix{Int}, n::Int)
+    return argmax.(x[i,:] for i in 1:n)
+end
+tour_naive = gettour(x_naive,n)
+```
+
+Now we can plot the optimisation result.
+```{code-cell}
+:tags: [remove-input]
+for i in 1:n
+    lines!(ax, X_coord[[i,tour_naive[i]]], Y_coord[[i,tour_naive[i]]], color = 1, colormap = :tab10, colorrange = (1, 10))
+end
+fig
+```
+
+As expected, this does not look very much like a tour, thus we need to add cut-set constraints.
+To do so, we create the following helper function that follows a given tour, so that we can detect the first cycle and all the cities in it.
+
+```{code-cell}
+function follow_tour(x::Matrix{Int}, n::Int)
+    tour = zeros(Int,n+1)   # Initialize tour vector (n+1 as city 1 appears twice)
+    tour[1] = 1             # Set city 1 as first one in the tour
+    k = 2                   # Index of vector tour[k]
+    i = 1                   # Index of current city 
+    while k <= n + 1        # Find all n+1 tour nodes (city 1 is counted twice)
+        for j = 1:n         
+            if x[i,j] == 1  # Find next city j visited immediately after i
+                tour[k] = j # Set city j as the k:th city in the tour
+                k = k + 1   # Update index k of tour[] vector
+                i = j       # Move to next city
+                break       
+            end
+        end
+    end 
+    return tour             # Return the optimal tour 
+end
+```
+
+The main optimisation loop is the following, where we iteratively solve the model and generate new cut constraints based on the cycle we observe.
+
+```{code-cell}
+using Combinatorics
+
+
+(m_naive, x_naive, cost_naive) = tsp_naive(d, n; silent=true);
+subnodes = []
+count = 0
+stop = 0
+lim = 100
+
+## Perform cuts to break subtours until we got an optimal
+while stop == 0 && count < lim
+
+    S = collect(permutations(subnodes,2))     # Possible connections present in the naive implementation
+    NS = setdiff(1:n,subnodes)                  # Nodes that are still not included in the tour
+
+    ## Cutset constraints
+    if length(S) > 0
+        @constraint(m_naive,sum(m_naive[:x][subnodes[i],NS[j]] for i in 1:length(subnodes), j in 1:length(NS)) >= 1)
+    end
+
+
+    set_silent(m_naive)
+    optimize!(m_naive)
+
+    cost2 = objective_value(m_naive)          # Optimal cost (length)
+    sol_x = round.(Int, value.(m_naive[:x]))     # Optimal solution vector
+
+    tour2 = follow_tour(sol_x,n)            # Get the optimal tour
+    
+    if length(unique(tour2)) < n
+        count = count + 1
+        subtour = tour2[1:2]
+        for city in tour2[3:end]
+            if subtour[end] == subtour[1]
+                break
+            end
+            push!(subtour, city) 
+        end
+        subnodes = unique(tour2);
+    else
+        println("Optimal tour: ", tour2')
+        println("Took $(count) iterations to find the optimal solution.")
+        S = []
+        stop = 1
+    end;
+end;
+```
+
+We can see the evolution of the solution at every iteration.
+
+<video width="800" controls loop autoplay>
+    <source src="../_static/tsp_cuts.mp4" type="video/mp4">
+</video>
+
+We can apply the same algorithm to the data in {numref}`random_graph`, however obtaining a result may take a while.
+{numref}`tsp_cut_incomplete` shows the state of the solution after 150 iterations, but it is difficult to estimate how many more would be needed to obtain a feasible solution.
+
+```{figure} ../figures/tsp_cut_incomplete.svg
+:name: tsp_cut_incomplete
+The cut-set constraint generation algorithm after 150 iterations on data with $n=40$.
+```
 
 ## Revisiting the food manufacture problem
 
