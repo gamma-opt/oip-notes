@@ -227,6 +227,7 @@ The `@with_kw` macros is a Julia trick to prevent us from having to use the synt
 
 This way, we can define only a single, generic function that takes `FoodParams` as inputs, and just change the input for different instances.
 
+(food_manufacture_small)=
 ### Small problem
 
 Now, we are ready to solve the instance discussed in {numref}`p1l5:food`.
@@ -381,8 +382,8 @@ display(df_s)
 println("Production amount (variables p)")
 display(df_p)
 ```
-
-The maximum profit is €107842, with the above distribution plan.
+% &nbsp; is non-breaking space
+The maximum profit is €107&nbsp;843, with the above distribution plan.
 
 In this small problem, we had 12 decision variables (one for each plant-city combination) as well as a non-negativity constraint for each of the variables, 3 constraints to ensure supply is not exceeded, and 4 constraints to ensure demand is met, for a total of 19 constraints. However, with symbolic formulation, we can immediately handle much larger models.
 
