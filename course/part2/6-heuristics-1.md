@@ -37,28 +37,22 @@ Greedy approaches are popular because
 - often more efficient than alternative algorithms, since they don't need to compute the globally best iteration.
 
 In addition, for some problems like MSTs, greedy approaches can even be optimal.
-However, this is more often an exception rather than the rule
+However, this is more often an exception rather than the rule.
 
-In perturbative search, instead of building up a solution, the algorithm starts with some solution and iteratively tweaks it in order to get closer to an optimum.
-
-Perturbative search
--- introduce
--- give tsp example and algorithm
--- give non tsp example? (same for greedy)
--- mention being stuck at local optima
-
-+++
-
-### Exploration v. exploitation
-Something like both greedy and local search will accept choices that improve immediately, which will be suboptimal if one is stuck in a local optimum. There are a number of strategies to try combatting this
-- restarts
-- allowing non-improving steps
-
-+++
+In _perturbative search_, instead of building up a solution, the algorithm starts with some solution and iteratively tweaks it in order to get closer to an optimum.
+What this means may depend a lot on the problem.
+For example, in TSP, swapping the visit order of two cities or changing the order of one city would both be perturbations.
+However, while both these operations will likely change the objective value, there is no reason to think a priori that either perturbation alone will actually improve the objective.
+In addition, if changes are not sufficiently big, e.g. swapping two adjacent cities only, they may be at risk of being stuck in a local optimum.
+There are a few strategies for dealing with such situations.
+For example, one can allow non-improving steps to be accepted after perturbations, which may help escape from the local optima neighborhoods.
+A more general strategy is random restarts where an algorithm may be run again with a different initialisation (or a different seed if randomness is involved) and ultimately selecting the best result out of all the runs.
 
 ## A selection of methods
 
-### Bisection and variants (univariate)
+In this section we present two methods that don't yield exact results, but are widely used in the optimisation practice.
+
+### Line search
 
 Suppose we have a univariate function $f$ and an interval $[a,c]$ that we know contains some local minimum $x^*$.
 Now, suppose that this function is _unimodal_, which means that 
@@ -74,39 +68,108 @@ Here, we present some methods for minimizing unimodal intervals. These methods c
 The most basic one is _ternary search_, where we continually pick two points within the interval.
 
 ```{code-cell}
-function ternary_search(f, a, c; eps=1e-2)
-    while abs(c-a) > eps
-        b1, b2 = pick_two_points(a, c)
-        yb1, yb2 = f(b1), f(b2)
-        if yb1 < yb2
-            c = b2
+:tags: [remove-output]
+function ternary_search(f, a, d; eps=1e-2)
+    while abs(d-a) > eps
+        b, c = pick_two_points(a, d)
+        fb, fc = f(b), f(c)
+        if fb < fc
+            d = c
         else
-            a = b1
+            a = b
         end
     end
-
-    return  (a+c)/2
+    return  (a+d)/2
 end
 ```
 
-To see what is happening here, consider the points $b_1$ and $b_2$.
-- If $f(b_1) < f(b_2)$, then it must be the case that $f$ is increasing for $x>b_2$, thus we don't need to look there and can shorten our interval to $[a,b_2]$.
-- If $f(b_1) > f(b_2)$, we have the symmetrical result where $f$ must be decreasing for $x<b_1$, so we shorten the interval to $[b_1,c]$.
-- It may be possible that $f(b_1)=f(b_2)$, in which case the minimum must be in between them, hence we can update the interval to be $[b_1,b_2]$, by adding another case to the if statement.
+To see what is happening here, consider the points $b$ and $c$.
+- If $f(b) < f(c)$, then it must be the case that $f$ is increasing for $x>c$, thus we don't need to look there and can shorten our interval to $[a,c]$.
+- If $f(b) > f(c)$, we have the symmetrical result where $f$ must be decreasing for $x<b$, so we shorten the interval to $[b,d]$.
+- It may be possible that $f(b)=f(c)$, in which case the minimum must be in between them, hence we can update the interval to be $[b,c]$, by adding another case to the if statement. Since the interval $[b,c]$ is contained in both the above options, this is not strictly necessary.
 
-% TODO: Add graph illustration for the above
+```{figure} ../figures/intervals.svg
+Three possibilities for ternary search.
+```
 
 An important aspect of how ternary search behaves is dependant on how the two points are selected.
-
 One option is to pick them at equal intervals, which guaranteed removing one-third of the interval.
-% TODO Add illustration.
-
 We could also pick both points around the center to approximately halve our interval.
-% TODO Add illustration
 
-Where to go from here?
-- Hard limit on function evaluations -> Fibonacci -> Limit -> Golden section
-- Less function evaluations (without limit)/efficiency -> Dichotomous search -> Equal spacing -> Golden section
+```{figure} ../figures/interval_reduction.svg
+Different midpoints reduce the interval differently.
+```
+
+A related idea is to pick these points so that they can be re-used in the next iteration, as shown in {numref}`golden_reuse`.
+
+```{figure} ../figures/golden.svg
+:name: golden_reuse
+Evaluation points of the golden line search in two iterations. If the interval $[a,d]$ is shortened to $[a,c]$, point $b$ can be reused without needing a new function evaluation.
+```
+
+The question then is how should we pick $b$ and $c$ such that we can make the search most efficient?
+Ideally, the size of the the reduction on the interval should not depend on which way the interval is reduced on.
+More generally, how should we pick points so that no matter which side the interval is shortened to, one of them will be reusable?
+We can derive this mathematically.
+A side-independent reduction means that $[a,c]$ and $[b,d]$ should be of the same length.
+Since $[b,c]$ is shared in these intervals, this implies $[a,b]$ and $[c,d]$ should be of the same length.
+Let
+```{math}
+l = \frac{b-a}{d-a}
+```
+be the ratio of this length to the total distance, and 
+```{math}
+m = \frac{c-b}{d-a}
+```
+be the ratio of the shared middle section $[b,c]$.
+Then it must be by definition that
+```{math}
+\frac{d-b}{d-a} = 1-l
+```
+and by equal reduction of sides
+```{math}
+:label: equal_sides
+m=1-2l.
+```
+
+In addition, reusing points across iterations continuously means we'd like to keep these ratios same in the following iterations.
+Looking at the next iteration, this means that
+```{math}
+:label: same_scale
+\frac{c-b}{c-a} = \frac{m}{1-l} = l
+```
+
+Using equations {eq}`equal_sides` and {eq}`same_scale`, we can solve for $l$
+```{math}
+&\frac{1-2l}{1-l} = l \\
+\implies & l^2-3l+1 = 0 \\
+\implies & l = 1- \varphi^{-1}
+```
+where $\varphi$ is the golden ratio, hence the name of this method _golden section search_.
+
+```{code-cell}
+:tags: [remove-output]
+function golden_section_search(f, a, d; eps=1e-2)
+    l = 1-1/MathConstants.golden
+    b = (d-a)*l + a
+    c = (d-a)*(1-l) + a
+    fb, fc = f(b), f(c)
+    while d-a>eps
+        if fb > fc
+            a = b
+            b, fb = c, fc
+            c = (d-a)*(1-l) + a
+            fc = f(c)
+        else
+            d = c
+            c, fc = b, fb
+            b = (d-a)*l + a
+            fb = f(b)
+        end
+    end
+    return (a-d)/2
+end
+```
 
 ### Nelder-Mead (multi-dimensional)
 
