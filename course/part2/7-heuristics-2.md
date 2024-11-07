@@ -58,6 +58,7 @@ end
 
 In the second phase, the solution is mutated in a neighborhood.
 In this implementation, we remove a randomly selected city and insert it at a random location, but one can imagine other descriptions of neighborhood and appropriate mutations.
+% TODO change to use lin-kernighan?
 ```{code-cell}
 function second_phase(solution, n, cost_f, n_iter)
     best = solution
