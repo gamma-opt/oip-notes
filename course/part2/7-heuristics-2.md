@@ -40,16 +40,15 @@ If $a=1$, then `rcl` will contain every candidate, thus solution construction wi
 ```{code-cell}
 function first_phase(d, n, a)
     solution = [1]
-    for _ in 1:n
+    for _ in 2:n
         curr_city = solution[end]
-        costs = d[curr_city, :]
+        candidates = filter(x->!(x[1] in solution), collect(zip(1:n, d[curr_city, :])))
 
-        c_max = max(costs)
-        costs[curr_city] = Inf
-        c_min = min(costs)
+        c_max = maximum(x->x[2], candidates)
+        c_min = minimum(x->x[2], candidates)
         cutoff = c_min + a*(c_max - c_min)
         
-        rcl = [i for i in 1:n if costs[i] <= cutoff]
+        rcl = [i for (i,c) in candidates if c <= cutoff]
         next_city = rand(rcl)
         push!(solution, next_city)
     end
@@ -95,7 +94,7 @@ function tsp_grasp(d, a, terminate, second_phase_iters=100)
 
     while true
         sol = first_phase(d, n, a)
-        sol = second_phase(sol, n, cost_f, n_iters=second_phase_iters)
+        sol = second_phase(sol, n, cost_f, second_phase_iters)
 
         cost = cost_f(sol)
         if cost < best_cost
@@ -120,7 +119,7 @@ end
 
 IterationCounter() = IterationCounter(0, 100)
 
-function (c::IterationCounter)()
+function (c::IterationCounter)(_)
     if c.iters > c.limit
       return true
     end
@@ -129,7 +128,30 @@ function (c::IterationCounter)()
 end
 ```
 
-% TODO Run code on example
+Need better local search logic probably
+```{code-cell}
+using Random, CairoMakie
+
+function generate_distance_matrix(n; random_seed = 1)
+    rng = Random.MersenneTwister(random_seed)
+    X_coord = 100 * rand(rng, n)
+    Y_coord = 100 * rand(rng, n)
+    d = [sqrt((X_coord[i] - X_coord[j])^2 + (Y_coord[i] - Y_coord[j])^2) for i in 1:n, j in 1:n]
+    return d, X_coord, Y_coord
+end
+
+n = 40
+d, X_coord, Y_coord = generate_distance_matrix(n)
+
+count = IterationCounter(0, 1000)
+path = tsp_grasp(d, .3, count, 1000)
+
+fig, ax, plot = scatter(X_coord, Y_coord)
+lines!(ax, X_coord[path], Y_coord[path], color = 1, colormap = :tab10, colorrange = (1, 10))  # reorder vector using permutation
+endpoints = path[[1,n]]
+lines!(ax, X_coord[endpoints], Y_coord[endpoints], color = 1, colormap = :tab10, colorrange = (1, 10))  # connect the cycle
+fig
+```
 
 ### simulated annealing
 
