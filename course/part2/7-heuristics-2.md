@@ -15,11 +15,125 @@ kernelspec:
 
 # Title
 
+% TODO Add some introduction
+% In this section we'll show some algorithms... We implement them here but you can use a library like metaheuristics...
+
 ## Randomized methods
 
-### GRASP 
+### GRASP
+
+% TODO Check: 
+% - just call this a metaheuristic
+% - local search or perturbative
+_Greedy randomised adaptive search procedure_ (GRASP) is an algorithm that combines greediness with local search techniques.
+This is achieved by repeating an iteration consisting of two phasesn until some termination criterion is satisfied.
+In the first phase, a new solution is constructed, similar to that in a greedy approach.
+However, instead of picking the best candidate, all candidates above a goodness threshold are collected, forming the _restricted candidate list_, from which one is chosen randomly.
+Once a solution is formed, the algoritm moves to the second phase, where neighboring solutions are explored for better performers.
+
+As an example, we can implement a GRASP algorithm for TSP.
+
+In the first phase, we construct a solution using a distance matrix $d$ and some cutoff strategy.
+In the below code, this is achieved by obtaining a range of the candidate costs and allowing only a fraction of this range, which is controlled by $a\in [0,1]$.
+If $a=0$, then `cutoff = c_min` and thus solution construction will be purely greedy.
+If $a=1$, then `rcl` will contain every candidate, thus solution construction will be entirely random.
+```{code-cell}
+function first_phase(d, n, a)
+    solution = [1]
+    for _ in 1:n
+        curr_city = solution[end]
+        costs = d[curr_city, :]
+
+        c_max = max(costs)
+        costs[curr_city] = Inf
+        c_min = min(costs)
+        cutoff = c_min + a*(c_max - c_min)
+        
+        rcl = [i for i in 1:n if costs[i] <= cutoff]
+        next_city = rand(rcl)
+        push!(solution, next_city)
+    end
+    return solution
+end
+```
+
+In the second phase, the solution is mutated in a neighborhood.
+In this implementation, we remove a randomly selected city and insert it at a random location, but one can imagine other descriptions of neighborhood and appropriate mutations.
+```{code-cell}
+function second_phase(solution, n, cost_f, n_iter)
+    best = solution
+    best_cost = cost_f(solution)
+    for _ in 1:n_iter
+        neighbor = copy(solution)
+        removed = popat!(neighbor, rand(1:n))
+        insert!(neighbor, rand(1:n), removed)
+        cost = cost_f(neighbor)
+        if cost < best_cost
+            best = neighbor
+            best_cost = cost
+        end
+    end
+    return best
+end
+```
+
+Putting the two phases together we get the GRASP algorithm.
+```{code-cell}
+function tsp_grasp(d, a, terminate, second_phase_iters=100)
+    n = size(d)[1]
+    best = nothing
+    best_cost = Inf
+
+    function cost_f(solution)
+        c = 0
+        for i in 2:n
+            c += d[solution[i-1],solution[i]]
+        end
+        c += d[solution[1], solution[n]]
+        return c
+    end
+
+    while true
+        sol = first_phase(d, n, a)
+        sol = second_phase(sol, n, cost_f, n_iters=second_phase_iters)
+
+        cost = cost_f(sol)
+        if cost < best_cost
+            best_cost = cost
+            best = sol
+        end
+
+        if terminate(sol)
+          return best
+        end
+    end
+end
+```
+
+In the code above, the termination criterion implementation is left to the user, it could be anything from a simple iteration count to something more involved looking at improvements across iterations.
+A simple example is provided by the following.
+```{code-cell}
+mutable struct IterationCounter
+    iters::Int
+    limit::Int
+end
+
+IterationCounter() = IterationCounter(0, 100)
+
+function (c::IterationCounter)()
+    if c.iters > c.limit
+      return true
+    end
+    c.iters += 1
+    return false
+end
+```
+
+% TODO Run code on example
 
 ### simulated annealing
+
+
 
 ## Metaheuristics
 
