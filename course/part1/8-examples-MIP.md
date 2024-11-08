@@ -15,7 +15,7 @@ kernelspec:
 
 # Mathematical programming models: (mixed-)integer examples
 
-In this lecture, we develop further the notion of modelling problem using integer-valued decision variables. When a model is sucht that both continuous and integer variables are present, we say that it is a mixed-integer programming (MIP) model. 
+In this lecture, we develop further the notion of modelling problem using integer-valued decision variables. When a model is such that both continuous and integer variables are present, we say that it is a mixed-integer programming (MIP) model.
 
 First, we start by introducing the famous **Travelling Salesperson Problem**, which can be formulated as an integer programming model. Then we expand some of our previous examples from the previous lectures, such that they include additional decisions that can be modelled using integer variables.
 
@@ -74,9 +74,9 @@ An alternative type of constraint is called **sub-tour elimination** constraint 
 
 Differently from the cut-set constraints, the sub-tour elimination constraints prevent the cardinality of the nodes in each subset from matching the cardinality of arcs within the same subset.
 
-There are some differences between these two constraints and, typically cut-set constraints are preferred for being more effective from a computational standpoint. In any case, either of them suffers from the same problem: the number of such constraints quickly becomes **computationally prohibitive** as the number of nodes increases. This is because one would have to generate a constraint to each possible node subset combination from sizes 2 to n − 1.
+There are some differences between these two constraints and, typically cut-set constraints are preferred for being more effective from a computational standpoint. In any case, either of them suffers from the same problem: the number of such constraints quickly becomes **computationally prohibitive** as the number of nodes increases. This is because one would have to generate a constraint to each possible node subset combination from sizes 2 to $n − 1$.
 
-A possible remedy to this consists of relying on delayed constraint generation. In this case, one can start from the naive formulation TSP and from the solution, observe whether there are any sub-tours formed. That being the case, only the constraints eliminating the observed sub-tours need to be generated, and the problem can be warm-started. This procedure typically terminates far earlier than having all of the possible cut-set or sub-tour elimination constraints generated.
+A possible remedy to this consists of relying on **delayed constraint generation**. In this case, one can start from the naive formulation TSP and from the solution, observe whether there are any sub-tours formed. That being the case, only the constraints eliminating the observed sub-tours need to be generated, and the problem can be warm-started. This procedure typically terminates far earlier than having all of the possible cut-set or sub-tour elimination constraints generated.
 
 ```{figure} ../figures/tsp_feasible.svg
 :name: feasible
@@ -89,6 +89,7 @@ A feasible solution without sub-tours.
 
 Let's solve a smaller TSP problem in JuMP.
 We can generate an instance of the problem using the following.
+
 ```{code-cell}
 :tags: [remove-output]
 using Random
@@ -213,21 +214,20 @@ lim = 100
 while stop == 0 && count < lim
 
     S = collect(permutations(subnodes,2))     # Possible connections present in the naive implementation
-    NS = setdiff(1:n,subnodes)                  # Nodes that are still not included in the tour
+    NS = setdiff(1:n,subnodes)                # Nodes that are still not included in the tour
 
     ## Cutset constraints
     if length(S) > 0
         @constraint(m_naive,sum(m_naive[:x][subnodes[i],NS[j]] for i in 1:length(subnodes), j in 1:length(NS)) >= 1)
     end
 
-
     set_silent(m_naive)
     optimize!(m_naive)
 
     cost2 = objective_value(m_naive)          # Optimal cost (length)
-    sol_x = round.(Int, value.(m_naive[:x]))     # Optimal solution vector
+    sol_x = round.(Int, value.(m_naive[:x]))  # Optimal solution vector
 
-    tour2 = follow_tour(sol_x,n)            # Get the optimal tour
+    tour2 = follow_tour(sol_x,n)              # Get the optimal tour
     
     if length(unique(tour2)) < n
         count = count + 1
@@ -276,10 +276,9 @@ Conditions of such nature are not uncommon. Often, it is desirable to avoid hand
 
 All the above conditions depend on whether some oil is used in the blend or not. This is a true/false condition, thus we need integer variables to model it. For that, let
 
-- $d_{ij}$ - whether or not oil $i$ is used in month $j$.
+- $d_{ij}$ - takes value 1 if oil $i$ is used in month $j$, and 0 otherwise.
 
-The value of $d_{ij}$ should be linked to that of $u_{ij}$, which represents the amount of use. If $u_{ij}$ is present in the blend, that is it is positive, then $d_{ij}$ should be 1.
-Logically, this can be stated as
+The value of $d_{ij}$ should be linked to that of $u_{ij}$, which represents the amount of use. If $u_{ij}$ is present in the blend (i.e., $u_{ij}>0$), then $d_{ij}$ should be 1. Logically, this can be stated as
 
 ```{math}
 u_{ij} > 0 \iff d_{ij} = 1,
@@ -302,10 +301,10 @@ which is the familiar big-M method and its counterpart, where $\epsilon > 0$ is 
 
 ```{math}
 u_{ij} &\leq 200 d_{ij} \\
-u_{ij} &\geq 20 d_{ij}
+u_{ij} &\geq 20 d_{ij}.
 ```
 
-Here if $d_{ij}=1$, then $u_{ij}$ cannot exceed 200, but need at least 20. If $d_{ij}=0$, then both right-hand sides are zero, which forces $u_{ij}$ to be zero. Repeating this for every oil and month gives us one of the additional conditions we want like to impose.
+Here, if $d_{ij}=1$, then $u_{ij}$ cannot exceed 200, but need at least 20. If $d_{ij}=0$, then both right-hand sides are zero, which forces $u_{ij}$ to be zero. Repeating this for every oil and month gives us one of the additional conditions we want to impose.
 
 With $d_{ij}$ defined and linked to $u_{ij}$, the other conditions are straightforward to implement. To limit the number of ingredients in a blend to three oils, we can just include the constraint
 
@@ -333,7 +332,7 @@ and
 
 In words, the first statement says that if one or both of $d_{1j}$ or $d_{2j}$ are 1, then $d_{5j}$ must be 1. The second statement says that if $d_{1j}$ and $d_{2j}$ are less than 1, i.e., they are 0, the statement is already satisfied and, as such, there is nothing to be stated regarding the value of $d_{5j}$. This can formulated mathematically as follows.
 
-Let us start with the latter case first. On one hand, assuming that $d_{1j}$ or $d_{2j}$ are not 1, we have that the left-hand side is 1. Thus, we do not care about what value $d_{5j}$ would take, other tha it can be 0 or 1. Thus, we would end up with a mathematical statement such as
+Let us start with the latter case first. On one hand, assuming that $d_{1j}$ or $d_{2j}$ are not 1, we have that the left-hand side is 1. Thus, we do not care about what value $d_{5j}$ would take, other than it can be 0 or 1. Thus, we would end up with a mathematical statement such as
 
 ```{math}
 0\leq d_{5j}
@@ -356,7 +355,7 @@ d_{1j} + d_{2j} \leq 2d_{5j}, \forall j \in J.
 Alternatively, one may notice that $(d_{1j} + d_{2j} \geq 1) \implies d_{5j} = 1$ may be stated as 
 
 ```{math}
-(d_{1j}  \geq 1 \implies d_{5j} = 1) \land (d_{2j} \geq 1) \implies d_{5j} = 1)
+(d_{1j}  \geq 1 \implies d_{5j} = 1) \land (d_{2j} \geq 1 \implies d_{5j} = 1)
 ```
 
 which can then be represented by the constraints
@@ -430,9 +429,12 @@ optimize!(model)
 println("Objective value: ", objective_value(model))
 ```
 % &nbsp; is non-breaking space
+
+```{important}
 When we solved the problem without the additional constraints in {numref}`food_manufacture_small`, we made a profit of €107&nbsp;843.
 With the additional constraints here, the profit is €100&nbsp;278 instead.
 This should not be surprising, additional constraints mean a smaller solution space, so (when we are maximizing) the objective can only decrease.
+````
 
 Below we also provide the values of the model variables and provide a summary visualisation.
 
@@ -476,19 +478,22 @@ f
 ## Factory planning 2
 
 Recall the problem {ref}`p1l5:production`.
-Now, instead of the given maintenance schedule, suppose it is up to us to find one that maximizes the profits.
+Now, instead of the given maintenance schedule, suppose it is up to us to find one that is performed while maximising profits. The following requirements must be observed when devising the maintenance plan:
 
-- Each machine except the grinders must be down for maintenance in any one of the six months.
-- Only two of the four grinders each need to be down in any one of the six months.
+- Each machine, with exception of the grinders, must be down for maintenance in any one of the six months.
+- Only two of the four grinders need to be down in any one of the six months.
 
 ### Solution
-Now, we need to keep track of how many machines are down for maintenance, so we make a new variable
+
+Now, we need to keep track of how many machines are down for maintenance. As such, we define a new variable
+
 - $d_{kj}$ - number of machines of type $k$ that are down for maintenance in month $j$,
 
-where $k=1,\dots,5$ is grinders, vertical drills, horizontal drills, borers and planers respectively.
+where $k=1,\dots,5$ represents (1) grinders, (2) vertical drills, (3) horizontal drills, (4) borers and (5) planers, respectively.
 Of course, $d_{kj}$ are integer variables, and each type $k$ will impose a different upper bound, based on the number of machines available in total.
 
 With these variables defined, we can impose the appropriate number of maintenances with the constraints
+
 ```{math}
 \sum^6_{j=1}d_{kj} = \begin{cases}2 &\text{ for }i=1,2, \\
 3 &\text{ for }i=3, \\
@@ -497,24 +502,26 @@ With these variables defined, we can impose the appropriate number of maintenanc
 \end{cases}
 ```
 
-Lastly, we need these variables to actually affect the amount of production possible.
-We do so by modifying our constraints from before to decrease if there is some maintenance going on.
-For the case of grinders as an example, instead of what we had before
+Lastly, we need these variables to actually affect the amount of production possible. We do so by modifying our constraints from before such that the availability of the machine decreases if there is some maintenance going on.
+For the case of grinders as an example, before we had
+
 ```{math}
 0.5m_{11}+0.7m_{21}+0.3m_{51}+0.2m_{61}+0.5m_{71}\leq 1152 \\
 0.5m_{12}+0.7m_{22}+0.3m_{52}+0.2m_{62}+0.5m_{72}\leq 1536 \\
 0.5m_{13}+0.7m_{23}+0.3m_{53}+0.2m_{63}+0.5m_{73}\leq 1536 \\
 0.5m_{14}+0.7m_{24}+0.3m_{54}+0.2m_{64}+0.5m_{74}\leq 1536 \\
 0.5m_{15}+0.7m_{25}+0.3m_{55}+0.2m_{65}+0.5m_{75}\leq 1152 \\
-0.5m_{16}+0.7m_{26}+0.3m_{56}+0.2m_{66}+0.5m_{76}\leq 1536
+0.5m_{16}+0.7m_{26}+0.3m_{56}+0.2m_{66}+0.5m_{76}\leq 1536,
 ```
-we now have a uniform number of available hours minus maintenance
-```{math}
-0.5m_{1j}+0.7m_{2j}+0.3m_{5j}+0.2m_{6j}+0.5m_{7j}\leq 1536 -384 d_{1,j},
-```
-and similarly for the remaining machine types.
 
-Now we can solve the modified problem
+indicating that in periods $j=1,5$ there was maintenance planned for the grinders. Now, we have a uniform number of available hours minus the downtime per grinder in maintenance (recall that each grinder works 2 shifts times 8 hours per shift times 24 days ina month, totalling 384 per month). This can be stated as 
+
+```{math}
+0.5m_{1j}+0.7m_{2j}+0.3m_{5j}+0.2m_{6j}+0.5m_{7j}\leq 1536 -384 d_{1,j}, \forall j \in \braces{1, \dots, 6}.
+```
+
+Naturally, the same must be considered for the remaining machine types. Now we can solve the modified problem
+
 ```{code-cell}
 :tags: [remove-cell]
 I = 7 # number of products
@@ -591,3 +598,5 @@ println("Maintenance")
 e = DataFrame(transpose(value.(d)), label2)
 display(e)
 ```
+
+% TODO: Include a comparison with the previous maintenance plan. Is it different? Do we obtain a better or worse objective function?
