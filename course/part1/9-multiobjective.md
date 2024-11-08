@@ -17,11 +17,11 @@ mystnb:
 
 # Multiobjective Optimisation
 
-So far in the previous lectures, we have discussed optimisation of a single objective, whether it was maximizing profit, minimizing costs or some other goal.
-In many situations, one needs to make a decision about multiple conflicting considerations and identify a good tradeoff.
-For example, instead of maximizing profits given some constraints of costs, one can maximize profits while minimizing costs simultaneously.
+So far in the previous lectures, we have discussed the optimisation of a single objective, whether it was maximizing profit, minimizing costs or some other goal. However, in many situations real-life settings, one needs to make a decisions that consider multiple **conflicting objectives** at once and identify a good tradeoff. For example, instead of solely maximizing profits or maximising service levels, one may be interested in maximising profits and service level simultaneously. However, these are often conflicting objectives, as higher service levels typically incur higher costs (more production, larger inventories, etc.) and thus, lower profits.
 
-To illustrate this lecture, we will use a multi-objective knapsack example, adapted from [JuMP tutorials](https://jump.dev/JuMP.jl/stable/tutorials/linear/multi_objective_knapsack).
+Multiobjective optimisation is the collection of concepts and methods that allow us to incorporate multiple objective functions in our mathematical optimisation model. These techniques aim at helping exposing and understanding trade-offs between objectives while still working with single-objective reformulations.
+
+To illustrate the concepts related to multiobjective optimisation that are introduced in this lecture, we use a multi-objective knapsack example, adapted from [JuMP tutorials](https://jump.dev/JuMP.jl/stable/tutorials/linear/multi_objective_knapsack).
 Our problem is the following
 
 ```{math}
@@ -30,6 +30,7 @@ Our problem is the following
 \st &\sum_{i\in I} w_i x_i \leq c \\
 &x_i \in \{0, 1\}\quad \forall i\in I.
 ```
+
 In words, for a given collection $I$ of items $i\in I$ and a corresponding weight $w_i$, a profit $p_i$, and a desirability rating $r_i$ for each item, and a capacity $c$, our goal is to select a subset of $I$ that maximizes both profit and desirability without exceeding the capacity.
 
 The associated data is the following (taken from [vOptGeneric](https://github.com/vOptSolver/vOptGeneric.jl)):
@@ -40,44 +41,46 @@ desire = [65, 90, 90, 77, 95, 84, 70, 94, 66, 92, 74, 97, 60, 60, 65, 97, 93]
 weight = [80, 87, 68, 72, 66, 77, 99, 85, 70, 93, 98, 72, 100, 89, 67, 86, 91]
 capacity = 900
 N = length(profit)
+println("Total of items: $(N)")
 ```
 
-Let's take a look at the data.
+Let us take a look at the data. We plot each point in terms of the pair (profit, desire), with the size of the dot representing the items weight.
+
 ```{code-cell}
 using CairoMakie
 
 f = Figure()
 ax = Axis(f[1,1],
     xlabel="Profit", 
-    ylabel="Rating"
+    ylabel="Desire"
     )
 scatter!(ax, profit, desire, markersize=weight/2)
 f
 ```
 
+Before we can solve this multiobjective problem, we need first to discuss some central concepts in multiobjective optimisation.
+
 ## Dominance and Pareto optimality
 
-For a single objective, it is easy to determine if one solution is better than the other, one can just compare the objective values.
-For multi-objective optimisation, this is more difficult: one solution can beat the other for one of the objectives while the reverse is true for the remaining objectives.
+For a single objective, it is easy to determine if one solution is better than the other: one can simply compare their objective values.
+For multi-objective optimisation, this is more difficult: one solution can be better than the other for one of the objectives while the reverse is true for another objective.
 
-% Add illustration: a pareto frontier for some decision like range vs cost of electric vehicle. maybe add a dominated point as well
+The concept of **dominance** is integral to the assessment of solutions in multi-objective problems.
 
-The concept of _dominance_ is integral to the assesment of solutions in multi-objective problems.
+Let $f_i : \reals^n \to \reals$ for $j \in \braces{1,\dots,n}$ be our objective functions of interest.
 
-Let $f_1(\mathbf{x}), \dots, f_n(\mathbf{x})$ be our objectives of interest.
-```{prf:definition}
+```{prf:definition} Dominance between solutions
 :label: dominance
 
-A solution {math}`\mathbf{x}` _dominates_ solution {math}`\mathbf{x'}` if
-- {math}`\mathbf{x}` is no worse than {math}`\mathbf{x'}` for all objectives, i.e. $f_i(\mathbf{x})\leq f_i(\mathbf{x'})\text{ for all } i$, and
-- {math}`\mathbf{x}` is strictly better than {math}`\mathbf{x'}` in at least one objective, i.e. $f_i(\mathbf{x})< f_i(\mathbf{x'})\text{ for some } i$.
+A solution $x$ **dominates** solution $x'$ if
 
-{math}`\mathbf{x'}` is _dominated by_ {math}`\mathbf{x}` if and only if {math}`\mathbf{x}` dominates {math}`\mathbf{x'}`.
+- $x$ is no worse than $x'$ for all objectives, i.e., $f_i(x) \leq f_i(x') \text{ for all } i \in \braces{1,\dots,n}$, and
+- $x$ is strictly better than $x'$ in at least one objective, i.e., $f_i(x) < f_i(x') \text{ for some } i \in \braces{1,\dots,n}$.
+
+$x'$ is **dominated** by $x$ if and only if $x$ dominates $x'$.
 ```
 
-If we have a solution dominating another, we can discard the latter from our consideration.
-
-Consider the following two solutions.
+Let us illustrate the notion of domination considering our knapsack example. For that, consider the following two solutions for the knapsack problem, where represent in orange the items selected in each solution.
 
 ```{code-cell}
 :tags: ["remove-input"]
@@ -91,8 +94,8 @@ sol_b_d = sum(desire[sol_b])
 sol_b_w = sum(weight[sol_b])
 
 f = Figure()
-ax1 = Axis(f[1,1], width = 400, height = 300)
-ax2 = Axis(f[1,2], width = 400, height = 300)
+ax1 = Axis(f[1,1], width = 400, height = 300, xlabel="Profit", ylabel="Desire")
+ax2 = Axis(f[1,2], width = 400, height = 300, xlabel="Profit", ylabel="Desire")
 scatter!(ax1, profit, desire, markersize=weight/2)
 scatter!(ax2, profit, desire, markersize=weight/2)
 scatter!(ax1, profit[sol_a], desire[sol_a], markersize=weight[sol_a]/2, color=:orange)
@@ -102,13 +105,13 @@ Label(f[2,2], "Solution B\n $(sol_a)")
 resize_to_layout!(f)
 f
 ```
-The first solution leads to a profit of {eval}`sol_a_p` and a desirability rating of {eval}`sol_a_d` at weight {eval}`sol_a_w`.
-Whereas for the second solution, the profit is {eval}`sol_b_p`, the rating {eval}`sol_b_d`, and the weight {eval}`sol_b_w`.
-Both solutions are feasible: they use each item once and their weights are under the capacity of {eval}`capacity`.
-However, Solution A is better than Solution B in both objectives.
-Thus the former **dominates** the latter, we would not be interested in Solution B when we have access to Solution A.
 
-We can also visualise this on what is called the _decision space_, which plots the solutions (so sets of selected items for the knapsack) according to their objective values.
+**Solution A** on the left leads to a profit of {eval}`sol_a_p` and a desirability rating of {eval}`sol_a_d` at total weight {eval}`sol_a_w`.
+Whereas **Solution B** has a profit of {eval}`sol_b_p`, rating {eval}`sol_b_d`, and total weight {eval}`sol_b_w`. Both solutions are feasible: each item is selected once and their total weights are under the capacity of {eval}`capacity`. However, Solution A is better than Solution B in both objectives. Thus Solution A **dominates** Solution B and, as such, we confidently prefer it between the two.
+
+We can also visualise this on what is called the . In that, we can plot each solution (i.e., selected items) considering their objective values as coordinates. In the objective space, we can plot the regions in which other solutions would dominate and be dominated by a given solution. For two linear objectives, these are two of the quadrants formed by a vertical and a horizontal line that crosses the coordinates, or objective values, of the solution. Which of the quadrants hold the dominated and dominating solutions depends whether the objectives are being minimised or maximised. In the knapsack example, since we want to maximimise both objectives, the dominated solutions would be in the lower left quadrant, while the dominating solutions would be in the top right quadrant.
+
+Below we plot the dominating/ dominated quadrants for Solution A. Notice that Solution B lies in the quadrant of solutions that are dominated by Solution A.
 
 ```{code-cell}
 :tags: ["remove-input"]
@@ -122,7 +125,7 @@ f = Figure()
 ax = Axis(f[1,1], 
     limits=((x_ll, x_ul), (y_ll, y_ul)),
     xlabel="Profit", 
-    ylabel="Rating"
+    ylabel="Desire"
     )
 vlines!(ax, [sol_a_p])
 hlines!(ax, [sol_a_d])
@@ -136,46 +139,46 @@ text!(ax, [((sol_a_p+x_ul)/2, (sol_a_d+y_ul)/2)]; text="Dominating\n Solution A"
 f
 ```
 
+Since dominated solution can be ignored, we is clear that we are interested in the so-called **non-dominated** solutions. Let us first formally define what we mean with the term.
 
-Since dominated solution can be ignored, we are interested in _non-dominated_ solutions.
-
-```{prf:definition}
+```{prf:definition} Non-dominated/ Pareto-optimal solutions
 :label: pareto_opt
 
-A solution {math}`\mathbf{x}` is called _Pareto-optimal_, or _non-dominated_, if there is no other solution that dominates it.
-In other words, a point is Pareto-optimal if no other point improves at least one objective (without harming the remaining objectives).
-
-A solution is called _weakly Pareto-optimal_ if no other solution improves all of the objectives.
-
-The set of Pareto-optimal points is called the _Pareto frontier_.
+A solution $x$ is called **non-dominated** or **Pareto-optimal**, if there is no other solution that dominates it. In other words, a point is Pareto-optimal if no other point improves at least one objective (without harming the remaining objectives). The set of Pareto-optimal points is called the **Pareto frontier**.
 ```
 
-% Add pareto frontier illustration
+The Pareto frontier represents the collection of best solutions for different trade-off preferences and is helpful in evaluating the alternative solutions and how they trade off each of the objectives. It thus becomes important to be able to construct the Pareto frontier, or at the very least find as many Pareto-optimal solutions as possible, in order to enable more informed decision-making.
 
-The Pareto frontier represents the collection of best solutions for different tradeoff decisions.
-Thus, if one does not know their preferences with respect to the different objectives, the Pareto frontier can be helpful in evaluating the alternatives.
-It thus becomes important to identify the Pareto frontier, or at the very least find as many Pareto-optimal solutions as possible, in order to enable more informed decision-making.
+## Ideal and nadir points
 
-The question then becomes how to generate Pareto frontiers efficiently
-The two classical methods of doing so are the weighted and the $\epsilon$-constraint methods.
+% TODO: describe what they are and plot them
 
-## Weighted Method
 
-The _weighted_ method, also known as the _weighted-sum_ method, uses a vector of weights $\lambda$ to turn the multi-objective problem into a single-objective one.
+## Finding Pareto-optimal points
+
+The question then becomes how to identify solutions that form the Pareto frontiers? The two classical methods of doing so are the **weighted** and the **$\epsilon$-constraint** methods.
+
+```{important}
+The notion of domination can be used to state our preference for solutions that dominate others. However, multiobjective problems typically have **multiple non-dominated solutions**. Our job is to be able to expose alternative non-dominated solutions (i.e., the Pareto frontier), but choosing between them require further input from the decision maker.
+````
+
+### Weighted Method
+
+The **weighted** method, also known as the weighted-sum method, uses a vector of weights $\lambda$ to turn the multi-objective problem into a single-objective one.
 
 ```{math}
-\mini_{x\in\mathcal{X}} \sum^n_{i=1}\lambda_if_i(\mathbf{x})
+\mini_{x\in\mathcal{X}} \sum^n_{i=1}\lambda_i f_i(x)
 ```
 
-The weights should be nonnegative and sum to one, and they can be interpreted as costs or preferences associated with different objectives.
-Thus, every weight specification represents a trade-off, and the corresponding optimization problem can be solved to obtain a Pareto-optimal solution.
-Then, the weights can be varied to generate a Pareto frontier.
+The weights should be nonnegative and sum to one, and they can be interpreted as preference ratios associated with different objectives.
+Thus, every weight specification represents a trade-off, and the corresponding optimization problem can be solved to obtain a Pareto-optimal solution. Then, the weights can be varied, and for each set of weights $\lambda_i$, $i \in \braces{1,\dots,n}$, the optimisation problem returns a solution in the Pareto frontier.
 
-For our example problem, we may implement this as the following.
+Returning to our knapsack example problem, we may implement this as follows. In the implementation, we have $n = 2$ and $\lambda_1 = 0.7$ and $\lambda_2 = 1 - \lambda_1 = 0.3$. 
+
 ```{code-cell}
 using JuMP, HiGHS
 
-ratio = 0.7
+lambda = 0.7
 
 m = Model(HiGHS.Optimizer)
 set_silent(m)
@@ -183,26 +186,27 @@ set_silent(m)
 @constraint(m, sum(weight[i] * x[i] for i in 1:N) <= capacity)
 @expression(m, profit_expr, sum(profit[i] * x[i] for i in 1:N))
 @expression(m, desire_expr, sum(desire[i] * x[i] for i in 1:N))
-@objective(m, Max, ratio*profit_expr+(1-ratio)*desire_expr)
+@objective(m, Max, lambda * profit_expr + (1 - lambda) * desire_expr)
 
 optimize!(m)
 @assert is_solved_and_feasible(m)
-print("Items: ",[i for i in 1:N if value(x[i]) > 0.9])
+print("Items: ",[i for i in 1:N if value(x[i]) > 0.99])
 ```
 
-Huh, this is actually our Solution A from before, turns out it is Pareto-optimal.
-We can repeat the above with a different ratio to try to obtain more points on the Pareto frontier.
-Suppose that we have wrapped the previous code in a function that takes `ratio` as input, then
+Notice that the solution obtained is our Solution A from before, i.e., it turns out it was Pareto-optimal. We can repeat the above with a different set of weights to try to obtain more points on the Pareto frontier. We say try, because, in principle, we may with a different set of weights still find the same solution.
+
+To make the search systematic, we can wrap the previous code in a function that takes `lambda` as input, then
+
 ```{code-cell}
 :tags: ["remove-cell"]
-function weighted_method_knapsack(ratio)
+function weighted_method_knapsack(lambda)
     m = Model(HiGHS.Optimizer)
     set_silent(m)
     @variable(m, x[1:N], Bin)
     @constraint(m, sum(weight[i] * x[i] for i in 1:N) <= capacity)
     @expression(m, profit_expr, sum(profit[i] * x[i] for i in 1:N))
     @expression(m, desire_expr, sum(desire[i] * x[i] for i in 1:N))
-    @objective(m, Max, ratio*profit_expr+(1-ratio)*desire_expr)
+    @objective(m, Max, lambda * profit_expr + (1 - lambda) * desire_expr)
 
     optimize!(m)
     @assert is_solved_and_feasible(m)
@@ -215,7 +219,8 @@ sol_c = weighted_method_knapsack(0.4)
 print("Items: ", sol_c)
 ```
 
-Let's plot the solutions on the decision space.
+Let us plot the solutions on the decision space. Also, we now plot the dominated (in red) and dominating (in blue) solution quadrants for both Solution A and the new Solution C.
+
 ```{code-cell}
 :tags: ["remove-input"]
 sol_c_p = sum(profit[sol_c])
@@ -227,8 +232,10 @@ f = Figure()
 ax = Axis(f[1,1], 
     limits=((x_ll, x_ul), (y_ll, y_ul)),
     xlabel="Profit", 
-    ylabel="Rating"
+    ylabel="Desire"
     )
+poly!(Point2f[(sol_c_p, sol_c_d), (sol_c_p, y_ul), (x_ul, y_ul), (x_ul, sol_c_d)]; color=(:lightblue, 0.5))
+poly!(Point2f[(sol_c_p, sol_c_d), (sol_c_p, y_ll), (x_ll, y_ll), (x_ll, sol_c_d)]; color=(:lightcoral, 0.5))
 poly!(Point2f[(sol_a_p, sol_a_d), (sol_a_p, y_ul), (x_ul, y_ul), (x_ul, sol_a_d)]; color=(:lightblue, 0.5))
 poly!(Point2f[(sol_a_p, sol_a_d), (sol_a_p, y_ll), (x_ll, y_ll), (x_ll, sol_a_d)]; color=(:lightcoral, 0.5))
 scatter!(ax, [sol_a_p], [sol_a_d], label="Solution A", markersize=30)
@@ -239,27 +246,21 @@ axislegend(position = :rt)
 f
 ```
 
-We can see that solutions A and C don't dominate each other.
-In fact, Solution C doesn't even dominate Solution B, if we cared only about profits and not about desirability ratings, Solution B would be a better choice than C.
-However, Solution C shines over the other two when we start giving more weight to ratings, which is exactly what we did when obtaining it via the weighted method.
+We can see that solutions A and C do not dominate each other. Also, Solution C also does not dominate Solution B. Indeed, if we cared only about profits and not about desirability ratings, Solution B would be a better choice than C. However, Solution C is preferred over the other two if we give more weight to ratings, which is exactly what we did by decreasing $\lambda_1$ and increasing $\lambda_2$.
 
-One can continue using the weighted method with different weightings and attempt to recover more of the Pareto frontier.
+Notice that Solutions A and C, found using the weighted method are solutions in the Pareto frontier. Morevoer, one can continue using the weighted method with different weightings and attempt to recover more of the Pareto frontier.
 
-While very simple conceptually, the weighted method has a number of downsides.
-First is the problem of picking weights, how should one decide their values?
-A well-defined preference information may not always be available, especially when the problem is over many objectives.
-A related problem is one of representation.
-In most cases, we would hope to obtain various non-dominated solutions across the Pareto frontier that represents the possible trade-off decisions well.
-However, the mapping between weights to the solution space is not uniform: there is no guarantee that wildly different weights won't end up with the same solutions, and similarly almost identical weights may result in very different solutions.
+While very simple conceptually, the weighted method has a number of downsides. First is the problem of picking weights, how should one decide their values? A well-defined preference information may not always be available, especially when the problem is over many objectives.
 
-% Add point/illustration about not being able to recover solutions on non-convex Pareto fronts
+A related problem is one of representation. In most cases, we would hope to obtain various non-dominated solutions across the Pareto frontier that represents the possible trade-off decisions well. However, the mapping between weights to the solution space is not uniform: there is no guarantee that different weights will expose alternative solutions.
 
-## $\epsilon$-Constraint Method
+### $\epsilon$-Constraint Method
 
-In the constraint method, one of the objective functions is optimized while the rest are constrained within user-specified values.
-For example, we may have the instance
+In the $\epsilon$-constraint method, one of the objective functions is optimised while the remaining objectives are considered as being constrained by user-specified values. For example, we may have the instance
+
 ```{math}
 :label: constraint_prob
+
 \mini &f_1(\mathbf{x}) \\
 \st &f_2(\mathbf{x})\leq \epsilon_2 \\
 &f_3(\mathbf{x})\leq \epsilon_3 \\
@@ -267,13 +268,10 @@ For example, we may have the instance
 &f_n(\mathbf{x})\leq \epsilon_n \\
 &x \in \mathcal{X}
 ```
-where $\epsilon_i$ are the user-specified constraints and $\mathcal{X}$ is the feasible space of the multiobjective problem.
 
-It can be shown that for every $\lambda$ and a problem like {eq}`constraint_prob`, the solution to the problem gives a weakly Pareto-optimal solution to the multiobjective problem.
-However, if the problem {eq}`constraint_prob` has a unique solution, then it is a Pareto-optimal solution for the multiobjective problem.
-The Pareto frontier can be generated by changing $\lambda$ and repeatedly solving the resulting problems.
+where $\epsilon_i$ are the user-specified thresholds for each objective $i \in  \braces{1,\dots,n}$. and $\mathcal{X}$ is the feasible space of the multiobjective problem. The thresholds are typically set as fractions of the the ideal value for objective $i$ or minimal requirements for the value of the non-optimised objectives.
 
-For the knapsack example, we can use this method via the [`MultiObjectiveAlgorithms.jl`](https://jump.dev/JuMP.jl/stable/packages/MultiObjectiveAlgorithms) package.
+Let us again return to our knapsack example. This time, we will use a package that implements multi-objective methods, including the $\epsilon$-constraint method. For that, we use the package [`MultiObjectiveAlgorithms.jl`](https://jump.dev/JuMP.jl/stable/packages/MultiObjectiveAlgorithms).
 
 ```{code-cell}
 import MultiObjectiveAlgorithms as MOA
@@ -293,25 +291,24 @@ optimize!(m)
 solution_summary(m)
 ```
 
-There are two important points to take note here.
-First, note that the code is almost identical to what we had before.
-Whereas for the weighting method we manually converted the optimisation problem into a singleobjective one, here we just added two lines to use the `MultiObjectiveAlgorithms.jl` package.
+There are two important points to take note here. First, note that the code is almost identical to what we had before. The main difference is that we specify an outer "layer" to the solver calling the multi-objective algorithm (MOA) solver on top of standard mathematical optimisation solver. 
 
-Second, the output states that there are 9 results.
-This should not be surprising, we already obtained two Pareto-optimal results using the weighted method.
-However, instead of having to find the right weighting boundaries between different solutions, the $\epsilon$-constraint method immediately gave us 9 results.
+Second, the output states that there are 9 results. This is typical with multi-objective solvers: they are engineered to return as many (hoepfully all) Pareto optimal solutions as possible. We had already obtained two Pareto-optimal results using the weighted method.
+However, instead of having to find the right weighting boundaries between different solutions, the $\epsilon$-constraint method gave us 9 Pareto-optimal solutions.
 
 We can access information about individual results with
+
 ```{code-cell}
 solution_summary(m; result = 7)
 ```
+
 and the result itself is
+
 ```{code-cell}
 print("Items: ", [i for i in 1:N if value(x[i]; result = 7) > 0.9])
 ```
 
-This is our Solution A again, so both methods agree it is on the Pareto frontier.
-In fact, let's plot all the solutions we just obtained.
+This is our Solution A again, so both methods agree it is on the Pareto frontier. In fact, we can plot all the solutions that were obtained.
 
 ```{code-cell}
 :tags: ["remove-input"]
@@ -333,8 +330,4 @@ text!(ax,
 f
 ```
 
-## Other methods
-
-Both of the above methods work by effectively transforming the multiobjective problem into a singleobjective one.
-However alternative approaches like goal programming and interactive methods exist.
-We will not cover them in this course.
+%TODO: add conclusion and point to other methods...
