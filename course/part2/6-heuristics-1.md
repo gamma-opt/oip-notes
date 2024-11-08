@@ -48,6 +48,8 @@ There are a few strategies for dealing with such situations.
 For example, one can allow non-improving steps to be accepted after perturbations, which may help escape from the local optima neighborhoods.
 A more general strategy is random restarts where an algorithm may be run again with a different initialisation (or a different seed if randomness is involved) and ultimately selecting the best result out of all the runs.
 
+% Todo talk about the concept of a neighbor solution somewhere in here
+
 ## A selection of methods
 
 In this section we present two methods that don't yield exact results, but are widely used in the optimisation practice.

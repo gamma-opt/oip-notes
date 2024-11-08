@@ -13,12 +13,29 @@ kernelspec:
   name: julia-1.10
 ---
 
-# Title
+# Metaheuristics
 
 % TODO Add some introduction
 % In this section we'll show some algorithms... We implement them here but you can use a library like metaheuristics...
 
-## Randomized methods
+% Focus on going downhill while trying to avoid local minima
+
+## Point methods
+
+```{code-cell}
+function cost_f(solution, d)
+    c = 0
+    for i in 2:n
+        c += d[solution[i-1],solution[i]]
+    end
+    c += d[solution[1], solution[n]]
+    return c
+end
+
+function create_neighbor(solution)
+
+end
+```
 
 ### GRASP
 
@@ -26,10 +43,29 @@ kernelspec:
 % - just call this a metaheuristic
 % - local search or perturbative
 _Greedy randomised adaptive search procedure_ (GRASP) is an algorithm that combines greediness with local search techniques.
-This is achieved by repeating an iteration consisting of two phasesn until some termination criterion is satisfied.
+This is achieved by repeating an iteration consisting of two phases until some termination criterion is satisfied.
 In the first phase, a new solution is constructed, similar to that in a greedy approach.
 However, instead of picking the best candidate, all candidates above a goodness threshold are collected, forming the _restricted candidate list_, from which one is chosen randomly.
 Once a solution is formed, the algoritm moves to the second phase, where neighboring solutions are explored for better performers.
+
+% TODO Should the objective function be added as input?
+```{prf:algorithm} GRASP
+1. While termination criterion is unmet
+
+    Construction
+    1. Initialize an empty solution.
+    2. While the solution is incomplete
+        1. Construct a RCL from the best performing elements.
+        2. Add a random element from the RCL to the solution.
+
+    Local Search
+
+    3. While the local search termination criterion is unmet
+        1. Generate a neighbor from the current solution.
+        2. If the neighbor is better, replace the current solution with it.
+    4. If this new solution is the best so far, replace the previous best.
+2. Return the best solution.
+```
 
 As an example, we can implement a GRASP algorithm for TSP.
 
@@ -60,14 +96,14 @@ In the second phase, the solution is mutated in a neighborhood.
 In this implementation, we remove a randomly selected city and insert it at a random location, but one can imagine other descriptions of neighborhood and appropriate mutations.
 % TODO change to use lin-kernighan?
 ```{code-cell}
-function second_phase(solution, n, cost_f, n_iter)
+function second_phase(solution, d, n, n_iter)
     best = solution
-    best_cost = cost_f(solution)
+    best_cost = cost_f(solution, d)
     for _ in 1:n_iter
         neighbor = copy(solution)
         removed = popat!(neighbor, rand(1:n))
         insert!(neighbor, rand(1:n), removed)
-        cost = cost_f(neighbor)
+        cost = cost_f(neighbor, d)
         if cost < best_cost
             best = neighbor
             best_cost = cost
@@ -84,20 +120,11 @@ function tsp_grasp(d, a, terminate, second_phase_iters=100)
     best = nothing
     best_cost = Inf
 
-    function cost_f(solution)
-        c = 0
-        for i in 2:n
-            c += d[solution[i-1],solution[i]]
-        end
-        c += d[solution[1], solution[n]]
-        return c
-    end
-
     while true
         sol = first_phase(d, n, a)
-        sol = second_phase(sol, n, cost_f, second_phase_iters)
+        sol = second_phase(sol, d, n, second_phase_iters)
 
-        cost = cost_f(sol)
+        cost = cost_f(sol, d)
         if cost < best_cost
             best_cost = cost
             best = sol
@@ -154,13 +181,89 @@ lines!(ax, X_coord[endpoints], Y_coord[endpoints], color = 1, colormap = :tab10,
 fig
 ```
 
-### simulated annealing
+### Simulated Annealing
 
+_Simulated annealing_ is a method that takes inspiration from thermodynamics.
+At high temperature, the molecules of a liquid will have high energy and mobility.
+If frozen immediately, the resulting molecular structure will likely be highly irregular.
+However, if cooled slowly such as in the process of annealing in metallurgy, the molecules are able to attain a regular arrangment, even possibly achieving the minimum energy state for the system.
+The notions of high energy and slow cooling are translated into optimisation to try to achieve the minimum energy state, corresponding to the minimum of an optimisation problem.
+More specifically, the simulated annealing algorithm works by starting with an initial solution and exploring the solution space via neighbors.
+However, worse solutions are sometimes accepted, with probability proportional to the system's current "temperature".
+Temperature decreases with every iteration and so does the mobility of the solution, as acceptance will be constrained to better performing solutions.
+Ideally, the high mobility at high temperatures will allow the algorithm to discover the region near the global minimum, which will then be achieved via the smaller changes at lower temperatures.
 
+```{prf:algorithm} Simulated annealing
+:label: alg_sa
+**Inputs** Objective function $f$
+1. Generate a random solution as current state $x$.
+2. While the termination criterion is unmet
+    1. Get the current temperature $T$.
+    2. Create a random neighbor $x'$ of the current state $x$.
+    3. Calculate performance difference $\Delta=f(x')-f(x)$.
+    4. If $\Delta<0$ (i.e. $x'$ is better than $x$), accept it as current state.
+    5. If not, accept $x'$ with probability $e^{-\Delta}/T$.
+3. Return $x$.
+```
 
-## Metaheuristics
+In {prf:ref}`alg_sa`, there are two points worth discussing in greater detail.
+First is the acceptance probability.
+If a new solution is better performing, it is always accepted.
+If the new solution is instead worse, then the probability of acceptance depends on how much worse it is, i.e. $\Delta$, and the temperature $T$.
+As the temperature tends to 0, the probability will be concentrated on the global minimum.
 
-### Evolutionary methods
+The second point is the cooling schedule of the algorithm, i.e. how the temperature decreases across iterations.
+This plays a crucial role in the algorithm's performance, as we would like to cool down slowly enough to capture the global minimum but without waiting for an infinite amount  of time to guarantee that.
+% From Numerical Recipes
+There is no universally good choice, but possible schedules worth trying include:
+- Exponential schedule: setting $T=T*\alpha$ after every $m$ moves,
+- Move budget: setting $T=T_0(1-k/K)^\alpha$ after every $m$ moves, where $k$ is the number of moves made so far and $K$ is the total number of moves allowed. $\alpha$ here is some positive hyperparameter. 
+
+```{code-cell}
+function tsp_sa(d, n, n_iters)
+    sol = shuffle(1:n)
+    for it in 1:n_iters
+        T = n_iters/it
+        neighbor = create_neighbor(sol)
+        delta = cost_f(neighbor, d) - cost_f(sol)
+        if delta < 0 || rand() < exp(-delta/T)
+            sol = neighbor
+        end
+    end
+    return sol
+end
+```
+
+## Population methods
+
+The methods we have covered so far relied on keeping ttrack of a single point moving around in the solution space.
+Some methods differ from this approach in that they are _population_ based, where avoiding local minima is achieved through spreading a collection of individuals throughout the solution space.
+
+### Genetic Algorithms
+
+_Genetic algorithms_ take inspiration from biology and simulate a natural-selection-like process in order to obtain good solutions.
+On a high level, genetic algorithms work by treating each individual solution in a population as a chromosome, whose fitness is inversely proportional to the value of the objective function at that point, since we are minimising.
+Every iteration represents a generation, during which a subpopulation is selected based on their fitness to reproduce, leading to a new generation.
+The reproduction step incorporates recombination, where pairs of "parent" solutions combine their genetic information similar to sexual reproduction, adding diversity to the optimisation process.
+Lastly, random mutations can occur on individual chromosomes, adding in additional diversity to the process.
+
+#### Chromosomes
+
+The representation of solutions as chromosomes is critical to the design of the recombination and mutation operations, and the performance of the algorithm.
+Most frequently, bit strings are used to represent solutions.
+For example in a 0-1 knapsack problem this would be natural, since every bit could correspond to whether an item is included in the selection or not.
+For TSP, it may be easier to consider integer sequences as we have done in earlier examples.
+Alternative representations are also possible, as long as recombination and mutation operations can be clearly defined.
+
+#### Selection
+
+There are a number of different strategies for picking parents for the next generation.
+
+- Genetic algorithms
+-- mutations
+-- recombination
+-- selection
+- More?
 
 ### Particle swarm
 
