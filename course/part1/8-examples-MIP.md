@@ -187,10 +187,8 @@ Alternatively, one may notice that $(d_{1j} + d_{2j} \geq 1) \implies d_{5j} = 1
 which can then be represented by the constraints
 
 ```{math}
-\begin{align*}
-  d_{1j} \leq d_{5j}, \forall j \in J \\ 
-  d_{2j} \leq d_{5j}, \forall j \in J.
-\end{align*}  
+d_{1j} &\leq d_{5j}, \forall j \in J \\ 
+d_{2j} &\leq d_{5j}, \forall j \in J.
 ```
 
 Notice that if we sum the two constraints, we obtain the $d_{1j} + d_{2j} \leq 2d_{5j}, \forall j \in J$. This example illustrates well the fact that seldom there is only one way of modelling problems as mathematical programming models. 
@@ -253,11 +251,15 @@ optimize!(model)
 @assert is_solved_and_feasible(model)
 ```
 
-% TODO: let's make this a bit more engaging. One idea is to compare it with the previous version. It should yield a worse solution (since it has more constraints)
-
 ```{code-cell}
 println("Objective value: ", objective_value(model))
 ```
+% &nbsp; is non-breaking space
+When we solved the problem without the additional constraints in {numref}`food_manufacture_small`, we made a profit of €107&nbsp;843.
+With the additional constraints here, the profit is €100&nbsp;278 instead.
+This should not be surprising, additional constraints mean a smaller solution space, so (when we are maximizing) the objective can only decrease.
+
+Below we also provide the values of the model variables and provide a summary visualisation.
 
 ```{code-cell}
 :tags: ["remove-input"]
@@ -276,6 +278,24 @@ println("Amount stored (variables s)")
 display(df_s)
 println("Production amount (variables p)")
 display(df_p)
+```
+
+```{code-cell}
+:tags: ["remove-input"]
+using CairoMakie
+
+pos = vcat([repeat([i], I) for i in 1:J]...)
+
+f = Figure()
+ax_b = Axis(f[1,1], xticks=1:J, title="Amount purchased (variables b)", width = 400, height = 300)
+ax_u = Axis(f[1,2], xticks=1:J, title="Amount used (variables u)", width = 400, height = 300)
+ax_s = Axis(f[2,1:2], xticks=1:J, title="Amount stored (variables s)", width = 400, height = 300)
+barplot!(ax_b, pos, vec(value.(b)), stack=pos, color=repeat(1:I,J))
+barplot!(ax_u, pos, vec(value.(u)), stack=pos, color=repeat(1:I,J))
+barplot!(ax_s, pos, vec(value.(s)), stack=pos, color=repeat(1:I,J))
+Legend(f[1:2,3], [PolyElement(polycolor = i, polycolormap=:viridis, polycolorrange= (1, I)) for i in 1:I], vcat(["Veg $(i)" for i in 1:2], ["Oil $(i)" for i in 1:3]), "Oils")
+resize_to_layout!(f)
+f
 ```
 
 ## Factory planning 2
