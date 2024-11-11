@@ -103,10 +103,10 @@ function generate_distance_matrix(n; random_seed = 1)
 end
 ```
 
-We pick $n=20$.
+We pick $n=200$.
 ```{code-cell}
 :tags: [remove-output]
-n = 20
+n = 200
 d, X_coord, Y_coord = generate_distance_matrix(n)
 ```
 ```{code-cell}
@@ -156,19 +156,12 @@ And use it on our data.
 m_naive, x_naive, cost_naive = tsp_naive(d, n);
 ```
 
-The output `x_naive` is a binary matrix indicating for each city what city is next.
-Converting it into a vector makes its use easier.
-Here, the value of each index $i$ gives the next city after city $i$.
-```{code-cell}
-function gettour(x::Matrix{Int}, n::Int)
-    return argmax.(x[i,:] for i in 1:n)
-end
-tour_naive = gettour(x_naive,n)
-```
-
-Now we can plot the optimisation result.
+The output `x_naive` is a binary matrix indicating the next destination for each city, which we can plot.
 ```{code-cell}
 :tags: [remove-input]
+
+tour_naive = map(argmax, eachrow(x_naive))
+
 for i in 1:n
     lines!(ax, X_coord[[i,tour_naive[i]]], Y_coord[[i,tour_naive[i]]], color = 1, colormap = :tab10, colorrange = (1, 10))
 end
@@ -176,91 +169,77 @@ fig
 ```
 
 As expected, this does not look very much like a tour, thus we need to add cut-set constraints.
-To do so, we create the following helper function that follows a given tour, so that we can detect the first cycle and all the cities in it.
+To do so, we create the following helper function that follows the paths in a given matrix and returns subtours.
 
 ```{code-cell}
-function follow_tour(x::Matrix{Int}, n::Int)
-    tour = zeros(Int,n+1)   # Initialize tour vector (n+1 as city 1 appears twice)
-    tour[1] = 1             # Set city 1 as first one in the tour
-    k = 2                   # Index of vector tour[k]
-    i = 1                   # Index of current city 
-    while k <= n + 1        # Find all n+1 tour nodes (city 1 is counted twice)
-        for j = 1:n         
-            if x[i,j] == 1  # Find next city j visited immediately after i
-                tour[k] = j # Set city j as the k:th city in the tour
-                k = k + 1   # Update index k of tour[] vector
-                i = j       # Move to next city
-                break       
+function get_subtours(x::Matrix{Int}, n::Int)
+    subtours = []
+    subtour = [1]
+    curr = 1
+    visited = Set(1)
+    queue = collect(1:n)
+    while true
+        next = argmax(x[curr,:])
+        if next in visited  # completed a subtour
+            push!(subtour, next)
+            push!(subtours, copy(subtour))
+            if length(visited) == n
+                return subtours
             end
+            
+            while curr in visited
+                curr = pop!(queue)
+            end
+
+            # prepare new subtour
+            subtour = [curr]
+            push!(visited, curr)
+        else                # move to new node
+            push!(subtour, next)
+            push!(visited, next)
+            curr = next
         end
-    end 
-    return tour             # Return the optimal tour 
+    end
 end
 ```
 
 The main optimisation loop is the following, where we iteratively solve the model and generate new cut constraints based on the cycle we observe.
 
 ```{code-cell}
-using Combinatorics
+:tags: [skip-execution]
+(m_naive, x_naive, cost_naive) = tsp_naive(d, n);
+lim = 150
+set_silent(m_naive)
 
-
-(m_naive, x_naive, cost_naive) = tsp_naive(d, n; silent=true);
-subnodes = []
-count = 0
-stop = 0
-lim = 100
-
-## Perform cuts to break subtours until we got an optimal
-while stop == 0 && count < lim
-
-    S = collect(permutations(subnodes,2))     # Possible connections present in the naive implementation
-    NS = setdiff(1:n,subnodes)                # Nodes that are still not included in the tour
-
-    ## Cutset constraints
-    if length(S) > 0
-        @constraint(m_naive,sum(m_naive[:x][subnodes[i],NS[j]] for i in 1:length(subnodes), j in 1:length(NS)) >= 1)
-    end
-
-    set_silent(m_naive)
+for it in 1:lim
+    
     optimize!(m_naive)
 
-    cost2 = objective_value(m_naive)          # Optimal cost (length)
-    sol_x = round.(Int, value.(m_naive[:x]))  # Optimal solution vector
+    x = round.(Int, value.(m_naive[:x])) 
+    subtours = get_subtours(x, n)
+    if length(subtours) == 1 # Found Hamiltonian path
+        println("Optimal tour: ", subtours[1]')
+        println("Took $(it) iterations to find the optimal solution.")
+        break
+    end
 
-    tour2 = follow_tour(sol_x,n)              # Get the optimal tour
-    
-    if length(unique(tour2)) < n
-        count = count + 1
-        subtour = tour2[1:2]
-        for city in tour2[3:end]
-            if subtour[end] == subtour[1]
-                break
-            end
-            push!(subtour, city) 
-        end
-        subnodes = unique(tour2);
-    else
-        println("Optimal tour: ", tour2')
-        println("Took $(count) iterations to find the optimal solution.")
-        S = []
-        stop = 1
-    end;
-end;
+    println("Iteration $(it); not optimal.")
+    println("Subtours:")
+    for subtour in subtours
+        println(subtour)
+        NS = setdiff(1:n, subtour)
+        @constraint(m_naive, sum(m_naive[:x][i,j] for i in subtour, j in NS) >= 1)
+    end
+    print("\n")
+end
 ```
 
+Even though we reach to a solution  for $n=200$ in just 16 iterations, it takes 10 minutes on our computer to actually compute everything.
 We can see the evolution of the solution at every iteration.
 
 <video width="800" controls loop autoplay>
     <source src="../_static/tsp_cuts.mp4" type="video/mp4">
 </video>
-
-We can apply the same algorithm to the data in {numref}`random_graph`, however obtaining a result may take a while.
-{numref}`tsp_cut_incomplete` shows the state of the solution after 150 iterations, but it is difficult to estimate how many more would be needed to obtain a feasible solution.
-
-```{figure} ../figures/tsp_cut_incomplete.svg
-:name: tsp_cut_incomplete
-The cut-set constraint generation algorithm after 150 iterations on data with $n=40$.
-```
 
 ## Revisiting the food manufacture problem
 
