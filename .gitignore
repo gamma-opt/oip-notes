@@ -2,3 +2,4 @@
 course/_build
 Manifest.toml
 .vscode/settings.json
+*.json
