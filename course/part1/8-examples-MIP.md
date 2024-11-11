@@ -475,7 +475,7 @@ resize_to_layout!(f)
 f
 ```
 
-## Factory planning 2
+## Production planning 2
 
 Recall the problem {ref}`p1l5:production`.
 Now, instead of the given maintenance schedule, suppose it is up to us to find one that is performed while maximising profits. The following requirements must be observed when devising the maintenance plan:
@@ -599,4 +599,39 @@ e = DataFrame(transpose(value.(d)), label2)
 display(e)
 ```
 
-% TODO: Include a comparison with the previous maintenance plan. Is it different? Do we obtain a better or worse objective function?
+% &nbsp; is non-breaking space
+The resulting objective value tells us that we can have profits of €108&nbsp;855.
+How does this compared to the result we obtained with the fixed schedule in {numref}`p1l6:production`?
+
+```{list-table} Maintenance schedules comparison
+:name: production_comparison
+:header-rows: 1
+
+* -
+  - Old schedule
+  - New schedule
+* - **January**
+  - 1 Grinder
+  - 1 Horizontal drill
+* - **February**
+  - 2 Horizontal drills
+  - 1 Vertical drill
+* - **March**
+  - 1 Borer
+  - 
+* - **April**
+  - 1 Vertical drill
+  - 2 Grinders, 2 horizontal drills, 1 borer and 1 planer
+* - **May**
+  - 1 Grinder and 1 Vertical drill
+  - 1 Vertical drill
+* - **June**
+  - 1 Planer and 1 Horizontal drill
+  -
+* - Profits
+  - €93&nbsp;715
+  - €108&nbsp;855
+```
+
+{numref}`production_comparison` presents both maintenance schedules and the associated profits.
+We can see that the new schedule yields higher profits, which should not be surprising since it is a relaxation of the problem and thus the objective value can only increase (since we are maximising).

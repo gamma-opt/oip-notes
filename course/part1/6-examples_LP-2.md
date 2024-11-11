@@ -17,6 +17,7 @@ kernelspec:
 
 In this lecture, we revisit more of our previous examples and implement them with the objective of exercising the process of modelling and implementing optimisation models. Our objective with this is to create familiarity with mathematical programming modelling while introducing problems whose structure frequently appears in practice.
 
+(p1l6:production)=
 ## Production Planning
 
 Now, we revisit the example in {numref}`p1l5:production`. Our goal is to make a factory production plan over a period of six months, so that we maximize profits. In {numref}`production_variables`, the relevant symbols are defined, where the indexing sets are
