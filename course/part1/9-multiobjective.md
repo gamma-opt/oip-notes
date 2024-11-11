@@ -31,9 +31,11 @@ Our problem is the following
 &x_i \in \{0, 1\}\quad \forall i\in I.
 ```
 
-In words, for a given collection $I$ of items $i\in I$ and a corresponding weight $w_i$, a profit $p_i$, and a desirability rating $r_i$ for each item, and a capacity $c$, our goal is to select a subset of $I$ that maximizes both profit and desirability rating without exceeding the capacity.
+In words, for a given collection $I$ of items $i\in I$ and a corresponding weight $w_i$, a profit $p_i$, and a desirability rating $r_i$ for each item, and a capacity $c$, our goal is to select a subset of $I$ that maximises both profit and desirability rating without exceeding the capacity.
 
-The associated data is the following (taken from [vOptGeneric](https://github.com/vOptSolver/vOptGeneric.jl)):
+Note that this is a maximisation problem, thus we adopt the maximisation perspective in this lecture.
+
+The associated data is the following (taken from the [vOptGeneric](https://github.com/vOptSolver/vOptGeneric.jl) package):
 
 ```{code-cell}
 profit = [77, 94, 71, 63, 96, 82, 85, 75, 72, 91, 99, 63, 84, 87, 79, 94, 90]
@@ -41,10 +43,10 @@ rating = [65, 90, 90, 77, 95, 84, 70, 94, 66, 92, 74, 97, 60, 60, 65, 97, 93]
 weight = [80, 87, 68, 72, 66, 77, 99, 85, 70, 93, 98, 72, 100, 89, 67, 86, 91]
 capacity = 900
 N = length(profit)
-println("Total of items: $(N)")
+println("Number of items: $(N)")
 ```
 
-Let us take a look at the data. We plot each point in terms of the pair (profit, desire), with the size of the dot representing the items weight.
+Let us take a look at the data. We plot each point in terms of the pair $(\text{profit}, \text{rating})$, with the size of the dot representing the items weight.
 
 ```{code-cell}
 using CairoMakie
@@ -54,11 +56,11 @@ ax = Axis(f[1,1],
     xlabel="Profit", 
     ylabel="Rating"
     )
-scatter!(ax, profit, desire, markersize=weight/2)
+scatter!(ax, profit, rating, markersize=weight/2)
 f
 ```
 
-Before we can solve this multio-bjective problem, we need first to discuss some central concepts in multi-objective optimisation.
+Before we can solve this multi-objective problem, we first need to discuss some central concepts in multi-objective optimisation.
 
 ## Dominance and Pareto optimality
 
@@ -74,8 +76,8 @@ Let $f_i : \reals^n \to \reals$ for $j \in \braces{1,\dots,n}$ be our objective 
 
 A solution $x$ **dominates** solution $x'$ if
 
-- $x$ is no worse than $x'$ for all objectives, i.e., $f_i(x) \leq f_i(x') \text{ for all } i \in \braces{1,\dots,n}$, and
-- $x$ is strictly better than $x'$ in at least one objective, i.e., $f_i(x) < f_i(x') \text{ for some } i \in \braces{1,\dots,n}$.
+- $x$ is no worse than $x'$ for all objectives, i.e., $f_i(x) \geq f_i(x') \text{ for all } i \in \braces{1,\dots,n}$, and
+- $x$ is strictly better than $x'$ in at least one objective, i.e., $f_i(x) > f_i(x') \text{ for some } i \in \braces{1,\dots,n}$.
 
 $x'$ is **dominated** by $x$ if and only if $x$ dominates $x'$.
 ```
@@ -109,11 +111,11 @@ f
 **Solution A** on the left leads to a profit of {eval}`sol_a_p` and a desirability rating of {eval}`sol_a_d` at total weight {eval}`sol_a_w`.
 Whereas **Solution B** has a profit of {eval}`sol_b_p`, rating {eval}`sol_b_d`, and total weight {eval}`sol_b_w`. Both solutions are feasible: each item is selected once and their total weights are under the capacity of {eval}`capacity`. However, Solution A is better than Solution B in both objectives. Thus Solution A **dominates** Solution B and, as such, we confidently prefer it between the two.
 
-We can also visualise this on what is called the . In that, we can plot each solution (i.e., selected items) considering their objective values as coordinates. In the objective space, we can plot the regions in which other solutions would dominate and be dominated by a given solution. 
+We can also visualise this on what is called the objective space_. In that, we can plot each solution (i.e., selected items) considering their objective values as coordinates. In the objective space, we can plot the regions in which other solutions would dominate and be dominated by a given solution. 
 
 For two linear objectives, these are two of the **quadrants** formed by a vertical and a horizontal line that crosses the coordinates, or objective values, of the solution. Which of the quadrants hold the dominated and dominating solutions depends whether the objectives are being minimised or maximised. In the knapsack example, since we want to maximise both objectives, the dominated solutions would be in the lower left quadrant, while the dominating solutions would be in the top right quadrant.
 
-Below we plot the dominating/ dominated quadrants for Solution A. Notice that Solution B lies in the quadrant of solutions that are dominated by Solution A.
+Below we plot the dominating/dominated quadrants for Solution A. Notice that Solution B lies in the quadrant of solutions that are dominated by Solution A.
 
 ```{code-cell}
 :tags: ["remove-input"]
@@ -143,10 +145,10 @@ f
 
 Since dominated solution can be ignored, we is clear that we are interested in the so-called **non-dominated** solutions. Let us first formally define what we mean with the term.
 
-```{prf:definition} Non-dominated/ Pareto-optimal solutions
+```{prf:definition} Non-dominated/Pareto-optimal solutions
 :label: pareto_opt
 
-A solution $x$ is called **non-dominated** or **Pareto-optimal**, if there is no other solution that dominates it. In other words, a point is Pareto-optimal if no other point improves at least one objective (without harming the remaining objectives). The set of Pareto-optimal points is called the **Pareto frontier**.
+A solution $x$ is called **non-dominated** or **Pareto-optimal**, if there is no other solution that dominates it. In other words, a point is Pareto-optimal if no other point improves at least one objective without harming the remaining objectives. The set of Pareto-optimal points is called the **Pareto frontier**.
 ```
 
 The Pareto frontier represents the collection of best solutions for different trade-off preferences and is helpful in evaluating the alternative solutions and how they trade off each of the objectives. It thus becomes important to be able to construct the Pareto frontier, or at the very least find as many Pareto-optimal solutions as possible, in order to enable more informed decision-making.
@@ -155,10 +157,10 @@ The Pareto frontier represents the collection of best solutions for different tr
 
 There are two important reference points in multi-objective optimisation: the ideal (sometimes called utopic) and nadir points. The **ideal point** coordinates are obtained by optimising each objective individually. The nadir point coordinates are somewhat more involved. For that, assume that while calculating the ideal value for each objective $f_i(x)$, $i \in \braces{1,\dots, n}$, we table the values of the other objectives $f_j(x)$, with $j \neq i$. The nadir point coordinates are given by the worst values observed for each objective.
 
-Table {numref}`tab-ideal_nadir` illustrates the process of obtaining the ideal and nadir coordinates. In that, $f_i(x_i^*)$ represents the optimal objective value for the optimisation of objective function $f_i(x)$ with $x_i^*$ being its optimal solution. In turn, $f_j(x_i^*)$ represents how the optimal solution $x_i^*$ for objective function $f_i$ performs in terms of the objective $f_j(x)$. Finally, assuming we maximising, the coordinates of the ideal and nadir points would be given by
+{numref}`tab-ideal_nadir` illustrates the process of obtaining the ideal and nadir coordinates. In the table, $f_i(x_i^*)$ represents the optimal objective value for the optimisation of objective function $f_i(x)$ with $x_i^*$ being its optimal solution. In turn, $f_j(x_i^*)$ represents how the optimal solution $x_i^*$ for objective function $f_i$ performs in terms of the objective $f_j(x)$. Finally, assuming we are maximising, the coordinates of the ideal and nadir points would be given by
 
-- Ideal: main-diagonal values of table {numref}`tab-ideal_nadir` $(f_1(x_1^*), f_2(x_2^*), \dots ,f_n(x_n^*)$.
-- Nadir: minimum value in each column {numref}`tab-ideal_nadir` $(\min_{i\in\braces{1,\dots,n}} f_1(x_i^*), \min_{i\in\braces{1,\dots,n}} f_2(x_i^*), \dots, \min_{i\in\braces{1,\dots,n}} f_n(x_i^*))$. 
+- Ideal: main-diagonal values of  {numref}`tab-ideal_nadir` $(f_1(x_1^*), f_2(x_2^*), \dots ,f_n(x_n^*)$.
+- Nadir: minimum value in each column in {numref}`tab-ideal_nadir` $(\min_{i\in\braces{1,\dots,n}} f_1(x_i^*), \min_{i\in\braces{1,\dots,n}} f_2(x_i^*), \dots, \min_{i\in\braces{1,\dots,n}} f_n(x_i^*))$. 
 
 ```{Table} Objective function values
 :name: tab-ideal_nadir
@@ -173,7 +175,47 @@ Table {numref}`tab-ideal_nadir` illustrates the process of obtaining the ideal a
 
 Notice that the nadir and ideal points provide bounds on the objective function values of each Pareto-optimal solution. In some cases, they can be useful for scaling the objective values, which may help defining relative preferences between objectives.
 
-%TODO: Calculate and plot ideal and nadir points for the knapsack problem
+Below, we have the nadir and ideal points for our knapsack data.
+The pareto boundary lies within the rectangle defined by the two points, which we will see later in this lecture.
+```{code-cell}
+:tags: ["remove-cell"]
+using JuMP, HiGHS
+function weighted_method_knapsack(lambda)
+    m = Model(HiGHS.Optimizer)
+    set_silent(m)
+    @variable(m, x[1:N], Bin)
+    @constraint(m, sum(weight[i] * x[i] for i in 1:N) <= capacity)
+    @expression(m, profit_expr, sum(profit[i] * x[i] for i in 1:N))
+    @expression(m, rating_expr, sum(rating[i] * x[i] for i in 1:N))
+    @objective(m, Max, lambda * profit_expr + (1 - lambda) * rating_expr)
+
+    optimize!(m)
+    @assert is_solved_and_feasible(m)
+    return [i for i in 1:N if value(x[i]) > 0.9]
+end
+```
+
+```{code-cell}
+:tags: [remove-input]
+using LaTeXStrings
+
+sol1 = weighted_method_knapsack(1)
+sol2 = weighted_method_knapsack(0)
+
+f = Figure()
+ax = Axis(f[1,1], 
+#    limits=((x_ll, x_ul), (y_ll, y_ul)),
+    xlabel="Profit", 
+    ylabel="Rating"
+    )
+
+sol_b_d = sum(rating[sol_b])
+sol_b_w = sum(weight[sol_b])
+scatter!(ax, [sum(profit[sol1]), sum(profit[sol2]), sum(profit[sol1]), sum(profit[sol2])], [sum(rating[sol2]), sum(rating[sol1]), sum(rating[sol1]), sum(rating[sol2])], markersize=30, color = [2,3,1,1], colormap = :tab10, colorrange = (1, 10))
+text!(ax, [sum(profit[sol1]), sum(profit[sol2])], [sum(rating[sol2]), sum(rating[sol2])], text=["Ideal", L"\max~f_2"], offset=(-14, -30))
+text!(ax, [sum(profit[sol2]), sum(profit[sol1])], [sum(rating[sol1]), sum(rating[sol1])], text=[" Nadir", L"\max~f_1"], offset=(-22, 13))
+f
+```
 
 ## Finding Pareto-optimal points
 
@@ -188,7 +230,7 @@ The notion of domination can be used to state our preference for solutions that 
 The **weighted** method, also known as the weighted-sum method, uses a vector of weights $\lambda$ to turn the multi-objective problem into a single-objective one.
 
 ```{math}
-\mini_{x\in\mathcal{X}} \sum^n_{i=1}\lambda_i f_i(x)
+\maxi_{x\in\mathcal{X}} \sum^n_{i=1}\lambda_i f_i(x)
 ```
 
 The weights should be nonnegative and sum to one, and they can be interpreted as preference ratios associated with different objectives.
@@ -206,8 +248,8 @@ set_silent(m)
 @variable(m, x[1:N], Bin)
 @constraint(m, sum(weight[i] * x[i] for i in 1:N) <= capacity)
 @expression(m, profit_expr, sum(profit[i] * x[i] for i in 1:N))
-@expression(m, desire_expr, sum(desire[i] * x[i] for i in 1:N))
-@objective(m, Max, lambda * profit_expr + (1 - lambda) * desire_expr)
+@expression(m, rating_expr, sum(rating[i] * x[i] for i in 1:N))
+@objective(m, Max, lambda * profit_expr + (1 - lambda) * rating_expr)
 
 optimize!(m)
 @assert is_solved_and_feasible(m)
@@ -216,24 +258,7 @@ print("Items: ",[i for i in 1:N if value(x[i]) > 0.99])
 
 Notice that the solution obtained is our Solution A from before, i.e., it turns out it was Pareto-optimal. We can repeat the above with a different set of weights to try to obtain more points on the Pareto frontier. We say try, because, in principle, we may with a different set of weights still find the same solution.
 
-To make the search systematic, we can wrap the previous code in a function that takes `lambda` as input, then
-
-```{code-cell}
-:tags: ["remove-cell"]
-function weighted_method_knapsack(lambda)
-    m = Model(HiGHS.Optimizer)
-    set_silent(m)
-    @variable(m, x[1:N], Bin)
-    @constraint(m, sum(weight[i] * x[i] for i in 1:N) <= capacity)
-    @expression(m, profit_expr, sum(profit[i] * x[i] for i in 1:N))
-    @expression(m, rating_expr, sum(desire[i] * x[i] for i in 1:N))
-    @objective(m, Max, lambda * profit_expr + (1 - lambda) * rating_expr)
-
-    optimize!(m)
-    @assert is_solved_and_feasible(m)
-    return [i for i in 1:N if value(x[i]) > 0.9]
-end
-```
+To make the search systematic, we can wrap the previous code in a function that takes $\lambda$ as input, then
 
 ```{code-cell}
 sol_c = weighted_method_knapsack(0.4)
@@ -262,14 +287,14 @@ poly!(Point2f[(sol_a_p, sol_a_d), (sol_a_p, y_ll), (x_ll, y_ll), (x_ll, sol_a_d)
 scatter!(ax, [sol_a_p], [sol_a_d], label="Solution A", markersize=30)
 scatter!(ax, [sol_b_p], [sol_b_d], label="Solution B", markersize=30)
 scatter!(ax, [sol_c_p], [sol_c_d], label="Solution C", markersize=30)
+text!(ax, [sol_a_p,sol_b_p,sol_c_p], [sol_a_d, sol_b_d, sol_c_d], text=["A","B","C"], offset=(20, -8), fontsize=20)
 
-axislegend(position = :rt)
 f
 ```
 
-We can see that solutions A and C do not dominate each other. Also, Solution C also does not dominate Solution B. Indeed, if we cared only about profits and not about desirability ratings, Solution B would be a better choice than C. However, Solution C is preferred over the other two if we give more weight to ratings, which is exactly what we did by decreasing $\lambda_1$ and increasing $\lambda_2$.
+We can see that solutions A and C do not dominate each other. Solution C also does not dominate Solution B. Indeed, if we cared only about profits and not about desirability ratings, Solution B would be a better choice than C. However, Solution C is preferred over the other two if we give more weight to ratings, which is exactly what we did by decreasing $\lambda_1$ and increasing $\lambda_2$.
 
-Notice that Solutions A and C, found using the weighted method are solutions in the Pareto frontier. Moreover, one can continue using the weighted method with different weightings and attempt to recover more of the Pareto frontier.
+Notice that Solutions A and C, found using the weighted method, are solutions in the Pareto frontier. Moreover, one can continue using the weighted method with different weightings and attempt to recover more of the Pareto frontier.
 
 While very simple conceptually, the weighted method has a number of downsides. First is the problem of picking weights, how should one decide their values? A well-defined preference information may not always be available, especially when the problem is over many objectives.
 
@@ -282,7 +307,7 @@ In the $\epsilon$-constraint method, one of the objective functions is optimised
 ```{math}
 :label: constraint_prob
 
-\mini &f_1(\mathbf{x}) \\
+\maxi &f_1(\mathbf{x}) \\
 \st &f_2(\mathbf{x})\leq \epsilon_2 \\
 &f_3(\mathbf{x})\leq \epsilon_3 \\
 &\dots \\
@@ -301,7 +326,7 @@ set_silent(m)
 @variable(m, x[1:N], Bin)
 @constraint(m, sum(weight[i] * x[i] for i in 1:N) <= capacity)
 @expression(m, profit_expr, sum(profit[i] * x[i] for i in 1:N))
-@expression(m, rating_expr, sum(desire[i] * x[i] for i in 1:N))
+@expression(m, rating_expr, sum(rating[i] * x[i] for i in 1:N))
 @objective(m, Max, [profit_expr, rating_expr])
 
 set_optimizer(m, () -> MOA.Optimizer(HiGHS.Optimizer))
@@ -345,8 +370,11 @@ scatter!(ax,
 text!(ax,
     [value(profit_expr; result = i) for i in 1:N_res],
     [value(rating_expr; result = i) for i in 1:N_res];
-    text = string.(1:N_res)
+    text = map(x->x!="7" ? x : x*" (A)",string.(1:N_res))
 )
+scatter!(ax, [sum(profit[sol1]), sum(profit[sol2])], [sum(rating[sol2]), sum(rating[sol1])], color = [2,3], colormap = :tab10, colorrange = (1, 10))
+text!(ax, [sum(profit[sol1])], [sum(rating[sol2])], text="Ideal", offset=(-14, -20))
+text!(ax, [sum(profit[sol2])], [sum(rating[sol1])], text=" Nadir", offset=(-22, 5))
 f
 ```
 
