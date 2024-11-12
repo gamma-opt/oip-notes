@@ -303,7 +303,7 @@ Similarly, the substitution effect between two types of cheese is measured by cr
 The cross-elasticity from a product A to product B is given by
 
 ```{math}
-E_{AB} = \frac{\text{\% decrease in demand for A}}{\text{\% increase in price of B}}.
+E_{AB} = \frac{\text{\% increase in demand for A}}{\text{\% increase in price of B}}.
 ```
 
 ```{table} Elasticity of products
