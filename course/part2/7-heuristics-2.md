@@ -20,6 +20,12 @@ kernelspec:
 
 % Focus on going downhill while trying to avoid local minima
 
+% Mention Julia packages that implement this stuff but say we provide implementations as examples
+% - metaheuristics
+% - evolutionary
+% - nlopt
+% - blackboxoptim
+
 ## Point methods
 
 ```{code-cell}
@@ -33,7 +39,7 @@ function cost_f(solution, d)
 end
 
 function create_neighbor(solution)
-
+    # implement lin-kernighan
 end
 ```
 
@@ -240,33 +246,213 @@ The methods we have covered so far relied on keeping ttrack of a single point mo
 Some methods differ from this approach in that they are _population_ based, where avoiding local minima is achieved through spreading a collection of individuals throughout the solution space.
 
 ### Genetic Algorithms
+% TODO make sure it is sufficiently emphasized that the operations described here are not absolute and can be tweaked in many ways
 
 _Genetic algorithms_ take inspiration from biology and simulate a natural-selection-like process in order to obtain good solutions.
-On a high level, genetic algorithms work by treating each individual solution in a population as a chromosome, whose fitness is inversely proportional to the value of the objective function at that point, since we are minimising.
-Every iteration represents a generation, during which a subpopulation is selected based on their fitness to reproduce, leading to a new generation.
-The reproduction step incorporates recombination, where pairs of "parent" solutions combine their genetic information similar to sexual reproduction, adding diversity to the optimisation process.
-Lastly, random mutations can occur on individual chromosomes, adding in additional diversity to the process.
+On a high level, genetic algorithms work by treating each individual solution in a population as a _chromosome_, whose fitness is inversely proportional to the value of the objective function at that point, since we are minimising.
+Every iteration represents a generation, during which a subpopulation is _selected_ based on their fitness to reproduce, leading to a new generation.
+The reproduction step incorporates _recombination_, where pairs of "parent" solutions combine their genetic information similar to sexual reproduction, adding diversity to the optimisation process.
+Lastly, random _mutations_ can occur on individual chromosomes, adding in additional diversity to the process.
+
+A generic genetic algorithm is given in {prf:ref}`genetic_alg`.
+
+```{prf:algorithm} Genetic Algorithm
+:label: genetic_alg
+1. Initialize the current generation.
+2. For $i=1,\dots,N$
+    1. **Select** parents from the current generation $G_i$.
+    2. **Recombine** selected parents to create the next generation $G_{i+1}$.
+    3. **Mutate** individuals of $G_{i+1}$.
+3. Return the solution corresponding to the individual with the highest fitness.
+```
 
 #### Chromosomes
 
 The representation of solutions as chromosomes is critical to the design of the recombination and mutation operations, and the performance of the algorithm.
 Most frequently, bit strings are used to represent solutions.
 For example in a 0-1 knapsack problem this would be natural, since every bit could correspond to whether an item is included in the selection or not.
-For TSP, it may be easier to consider integer sequences as we have done in earlier examples.
+For TSP, it may be easier to consider permutations as we have done in earlier examples.
 Alternative representations are also possible, as long as recombination and mutation operations can be clearly defined.
 
 #### Selection
 
 There are a number of different strategies for picking parents for the next generation.
+They vary in the selection pressure they impose.
+If pressure is too high, only the currently-best solutions will be selected and the evolution process will be concentrated into alike solutions.
+Conversely, if the pressure is too low, then mediocre solutions will not be eliminated and thus will pollute the next generation, making optimisation difficult.
+An ideal amount of pressure will allow seeking good solutions while exploring the solution space, thus escaping local optima.
 
-- Genetic algorithms
--- mutations
--- recombination
--- selection
-- More?
+One example method for selection is **roulette wheel selection**, also known as **fitness proportionate selection**, where parents are chosen randomly, each having probability proportional to their fitness.
+This is akin to spinning a roulette wheel where the slices are bigger for individuals with higher fitness.
+
+```{code-cell}
+abstract type Selection end
+
+struct RouletteWheelSelection <: Selection end
+function select(t::RouletteWheelSelection, fitness, N)
+    s = sum(fitness)
+    fitness_probs = cumsum(fitness ./ s)
+    parent() = begin
+        r = rand()
+        for (i, prob) in enumerate(fitness_probs)
+            if rand < prob
+                return i
+            end
+        end
+    end
+    return [(parent(), parent()) for _ in 1:N]
+end
+```
+
+Another strategy is **tournament selection**, in which a subset of the population is selected randomly to "compete in a tournament" based on their fitness.
+The winner, i.e. the individual with the highest fitness is selected as a parent.
+If the subset to be selected is large, this reduces to greedy selection since individuals with the highest fitness will be more likely to be included.
+With a smaller size, the selection pressure decreases, adding diversity to the solution evolution.
+
+```{code-cell}
+struct TournamentSelection <: Selection 
+    size
+end
+function select(t::TournamentSelection, fitness, N)
+    parent() = begin
+        perm = randperm(length(fitness))
+        return p[argmin(fitness[perm[1:t.size]])]
+    end
+    return [(parent(), parent()) for _ in 1:N]
+end
+```
+
+
+#### Recombination
+
+In sexual reproduction, the two sets of chromosomes from parent cells exchange genetic information with one another in a process called crossing-over or recombination, resulting in an offspring that is related to its parents but with a different genetic makeup.
+In genetic algorithms, this is emulated similarly, where the next generation is created via recombination of the selected individuals from the previous generation.
+More specifically, two parents are selected and applied a crossover operation, which often results in two offsprings.
+
+The exact mechanism of the recombination is dependant on the chromosome structure.
+For example, if the chromosomes are bitstrings, some random substring(s) of each chromosome may be swapped.
+```{figure} ../figures/recombination_twopoint.drawio.svg
+A popular bitstring recombination operation is two-point crossover, where a start point and an end point are selected randomly and the region in between are exchanged.
+```
+
+```{code-cell}
+abstract type Recombination end
+
+struct TwoPointCrossover <: Recombination end
+function recombine(t::TwoPointCrossover, parents)
+    n = length(parents[1])
+    s, e = randperm(n)[1:2]
+    mask = falses(n)
+    if s < e
+        mask[s:e] .= 1
+    else
+        mask[1:s] .= 1
+        mask[e:n] .= 1
+    end
+    child1 = copy(parents[1])
+    child2 = copy(parents[2])
+    child1[mask] = parents[2][mask]
+    child2[mask] = parents[1][mask]
+    return [child1, child2]
+end
+```
+
+% http://www.permutationcity.co.uk/projects/mutants/tsp.html
+For more elaborate chromosomes, for example those representing permutations, recombination is often a bit more involved, since one needs to ensure that the special structure is not destroyed as a result of the changes. An example of a recombination for permutation is called _order crossover_. In order crossover, a subset of values from the permutation is randomly selected. Each offspring is then constructed as a copy of one of the parents, except the selected subset of values is reordered to match the other parent.
+
+```{figure} ../figures/recombination_order.drawio.svg
+Example of an order crossover where $S=\{1,3,4,7\}$ is selected. For the top offspring, the values are retained in the position from the first parent and for the bottom offspring, the second parent.
+```
+
+```{code-cell}
+struct OrderCrossover <: Recombination 
+    size
+end
+function recombine(t::OrderCrossover, parents)
+    n = length(parents[1])
+    values = randperm(n)[1:t.size]
+    print(values)
+
+    child1 = []
+    child2 = []
+    p1i = 1
+    p2i = 1
+    for i in 1:n
+        if !(parents[1][i] in values)
+            push!(child1, parents[1][i])
+        else
+            while !(parents[2][p2i] in values)
+                p2i += 1
+            end
+            push!(child1, parents[2][p2i])
+            p2i += 1
+        end
+
+        if !(parents[2][i] in values)
+            push!(child2, parents[2][i])
+        else
+            while !(parents[1][p1i] in values)
+                p1i += 1
+            end
+            push!(child2, parents[1][p1i])
+            p1i += 1
+        end
+
+    end
+    return [child1, child2]
+end
+```
+
+#### Mutation
+
+Mutations introduce random changes in individuals, resulting in a larger diversity in the population and prevent being stuck in a local optimum.
+Ideally, the mutations should be small and unbiased so that they don't interfere with specialisation and only help in the exploration of the solution space.
+Similar to recombination, the mutation mechanism is heavily influenced by chromosome representation.
+In bitstrings, this can be as simple as flipping a randomly selected bit (or a certain number of them).
+```{figure} ../figures/mutation_bitflip.drawio.svg
+Write
+```
+
+```{code-cell}
+abstract type Mutation end
+
+struct BitflipMutation <: Mutation 
+    p
+end
+function mutate!(t::BitflipMutation, chromosome)
+    mask = rand(length(chromosome)) < p
+    chromosome[mask] = !chromosome[mask]
+    return nothing
+end
+```
+
+Two common examples of permutation mutations are rotations and swaps.
+In a rotation, a subsequence of the chromosome is randomly selected, along with a rotation number $k$. Then, within the subsequence, every item is shifted to some direction $k$ times, wrapping over to the start of the subsequence when needed. The rest of the chromosome is left intact.
+
+```{code-cell}
+struct RotationMutation <: Mutation end
+function mutate!(t::RotationMutation, chromosome)
+    
+end
+```
+
+In a swap, two items (or non-overlapping subsequences) are randomly selected and swapped.
+
+```{figure} ../figures/mutation_permutation.drawio.svg
+Write
+```
+
+```{code-cell}
+struct SwapMutation <: Mutation end
+function mutate!(t::SwapMutation, chromosome)
+
+end
+```
+
 
 ### Particle swarm
 
+<!---
 ### Example: Knapsack Problem
 
 Should there be a problem example here or should it be left for Workshop 3?
@@ -343,3 +529,4 @@ PSO also doesn't support permutations.
 pso = PSO(;N = 100, C1=1.5, C2=1.5, ω = 0.7)
 optimize(f, search_space, pso)
 ```
+--->
