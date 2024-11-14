@@ -29,6 +29,19 @@ kernelspec:
 ## Point methods
 
 ```{code-cell}
+using Random, CairoMakie
+
+function generate_distance_matrix(n; random_seed = 1)
+    rng = Random.MersenneTwister(random_seed)
+    X_coord = 100 * rand(rng, n)
+    Y_coord = 100 * rand(rng, n)
+    d = [sqrt((X_coord[i] - X_coord[j])^2 + (Y_coord[i] - Y_coord[j])^2) for i in 1:n, j in 1:n]
+    return d, X_coord, Y_coord
+end
+
+n = 40
+d, X_coord, Y_coord = generate_distance_matrix(n)
+
 function cost_f(solution, d)
     c = 0
     for i in 2:n
@@ -164,19 +177,6 @@ end
 
 Need better local search logic probably
 ```{code-cell}
-using Random, CairoMakie
-
-function generate_distance_matrix(n; random_seed = 1)
-    rng = Random.MersenneTwister(random_seed)
-    X_coord = 100 * rand(rng, n)
-    Y_coord = 100 * rand(rng, n)
-    d = [sqrt((X_coord[i] - X_coord[j])^2 + (Y_coord[i] - Y_coord[j])^2) for i in 1:n, j in 1:n]
-    return d, X_coord, Y_coord
-end
-
-n = 40
-d, X_coord, Y_coord = generate_distance_matrix(n)
-
 count = IterationCounter(0, 1000)
 path = tsp_grasp(d, .3, count, 1000)
 
@@ -295,12 +295,12 @@ function select(t::RouletteWheelSelection, fitness, N)
     parent() = begin
         r = rand()
         for (i, prob) in enumerate(fitness_probs)
-            if rand < prob
+            if r < prob
                 return i
             end
         end
     end
-    return [(parent(), parent()) for _ in 1:N]
+    return [[parent(), parent()] for _ in 1:N]
 end
 ```
 
@@ -339,8 +339,8 @@ A popular bitstring recombination operation is two-point crossover, where a star
 abstract type Recombination end
 
 struct TwoPointCrossover <: Recombination end
-function recombine(t::TwoPointCrossover, parents)
-    n = length(parents[1])
+function recombine(t::TwoPointCrossover, parent_pair)
+    n = length(parent_pair[1])
     s, e = randperm(n)[1:2]
     mask = falses(n)
     if s < e
@@ -349,10 +349,10 @@ function recombine(t::TwoPointCrossover, parents)
         mask[1:s] .= 1
         mask[e:n] .= 1
     end
-    child1 = copy(parents[1])
-    child2 = copy(parents[2])
-    child1[mask] = parents[2][mask]
-    child2[mask] = parents[1][mask]
+    child1 = copy(parent_pair[1])
+    child2 = copy(parent_pair[2])
+    child1[mask] = parent_pair[2][mask]
+    child2[mask] = parent_pair[1][mask]
     return [child1, child2]
 end
 ```
@@ -368,33 +368,32 @@ Example of an order crossover where $S=\{1,3,4,7\}$ is selected. For the top off
 struct OrderCrossover <: Recombination 
     size
 end
-function recombine(t::OrderCrossover, parents)
-    n = length(parents[1])
+function recombine(t::OrderCrossover, parent_pair)
+    n = length(parent_pair[1])
     values = randperm(n)[1:t.size]
-    print(values)
 
     child1 = []
     child2 = []
     p1i = 1
     p2i = 1
     for i in 1:n
-        if !(parents[1][i] in values)
-            push!(child1, parents[1][i])
+        if !(parent_pair[1][i] in values)
+            push!(child1, parent_pair[1][i])
         else
-            while !(parents[2][p2i] in values)
+            while !(parent_pair[2][p2i] in values)
                 p2i += 1
             end
-            push!(child1, parents[2][p2i])
+            push!(child1, parent_pair[2][p2i])
             p2i += 1
         end
 
-        if !(parents[2][i] in values)
-            push!(child2, parents[2][i])
+        if !(parent_pair[2][i] in values)
+            push!(child2, parent_pair[2][i])
         else
-            while !(parents[1][p1i] in values)
+            while !(parent_pair[1][p1i] in values)
                 p1i += 1
             end
-            push!(child2, parents[1][p1i])
+            push!(child2, parent_pair[1][p1i])
             p1i += 1
         end
 
@@ -410,7 +409,7 @@ Ideally, the mutations should be small and unbiased so that they don't interfere
 Similar to recombination, the mutation mechanism is heavily influenced by chromosome representation.
 In bitstrings, this can be as simple as flipping a randomly selected bit (or a certain number of them).
 ```{figure} ../figures/mutation_bitflip.drawio.svg
-Write
+Bitflip mutation example.
 ```
 
 ```{code-cell}
@@ -420,7 +419,7 @@ struct BitflipMutation <: Mutation
     p
 end
 function mutate!(t::BitflipMutation, chromosome)
-    mask = rand(length(chromosome)) < p
+    mask = rand(length(chromosome)) .< p
     chromosome[mask] = !chromosome[mask]
     return nothing
 end
@@ -430,25 +429,78 @@ Two common examples of permutation mutations are rotations and swaps.
 In a rotation, a subsequence of the chromosome is randomly selected, along with a rotation number $k$. Then, within the subsequence, every item is shifted to some direction $k$ times, wrapping over to the start of the subsequence when needed. The rest of the chromosome is left intact.
 
 ```{code-cell}
-struct RotationMutation <: Mutation end
+struct RotationMutation <: Mutation 
+    size
+    k
+end
 function mutate!(t::RotationMutation, chromosome)
-    
+    n = length(chromosome)
+    original = copy(chromosome)
+    start = rand(1:n)
+    selection = start:(start+t.size-1)
+    if start + t.size - 1 > n
+        rem = (start + t.size) % n
+        selection = vcat(1:rem, start:n)
+    end
+    placement = circshift(selection, t.k)
+    chromosome[placement] = original[selection]
+    return nothing
 end
 ```
 
 In a swap, two items (or non-overlapping subsequences) are randomly selected and swapped.
 
-```{figure} ../figures/mutation_permutation.drawio.svg
-Write
-```
-
 ```{code-cell}
 struct SwapMutation <: Mutation end
 function mutate!(t::SwapMutation, chromosome)
-
+    p1, p2 = randperm(length(chromosome))[1:2]
+    tmp = chromosome[p1]
+    chromosome[p1] = chromosome[p2]
+    chromosome[p2] = tmp
+    return nothing
 end
 ```
 
+```{figure} ../figures/mutation_permutation.drawio.svg
+Permutation mutation examples.
+```
+
+% TODO Talk a little bit about initialisation
+
+```{code-cell}
+function initialise(n_cities, gen_size)
+    [randperm(n_cities) for _ in 1:gen_size]
+end
+```
+
+Combining everything together according to {prf:ref}`genetic_alg`, we get
+
+```{code-cell}
+function tsp_ga(f, n_cities, n_iters, gen_size; 
+                t_sel=RouletteWheelSelection(),
+                t_rec=OrderCrossover(10),
+                t_mut=RotationMutation(5, 3)
+)
+    population = initialise(n_cities, gen_size)
+    fitnesses = f.(population)
+    for _ in 1:n_iters
+        parent_idxs = select(t_sel, fitnesses, gen_size/2)
+        parents = getindex.(Ref(population), parent_idxs)
+        offspring_pairs = recombine.(Ref(t_rec), parents)
+        population = vcat(offspring_pairs...)
+        mutate!.(Ref(t_mut), population)
+        fitnesses = f.(population)
+    end
+    max_fit, i = findmax(fitnesses)
+    return population[i], max_fit
+end
+```
+
+```{code-cell}
+:tags: [skip-execution]
+fitness(x) = -cost_f(x, d)
+tsp_ga(fitness, n, 100, 100)
+```
 
 ### Particle swarm
 
