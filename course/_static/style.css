@@ -17,6 +17,6 @@ table thead tr th.text-center {
 }
 
 #critical_points {
-  transform: scale(1.5) translate(-20px, -20px);
-  clip-path: rect(20% 30% 85% 80%);
+  transform: scale(1.5) translate(-20px, -60px);
+  clip-path: rect(30% auto auto auto);
 }

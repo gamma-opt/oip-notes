@@ -81,7 +81,7 @@ fig
 In the above figure, four functions are illustrated.
 
 - On the top left, the function
-- 
+
 ```{math}
 f(x) = \begin{cases}0&x<0\\1&x\geq 1\end{cases}
 ```
@@ -361,6 +361,9 @@ app = App() do session
 
     return grid
 end
+
+# we are done with WGLMakie so return to Cairo for scrolling
+CairoMakie.activate!()
 ```
 
 With that, we are ready to define differentiability for the multidimensional case.
@@ -415,7 +418,7 @@ record(fig, "course/_static/critical_points.mp4", azimuth_it) do az
 end
 ```
 
-<video id="critical_points" width="800" controls loop autoplay>
+<video id="critical_points" width="800" loop autoplay>
     <source src="../_static/critical_points.mp4" type="video/mp4">
 </video>
 
