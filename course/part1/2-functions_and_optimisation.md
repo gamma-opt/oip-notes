@@ -14,7 +14,7 @@ kernelspec:
 ---
 
 
-
+(p1l2)=
 # Functions and optimisation
 
 ## What is a function?
@@ -34,6 +34,7 @@ A **function** {math}`f` is a rule that assigns each element {math}`x` in a set,
 On the other hand, {prf:ref}`def-function` is also very general and flexible, making functions a powerful conceptual tool in mathematics. The formula {math}`f(x)=(x+2)^2` is clearly a function. We can also have functions in multiple variables, such as {math}`f(x,y)=x+y`, as long as we do not violate the unique outputs rule. This would only require that every element of the set {math}`X` is an ordered pair {math}`(x,y)` instead of a single number. Alternatively, we can define functions that are difficult to describe as algebraic formulas. Recall the example with the population of Finland at year {math}`t`, we cannot write a formula for this for multiple reasons, one of which is that we don't yet know many of its values, for example at {math}`t=2100`.
 
 In mathematical optimisation, our main objective will be searching for points in the function domain $X$ that yield the maximum (or minimum) value $f(x)$. And, as we will see, the ways of achieving this objective is deeply intertwined with "how the function looks like", i.e., its **analytical properties**. For the purpose of optimisation tasks, three properties stand out. They are:
+
   1. **Continuity**
   2. **Differentiability**
   3. **Convexity**  
@@ -43,6 +44,7 @@ We will next provide formal definitions of all these, but for now, let us visual
 % In myst there is a way of capturing the code output and wrapping it in a figure
 % https://mystmd.org/guide/reuse-jupyter-outputs#label-a-notebook-cell
 % But it doesn't work in jupyter-book v1
+
 ```{code-cell} julia
 :tags: ["remove-input"]
 
@@ -77,11 +79,15 @@ fig
 ```
 
 In the above figure, four functions are illustrated.
+
 - On the top left, the function
+- 
 ```{math}
 f(x) = \begin{cases}0&x<0\\1&x\geq 1\end{cases}
 ```
+
 is continuous and differentiable, except at $x=0$ where it is neither.
+
 - On the top right, the function is continuous everywhere and differentiable except at $x=0$. It is also convex.
 - Bottom left function is the standard logistic function $\sigma(x)$, which is continuous and differentiable everywhere, but not convex.
 - Bottom right function $e^x$ is continuous, differentiable and convex.
@@ -96,6 +102,7 @@ For most practical cases, we rely on the second idea. That is, we rely on algori
 ## Analysing a function
 
 ### Continuity
+
 How optimisation methods move towards optimal points is determined by inferences we can make about the function based on structure that it may have.
 Take, for example, continuity, which roughly means that the graph of the function is an uninterrupted line. One formal definition is the following:
 
@@ -182,7 +189,9 @@ end
 
 fig
 ```
+
 The figure below shows the sine function, along with the tangent line. Notice how the orange line is a good approximation of the blue line close to the green dot. Also, notice how we can, by looking at the inclination of the tangent line tell whether the function is going up or down in value. Make sure you move the slider to see the tangent line at different points.
+
 ```{code-cell} julia
 :tags: ["remove-input"]
 
@@ -276,6 +285,7 @@ J(a, b) = f(a , b) + \nabla f(a,b)^\top (x_1 - a, x_2 - b),
 where $\nabla f(a, b)$ is the *gradient* of $f$ at $(a, b)$.
 
 Here is how it looks like for a function $f(x,y) = -x^2 - y^2$. As before, notice how the inclination the plane has, generally governed by the gradient vector of the function, can be used to infer how the function behaves around the point (in orange).
+
 ```{margin}
 This plot can be moved with left-click and rotated with Ctrl+left-click.
 ```
@@ -372,7 +382,6 @@ If either of the partial derivatives do not exist, or the above limit does not e
 
 As we will see later, the gradient plays a **crucial role** in many of the optimisation methods that we will use. This is precisely because the gradient vector serves as an indicator of how the function behaves locally, pointing towards the direction of of "fastest" value increase. We will return to that point in part two. For the purpose of our discussion, let us now focus on how to use the gradient to find minima and maxima.
 
-
 ## Function shapes, convexity and its role in optimisation
 
 One crucial feature about gradients is that they can be used to identify points that are candidate to being optimal. To see that, assume that $f$ is differentiable, in line with {prf:ref}`differentiability_multi`. Assume that $f : \reals^2 \to \reals$ for simplicity and that we are at point $(a,b)$. For a sufficiently small step away from $(a,b)$ towards any point $(x_1, x_2)$, we have seen that $J(a, b) = f(a , b) + \nabla f(a,b)^\top (x_1 - a, x_2 - b)$ is an arbitrarily good approximation for $f(x_1,x_2)$. We can use this to realise something about optimality: if $(a,b)$ is to be an optimal point (say, a minimum point), we must have
@@ -381,7 +390,7 @@ One crucial feature about gradients is that they can be used to identify points 
 f(a,b) \le f(x_1, x_2), \text{ for all } (x_1,x_2) \in X,
 ```
 
-which, can only be true if $\nabla f(a,b) = 0$. Otherwise, we could move in its opposite direction and find another point $(x_1,x_2)$ where $f(x_1,x_2) < f(a,b)$. Thus, having zero gradients is a necessary condition for a point to be optimal. Cleary, verifying that the gradient is zero is not sufficient for one to state that $(a,b)$ is an optimal point, because one must also that into account curvature. 
+which, can only be true if $\nabla f(a,b) = 0$. Otherwise, we could move in its opposite direction and find another point $(x_1,x_2)$ where $f(x_1,x_2) < f(a,b)$. Thus, having zero gradients is a necessary condition for a point to be optimal. Cleary, verifying that the gradient is zero is not sufficient for one to state that $(a,b)$ is an optimal point, because one must also that into account curvature.
 
 The function plotted below illustrates some alternative cases. Notice that in two of the cases (purple and red) we can trust the zero-gradient condition to be the indication of optimality, while it is not the case for the saddle point in orange.
 
