@@ -98,13 +98,13 @@ An important aspect of how ternary search behaves is dependant on how the two po
 One option is to pick them at equal intervals, which guaranteed removing one-third of the interval.
 We could also pick both points around the center to approximately halve our interval.
 
-```{figure} ../figures/interval_reduction.svg
+```{figure} ../figures/interval_reduction.drawio.svg
 Different midpoints reduce the interval differently.
 ```
 
 A related idea is to pick these points so that they can be re-used in the next iteration, as shown in {numref}`golden_reuse`.
 
-```{figure} ../figures/golden.svg
+```{figure} ../figures/golden.drawio.svg
 :name: golden_reuse
 Evaluation points of the golden line search in two iterations. If the interval $[a,d]$ is shortened to $[a,c]$, point $b$ can be reused without needing a new function evaluation.
 ```
