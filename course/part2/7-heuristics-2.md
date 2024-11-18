@@ -15,19 +15,16 @@ kernelspec:
 
 # Metaheuristics
 
-% TODO Add some introduction
-% In this section we'll show some algorithms... We implement them here but you can use a library like metaheuristics...
+In [Lecture 16](./6-heuristics-1.md), we discussed heuristic methods, which are general approaches for obtaining good results for difficult problems.
+In this lecture, we will talk about _metaheuristics_, which can be thought of as "template algorithms" that use heuristic ideas on a high-level, so that they can be adapted to work for many problems.
 
-% Focus on going downhill while trying to avoid local minima
+A big focus of these algorithms is balancing exploration versus exploitation: making sure that we get the best result available without being stuck in a local optimum.
+Keep this in mind throughout the lecture, many algorithms that fall under the umbrella of metaheuristics can be thought of as greedy approach plus some mechanism to add diversity to the solution and explore the solution space globally.
 
-% Mention Julia packages that implement this stuff but say we provide implementations as examples
-% - metaheuristics
-% - evolutionary
-% - nlopt
-% - blackboxoptim
+Below we also provide code examples for the methods we present, however keep in mind that many packages exist that implement the main logic of the algorithms and require only problem specific information from the user.
+Such packages in Julia include [`Metaheuristics.jl`](https://jmejia8.github.io/Metaheuristics.jl/stable/), [`BlackBoxOptim.jl`](https://github.com/robertfeldt/BlackBoxOptim.jl) and [`Evolutionary.jl`](https://wildart.github.io/Evolutionary.jl/stable/).
 
-## Point methods
-
+Here are some functions we will need throughout the lecture for giving TSP examples.
 ```{code-cell}
 using Random, CairoMakie
 
@@ -50,17 +47,12 @@ function cost_f(solution, d)
     c += d[solution[1], solution[n]]
     return c
 end
-
-function create_neighbor(solution)
-    # implement lin-kernighan
-end
 ```
+
+## Point methods
 
 ### GRASP
 
-% TODO Check: 
-% - just call this a metaheuristic
-% - local search or perturbative
 _Greedy randomised adaptive search procedure_ (GRASP) is an algorithm that combines greediness with local search techniques.
 This is achieved by repeating an iteration consisting of two phases until some termination criterion is satisfied.
 In the first phase, a new solution is constructed, similar to that in a greedy approach.
@@ -175,8 +167,9 @@ function (c::IterationCounter)(_)
 end
 ```
 
-Need better local search logic probably
+Let's see what result we get.
 ```{code-cell}
+:tags: [skip-execution]
 count = IterationCounter(0, 1000)
 path = tsp_grasp(d, .3, count, 1000)
 
@@ -186,6 +179,12 @@ endpoints = path[[1,n]]
 lines!(ax, X_coord[endpoints], Y_coord[endpoints], color = 1, colormap = :tab10, colorrange = (1, 10))  # connect the cycle
 fig
 ```
+```{figure} ../figures/tsp_grasp.svg
+GRASP algorithm output for TSP with $n=40$.
+```
+
+This is not a bad attempt though clearly suboptimal.
+Tweaking the hyperparameters such as $a$ and the number of iterations, along with devising better local-search methods in the second phase of the algorithm may yield significantly better results.
 
 ### Simulated Annealing
 
@@ -193,6 +192,7 @@ _Simulated annealing_ is a method that takes inspiration from thermodynamics.
 At high temperature, the molecules of a liquid will have high energy and mobility.
 If frozen immediately, the resulting molecular structure will likely be highly irregular.
 However, if cooled slowly such as in the process of annealing in metallurgy, the molecules are able to attain a regular arrangment, even possibly achieving the minimum energy state for the system.
+
 The notions of high energy and slow cooling are translated into optimisation to try to achieve the minimum energy state, corresponding to the minimum of an optimisation problem.
 More specifically, the simulated annealing algorithm works by starting with an initial solution and exploring the solution space via neighbors.
 However, worse solutions are sometimes accepted, with probability proportional to the system's current "temperature".
@@ -226,12 +226,19 @@ There is no universally good choice, but possible schedules worth trying include
 - Move budget: setting $T=T_0(1-k/K)^\alpha$ after every $m$ moves, where $k$ is the number of moves made so far and $K$ is the total number of moves allowed. $\alpha$ here is some positive hyperparameter. 
 
 ```{code-cell}
+function create_neighbor(sol)
+    c = copy(sol)
+    i,j = randperm(length(sol))[1:2]
+    c[i],c[j] = c[j],c[i]
+    return c
+end
+
 function tsp_sa(d, n, n_iters)
     sol = shuffle(1:n)
     for it in 1:n_iters
         T = n_iters/it
         neighbor = create_neighbor(sol)
-        delta = cost_f(neighbor, d) - cost_f(sol)
+        delta = cost_f(neighbor, d) - cost_f(sol, d)
         if delta < 0 || rand() < exp(-delta/T)
             sol = neighbor
         end
@@ -240,13 +247,32 @@ function tsp_sa(d, n, n_iters)
 end
 ```
 
+Applying it to the same TSP problem gives us the following solution.
+
+```{code-cell}
+:tags: [skip-execution]
+path = tsp_sa(d, n, 1000)
+
+fig, ax, plot = scatter(X_coord, Y_coord)
+lines!(ax, X_coord[path], Y_coord[path], color = 1, colormap = :tab10, colorrange = (1, 10))  # reorder vector using permutation
+endpoints = path[[1,n]]
+lines!(ax, X_coord[endpoints], Y_coord[endpoints], color = 1, colormap = :tab10, colorrange = (1, 10))  # connect the cycle
+fig
+```
+```{figure} ../figures/tsp_sa.svg
+Simulated annealing algorithm output for TSP with $n=40$.
+```
+
+Similar to GRASP, the SA solution we obtain is suboptimal but significantly better than a random permutation.
+The `create_neighbor` function used above does only a simple swap of two cities.
+A significant improvement to this approach would be to use the [Lin-Kernighan heuristic](https://en.wikipedia.org/wiki/Lin%E2%80%93Kernighan_heuristic) for generating neighboring solutions, which is specifically optimisation related thus we only mention for completeness.
+
 ## Population methods
 
-The methods we have covered so far relied on keeping ttrack of a single point moving around in the solution space.
+The methods we have covered so far relied on keeping track of a single point moving around in the solution space.
 Some methods differ from this approach in that they are _population_ based, where avoiding local minima is achieved through spreading a collection of individuals throughout the solution space.
 
 ### Genetic Algorithms
-% TODO make sure it is sufficiently emphasized that the operations described here are not absolute and can be tweaked in many ways
 
 _Genetic algorithms_ take inspiration from biology and simulate a natural-selection-like process in order to obtain good solutions.
 On a high level, genetic algorithms work by treating each individual solution in a population as a _chromosome_, whose fitness is inversely proportional to the value of the objective function at that point, since we are minimising.
@@ -314,11 +340,11 @@ struct TournamentSelection <: Selection
     size
 end
 function select(t::TournamentSelection, fitness, N)
-    parent() = begin
+    parents() = begin
         perm = randperm(length(fitness))
-        return p[argmin(fitness[perm[1:t.size]])]
+        return sort(perm[1:t.size], by=x->fitness[x], rev=true)[1:2]
     end
-    return [(parent(), parent()) for _ in 1:N]
+    return [parents() for _ in 1:N]
 end
 ```
 
@@ -465,7 +491,8 @@ end
 Permutation mutation examples.
 ```
 
-% TODO Talk a little bit about initialisation
+Finally, we need a method for initialising the first population.
+As long as the individuals are sufficiently spread, the exact mechanism of initialisation should not be critical to performance.
 
 ```{code-cell}
 function initialise(n_cities, gen_size)
@@ -502,83 +529,148 @@ fitness(x) = -cost_f(x, d)
 tsp_ga(fitness, n, 100, 100)
 ```
 
-### Particle swarm
+### Particle swarm optimisation
 
-<!---
-### Example: Knapsack Problem
+_Particle swarm optimisation_ (PSO) is similar to genetic algorithms in using a population of individuals that represent candidate solutions.
+However, instead of emulating evolution, PSO simulates the movement of a _swarm_ of _particles_ across the solution space.
+The movements of each particle is influenced by their individual experience and that of the entire swarm, allowing for an exploration of the solution space while seeking improvement.
 
-Should there be a problem example here or should it be left for Workshop 3?
-I think it may be easier to have an example, so we can exemplify/illustrate solution construction, neighbour search, mutation etc.
+```{prf:algorithm} Particle swarm
+:label: alg_pso
+**Inputs** Objective function $f$
+1. Initialize the swarm
+2. While the termination criterion is unmet
+    1. For each particle in the swarm
+        1. Update velocity and position
+        2. If new position is better than particle's personal best or the entire swarm's best, replace them
+3. Return the swarm's best position
+```
 
-0/1 knapsack (from http://artemisa.unicauca.edu.co/~johnyortega/instances_01_KP/)
-Optimum is 295.
+The crucial feature of PSO is the velocity update.
+For continuous problems, the update rule is
+```{math}
+:label: pso_update_continuous
+v_i = av_i + b_p r_p (p_i-x_i) + b_g r_g (g_i-x_i)
+```
+where $v_i$ is the velocity of the $i$th particle and $x_i$ its current position.
+$p_i$ and $g_i$ are the best positions of the particle and the swarm so far, and thus $(p_i-x_i)$ and $(g_i-x_i)$ can be thought of as **local** and **global** attraction, also referred to as cognitive and social contributors.
+$b_p$ and $b_g$ are user-defined weights that control the contribution of the local and global attractions.
+However, these are augmented by $r_p$ and $r_g$, which are randomly generated in $[0,1]$, adding stochastic variety to the movement.
+The user-defined inertia $a$ ensures that the movement of the particle is not wholly independent from the previous movement.
 
-GRASP code following example in source code.
+Another important aspect of PSO is the social interaction provided by the topology of the swarm.
+In the basic algorithm in {prf:ref}`alg_pso`, we have used a global topology, i.e. every individual can communicate with one another, since the swarm's best solution is accessible to all.
+One can imagine that this is not ideal in all problems, for example a local minimum that is significantly better than the current best solution may attract the entire swarm to it too fast before sufficient exploration can take place.
+Such a scenario can be avoided if the communication of particles is constrained to a local neighborhood or some grouping of the particles independent of their current location.
+
+It should be noted that the continuous velocity update in {eq}`pso_update_continuous` may not be appropriate for problems in discrete space, such as TSP.
+In such situations, good update rules may be problem-specific.
+Here, we will formulate one for TSP with permutation solutions like in prior examples.
+Let us consider the swap of two positions as our fundamental operation.
+Then, we define 
+- the difference between to positions, for example $p_i-x_i$, as the shortest sequence of swaps $(s_1,\dots,s_k)$ required to convert $x_i$ to $p_i$,
+- the multiplication $a \cdot (s_1,\dots,s_k)$ of a swap sequence with a scalar $a$ where $0<s\leq 1$ as the swap sequence $(s_1,\dots,s_{\ceil{ak}})$,
+- the addition of two swap sequences $(s_1,\dots,s_k)+(s'_1,\dots,s'_l)$ as the swap sequenece $(s_1,\dots,s_k,s'_1,\dots,s'_l)$,
+- and the addition of a swap sequence and a position (i.e. a permutation) as the application of each swap in the sequence on the permutation in order.
+
+One way of implementing these in Julia is to create a `struct` to represent each particle and define the above operations for this new object type, along with other functions for convenience.
 
 ```{code-cell}
-using Metaheuristics
+import Base: *, -, +
 
-struct KPInstance
-    profit
-    weight
-    capacity
+const Swap = Tuple{Int, Int}
+const SwapSequence = Vector{Swap}
+const Permutation = Vector{Int}
+
+mutable struct Particle
+    perm::Permutation
+    vel::SwapSequence
+    best::Permutation
+    best_f::Float64
+    Particle(perm, vel, best, best_f) = perm[sortperm(perm)] == 1:length(perm) ? new(perm, vel, best, best_f) : error("invalid permutation")
 end
 
-capacity = 269
+Particle(perm, best_f) = Particle(perm, [], perm, best_f)
 
-# (value, weight)
-profit = [55, 10,47, 5, 4, 50, 8, 61, 85, 87]
-weight = [95, 4, 60, 32, 23, 72, 80, 62, 65, 46]
+Base.getindex(x::Particle, i::Int) = x.perm[i]
+Base.setindex!(x::Particle, val::Int, key::Int) = (x.perm[key] = val; val)
+Base.copy(x::Particle) = Particle(copy(x.perm), copy(x.vel), copy(x.best), x.best_f)
+Base.length(x::Particle) = length(x.perm)
+Base.keys(x::Particle) = keys(x.perm)
+Base.iterate(x::Particle) = iterate(x.perm)
+Base.iterate(x::Particle, i::Int) = iterate(x.perm, i)
 
-f, search_space, _ = Metaheuristics.TestProblems.knapsack(profit, weight, capacity)
-```
 
-## Randomised methods: GRASP
 
-Greedy Randomized Adaptive Search Procedure
-
-```{code-cell}
-instance = KPInstance(profit, weight, capacity)
-
-function Metaheuristics.compute_cost(candidates, constructor, instance::KPInstance)
-    # Ration profit / weight
-    ratio = instance.profit[candidates] ./ instance.weight[candidates]
-    # It is assumed minimizing non-negative costs
-    maximum(ratio) .- ratio
+function -(x::Union{Particle,Permutation}, y::Particle)
+    y = copy(y) # we don't want to mutate the original y
+    seq = SwapSequence()
+    for i in 1:length(x)
+        if x[i] != y[i]
+            j = findfirst(k->k==x[i], y)
+            y[i], y[j] = y[j], y[i]
+            push!(seq, (i, j))
+        end
+    end
+    seq
 end
 
-options = Options(seed = 1, iterations=1000)
+function *(a::Float64, seq::SwapSequence)
+    if a <= 0 || a > 1
+        throw(DomainError(x, "0 < a <= 1 must hold for multiplying with SwapSequence"))
+    end
+    l = length(seq)
+    if l == 0
+        return seq
+    end
+    new_l = Int(ceil(a*l))
+    seq[1:new_l]
+end
 
-candidates = rand(search_space)
-constructor = Metaheuristics.GreedyRandomizedContructor(;candidates, instance, α = 0.95)
-local_search = Metaheuristics.BestImprovingSearch()
-neighborhood = Metaheuristics.TwoOptNeighborhood()
-grasp = GRASP(;constructor, local_search, options)
-result = optimize(f, search_space, grasp)
++(seq1::SwapSequence, seq2::SwapSequence) = vcat(seq1,seq2)
++(seq1::SwapSequence, seq2::SwapSequence, seq3::SwapSequence) = vcat(seq1,seq2, seq3)
+function +(x::Particle, seq::SwapSequence)
+    x = copy(x)
+    for (i,j) in seq
+        x[i], x[j] = x[j], x[i]
+    end
+    x
+end
+
+function initialize(swarm_size, n_particle, cost_f)
+    swarm::Vector{Particle} = []
+    for _ in 1:swarm_size
+        perm = randperm(n_particle)
+        push!(swarm, Particle(perm, cost_f(perm)))
+    end
+    return swarm
+end
 ```
-
-## Randomised methods: Simulated Annealing
-
-In Metaheuristics.jl SA doesn't currently support working with permutations, as I've used above.
-I hacked something and may make a PR later but it needs more work.
 
 ```{code-cell}
-sa = SA(;N=100, options)
-optimize(f, search_space, sa)
+function pso(f; inertia, attr_l, attr_g, swarm_size, n_particle, n_iters)
+    swarm::Vector{Particle} = initialize(swarm_size, n_particle, f)
+    f_g, i_g = findmin(f, swarm)
+    swarm_best = copy(swarm[i_g])
+    for _ in 1:n_iters
+        for i in 1:length(swarm)
+            particle = swarm[i]
+            v = inertia*particle.vel + attr_l*rand()*(particle.best - particle) + attr_g*rand()*(swarm_best - particle)
+            particle += v
+            particle.vel = v
+            cost = f(particle)
+            if cost < f_g
+                f_g = cost
+                particle.best = particle.perm
+                particle.best_f = cost
+                swarm_best = copy(particle)
+            elseif cost < particle.best_f
+                particle.best = particle.perm
+                particle.best_f = cost
+            end
+            swarm[i] = particle
+        end
+    end
+    return swarm_best, f_g
+end
 ```
-
-## Evolutionary methods (Genetic algorithms -> memetic / differential )
-
-Metaheuristics.jl have some options like [Differential Evolution](https://jmejia8.github.io/Metaheuristics.jl/stable/algorithms/#Differential-Evolution) and [ε Constrained Differential Evolution](https://jmejia8.github.io/Metaheuristics.jl/stable/algorithms/#\\varepsilonDE), in addition to the classic GA. Not sure which one is better.
-
-There is no memetic option (unless εDE counts), which means I need to find something else.
-
-## Particle swarm
-
-PSO also doesn't support permutations.
-
-```{code-cell}
-pso = PSO(;N = 100, C1=1.5, C2=1.5, ω = 0.7)
-optimize(f, search_space, pso)
-```
---->
