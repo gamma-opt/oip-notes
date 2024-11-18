@@ -18,15 +18,15 @@ kernelspec:
 *Heuristic* algorithms sacrifice accuracy for speed, by producing reasonably good solutions much quicker than an optimal algorithm may require.
 
 ## Solution construction v. improvement
-Many heuristics fall under a _constructive_ versus _perturbative_ search duality.
+Many heuristics fall under a _constructive_ versus _local_ search duality.
 In constructive search, algorithms make up solutions by iteratively building up one.
-A widely used example is _greedy_ approaches where the algorithm at each iteration selects the smallest cost or largest value addition. For example, Kruskal's algorithm given in {prf:ref}`kruskal` is a greedy algorithm, because at every iteration the minimum weight edge (that doesn't introduce cycles).
+A widely used example is _greedy_ approaches where the algorithm at each iteration selects the smallest cost or largest value addition. For example, Kruskal's algorithm given in {prf:ref}`kruskal` is a greedy algorithm, because at every iteration the minimum weight edge (that doesn't introduce cycles) is added to the tree.
 
 For TSP, we can devise a similarly greedy algorithm as follows.
 ```{prf:algorithm} Greedy Traveling Salesperson Problem Algorithm
 :label: greedy_tsp
 **Inputs:** vertices and a distance matrix
-1. Choose a vertex at random (uniformly)
+1. Choose a vertex at random (uniformly) as a starting point
 2. While there are still vertices we have not visited
     1. Add the closest vertex to our route
 3. Add the initial vertex to our route to complete the path
@@ -39,11 +39,11 @@ Greedy approaches are popular because
 In addition, for some problems like MSTs, greedy approaches can even be optimal.
 However, this is more often an exception rather than the rule.
 
-In _perturbative search_, instead of building up a solution, the algorithm starts with some solution and iteratively tweaks it in order to get closer to an optimum.
-What this means may depend a lot on the problem.
-For example, in TSP, swapping the visit order of two cities or changing the order of one city would both be perturbations.
+In _local search_, instead of building up a solution, the algorithm starts with some solution and iteratively tweaks it in order to get closer to an optimum.
+What this means may depend a lot on the problem. For example, in TSP, swapping the visit order of two cities or changing the order of one city would both be perturbations.
 However, while both these operations will likely change the objective value, there is no reason to think a priori that either perturbation alone will actually improve the objective.
 In addition, if changes are not sufficiently big, e.g. swapping two adjacent cities only, they may be at risk of being stuck in a local optimum.
+
 There are a few strategies for dealing with such situations.
 For example, one can allow non-improving steps to be accepted after perturbations, which may help escape from the local optima neighborhoods.
 A more general strategy is random restarts where an algorithm may be run again with a different initialisation (or a different seed if randomness is involved) and ultimately selecting the best result out of all the runs.
@@ -203,7 +203,7 @@ The idea of the algorithm is the following: to optimize an $n$ dimensional funct
 The algorithm then iteratively replaces the worst performing vertex with a new one by performing one of four operations:
 
 1. _Reflection_ attempts to move from the worst point $x_{n+1}$ towards (the mean of) the rest of the points, which should hopefully be a lower-value region. 
-2. If the reflection point is the new best one, the area beyond it may contain even better points. _Expansion_ explores exactly this.
+2. If the reflection point is the new best one, the area beyond it may contain even better points. _Expansion_ explores exactly this prospect.
 3. If the reflection point is not better, then better points may be expected to be within the simplex, so _contraction_ proposes an inside point to replace the worst one.
 4. If the contraction point is not better, then _shrinkage_ moves all the points (except the best one) inside, hoping to find a better landscape.
 

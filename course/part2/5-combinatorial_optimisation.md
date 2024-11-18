@@ -226,9 +226,8 @@ For example, the cities and roads of Finland could be considered as a weighted g
 
 ```{figure} ../figures/graph.svg
 :name: graphs
-A non-connected graph and a connected, weighted graph.
+A non-connected graph on the left and a connected, weighted graph on the right.
 ```
-
 
 A _minimum spanning tree_ (MST) of a connected, weighted graph $G=(V,E,w)$ is a subset of the edges $E'\subseteq E$ such that
 - $G'=(V,E')$ is connected,
