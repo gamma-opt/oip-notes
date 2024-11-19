@@ -418,7 +418,7 @@ record(fig, "course/_static/critical_points.mp4", azimuth_it) do az
 end
 ```
 
-<video id="critical_points" width="800" loop autoplay>
+<video id="critical_points" width="800" loop autoplay muted>
     <source src="../_static/critical_points.mp4" type="video/mp4">
 </video>
 

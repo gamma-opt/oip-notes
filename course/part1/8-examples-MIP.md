@@ -237,7 +237,7 @@ end
 Even though we reach to a solution  for $n=200$ in just 16 iterations, it takes 10 minutes on our computer to actually compute everything.
 We can see the evolution of the solution at every iteration.
 
-<video width="800" controls loop autoplay>
+<video width="800" controls loop autoplay muted>
     <source src="../_static/tsp_cuts.mp4" type="video/mp4">
 </video>
 
