@@ -9,5 +9,7 @@ dependencies:
 
   - pip
   - pip:
+    #- sphinx>7,<8 # this needs to be upgraded manually with pip after the environment is created
     - sphinx-proof
+    - sphinxcontrib.jquery
     - git+https://github.com/QuantEcon/quantecon-book-theme.git

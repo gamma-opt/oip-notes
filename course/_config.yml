@@ -35,6 +35,7 @@ execute:
 sphinx:
   extra_extensions:
     - sphinx_proof
+    - sphinxcontrib.jquery
   config:
     html_theme: quantecon_book_theme
     numfig_secnum_depth: 1  # https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-numfig_secnum_depth
