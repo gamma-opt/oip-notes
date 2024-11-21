@@ -239,7 +239,7 @@ The figure below shows the sine function, along with the tangent line. Notice ho
 ---
 mystnb:
   figure:
-    name: fig:function-examples-1
+    name: fig:function-examples-2
     caption: |
       Examples of functions. top-left: a "step" function; top-right: a piecewise linear function; bottom-left: sigmoid function; bottom-right: an exponential function.
 tags: [remove-input]
@@ -406,7 +406,9 @@ app = App() do session
 
     return grid
 end
-
+```
+```{code-cell}
+:tags: [remove-cell]
 # we are done with WGLMakie so return to Cairo for scrolling
 CairoMakie.activate!()
 ```
