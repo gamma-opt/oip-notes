@@ -23,15 +23,21 @@ When using mathematics as a framework for explaining the world around us in orde
 
 There are multiple ways of thinking about functions, for example one may imagine an algebraic formula or a graph, but one general definition is the following {cite}`stewart_calculus_2021`:
 
-```{prf:definition}
+```{prf:definition} Functions
 :label: def-function
 
-A **function** {math}`f` is a rule that assigns each element {math}`x` in a set, say {math}`X`, to exactly one element {math}`f(x)` in another set, say {math}`Y`.
+A **function** {math}`f` is a rule that assigns each element {math}`x` in a set, say {math}`X`, to exactly one element {math}`f(x)` in another set, say {math}`Y`. This is indicated with the notation $f : X \to Y$.
 ```
 
 {prf:ref}`def-function` is specific enough to satisfy what we may expect from functions, for example with a formula {math}`f(x)=(x+2)^2` we cannot input the same value for {math}`x` and end up with different outputs {math}`f(x)`. Instead, for both the formula and our definition, every input has a unique output.
 
 On the other hand, {prf:ref}`def-function` is also very general and flexible, making functions a powerful conceptual tool in mathematics. The formula {math}`f(x)=(x+2)^2` is clearly a function. We can also have functions in multiple variables, such as {math}`f(x,y)=x+y`, as long as we do not violate the unique outputs rule. This would only require that every element of the set {math}`X` is an ordered pair {math}`(x,y)` instead of a single number. Alternatively, we can define functions that are difficult to describe as algebraic formulas. Recall the example with the population of Finland at year {math}`t`, we cannot write a formula for this for multiple reasons, one of which is that we don't yet know many of its values, for example at {math}`t=2100`.
+
+In our context, our functions will always be represented by a mathematical statement that relates real-valued vectors from $X$ to real-valued vectors in $Y$. A $n$-dimensional real-valued vector has $n$ components, each being a real number. Also, most of the time we will have that $X \subseteq \reals^n$ and that $Y \subseteq \reals^m$, where $n$ and $m$ are integers indicating the dimensions of the input and output vectors of the functions.
+
+```{note}
+When we simply say "vector", it is implied that it is a real-valued vector. Also, notice that for $n =1$ then our vector is a scalar.
+```
 
 In mathematical optimisation, our main objective will be searching for points in the function domain $X$ that yield the maximum (or minimum) value $f(x)$. And, as we will see, the ways of achieving this objective is deeply intertwined with "how the function looks like", i.e., its **analytical properties**. For the purpose of optimisation tasks, three properties stand out. They are:
 
@@ -45,8 +51,15 @@ We will next provide formal definitions of all these, but for now, let us visual
 % https://mystmd.org/guide/reuse-jupyter-outputs#label-a-notebook-cell
 % But it doesn't work in jupyter-book v1
 
-```{code-cell} julia
-:tags: ["remove-input"]
+```{code-cell}
+---
+mystnb:
+  figure:
+    name: fig:function-examples-1
+    caption: |
+      Examples of functions. top-left: a "step" function; top-right: a piecewise linear function; bottom-left: sigmoid function; bottom-right: an exponential function.
+tags: [remove-input]
+---
 
 using CairoMakie
 
@@ -64,10 +77,10 @@ foo = x -> if x < 0 f1(x) else f2(x) end
 
 fig = Figure(size = (1200, 800))
 
-ax1 = Axis(fig[1,1], limits = (xlims, nothing))
-ax2 = Axis(fig[1,2], limits = (xlims, nothing))
-ax3 = Axis(fig[2,1], limits = (xlims, nothing))
-ax4 = Axis(fig[2,2], limits = (xlims, nothing))
+ax1 = Axis(fig[1,1], xlabel = "x", ylabel = "f(x)", limits = (xlims, nothing))
+ax2 = Axis(fig[1,2], xlabel = "x", ylabel = "f(x)", limits = (xlims, nothing))
+ax3 = Axis(fig[2,1], xlabel = "x", ylabel = "f(x)", limits = (xlims, nothing))
+ax4 = Axis(fig[2,2], xlabel = "x", ylabel = "f(x)", limits = (xlims, nothing))
 
 lines!(ax1, x[51:end], repeat([1], 51); linewidth = 3, color = 1, colormap = :tab10, colorrange = (1, 10))
 lines!(ax1, x[begin:51], repeat([0], 51); linewidth = 3, color = 1, colormap = :tab10, colorrange = (1, 10))
@@ -99,27 +112,34 @@ Being able to say whether functions are continuous, differentiable, and/or conve
 
 For most practical cases, we rely on the second idea. That is, we rely on algorithms to search for points that satisfy what we call **optimality conditions**, which are, in turn, informed by the analysis described in 1.
 
-## Analysing a function
+## Analysing functions
 
 ### Continuity
 
 How optimisation methods move towards optimal points is determined by inferences we can make about the function based on structure that it may have.
 Take, for example, continuity, which roughly means that the graph of the function is an uninterrupted line. One formal definition is the following:
 
-````{prf:definition}
+````{prf:definition} Continuous functions
 :label: continuity_def
 
-A function {math}`f:X\to \reals` is continuous at point {math}`a\in X` if 
+A function $f:X \to \reals$ is continuous at point $a \in X$ if 
+
 ```{math}
 \lim_{x \to a}f(x) = f(a).
 ```
+
+We say that $f$ is *continuous* over $X$ if it is continuous at all points $a \in X$. 
 ````
+
+```{note}
+If the domain $X$ is assumed to represent set of real values with $\reals^n$, where $n$ represents the number of components of $x$, then it is common to simply say that $f$ is continuous. 
+```
 
 Intuitively, {prf:ref}`continuity_def` means that for sufficiently nearby inputs, a continuous function gives nearby outputs. Continuity is a useful property since it removes concerns related to whether the function is defined for a given input or not and allows us to rely on neighbouring evaluations to estimate whether the function's value is increasing or decreasing.
 
 ### Differentiability
 
-This idea of using function evaluations to infer how a function behaves around a given point $x \in X$ is central for computational optimisation methods. Let $x_k$ and $x_{k+1} = x_k + \Delta x$, with $\Delta x > 0$, represent two close-by points in the domain $X$ of $f$. We can then use the rate $d$
+This idea of using function evaluations to infer how a function behaves around a given point $x \in X$ is central for computational optimisation methods. Assume that $X \subseteq \reals$ and thus, $f: \reals \to \reals$ (that is, $x$ and $f(x)$ are scalars). Let $x_k$ and $x_{k+1} = x_k + \Delta x$, with $\Delta x > 0$, represent two close-by points in the domain $X$ of $f$. We can then use the rate $d$
 
 ```{math}
 d = \frac{f(x_{k+1}) - f(x_k)}{x_{k+1} - x_{k}}
@@ -132,7 +152,7 @@ to guide our search. For example, suppose we would like to find $x \in X$ that m
 
 If we take this idea to the limit, i.e., make $\Delta x \to 0$, we recover the **derivative** of the function at $x$, which is precisely an indication of how the function behaves locally in terms of its value. If we can be sure that derivatives are unique and available everywhere in the domain of $f$, we say that the function is *differentiable*.
 
-````{prf:definition}
+````{prf:definition} Differentiable functions
 :label: differentiability_def
 
 A function {math}`f:X\to \reals` is differentiable at {math}`a \in X \subseteq \reals` if the derivative
@@ -140,7 +160,13 @@ A function {math}`f:X\to \reals` is differentiable at {math}`a \in X \subseteq \
 f'(a) = \lim_{ x \to a}\frac{f(x )-f(a)}{x - a}
 ```
 exists.
+
+We say that $f$ is *differentiable* over $X$ if it is differentiable at all points $a \in X$.
 ````
+
+```{note}
+As before, if the domain $X$ is assumed to represent set of real values with $\reals^n$, we say that $f$ is differentiable. 
+```
 
 ````{admonition} Why is differentiability stronger than continuity?
 :class: seealso, dropdown
@@ -158,26 +184,42 @@ However, continuity does not imply differentiability.
 For example, the function {math}`|x|` is continuous at {math}`x=0` but not differentiable, since the one-sided limits do not match.
 ````
 
-The derivative {math}`f'(x)` tells us the instantaneous rate of change at a given point {math}`x`, it is equal to the slope of the tangent line going through the point {math}`f(x)`. To see that, notice the following
+The derivative {math}`f'(x)` tells us the instantaneous rate of change at a given point {math}`x`. Interestingly, the derivative is also equal to the slope of the tangent line going through the point {math}`f(x)`. To see that, notice the following
 
 ```{math}
   & f'(a) = \lim_{x \to a}\frac{f(x) - f(a)}{x - a} \\
   & \Leftrightarrow \lim_{x \to a} \left(\frac{f(x)-f(a)}{x - a} - f'(a)\right) = 0 \\
-  & \Leftrightarrow \lim_{\Delta x \to 0} \frac{f(x) - f(a) - f'(a)(x-a)}{x-a} = 0 \\
-  & \Leftrightarrow \lim_{\Delta x \to 0} \frac{f(x) - J(x)}{x - a} = 0
+  & \Leftrightarrow \lim_{x \to a} \frac{f(x) - f(a) - f'(a)(x-a)}{x-a} = 0 \\
+  & \Leftrightarrow \lim_{x \to a} \frac{f(x) - J(x)}{x - a} = 0,
 ```
 
-where $J(x) = f(a) + f'(a)(x - a)$ is the linear approximation of $f(x)$ at $x = a$, i.e., the tangent line to $f$ going through $f(a)$. One important conclusion we gather from the above is that, if a given point $x$ is sufficiently close to $a$, $f(x)$ and $J(x)$ are close in value, and as such $J$ to approximate $f$. Clearly, this information is useful in our search for optimal points, although we also must take into account how far we move in the direction of interest.
+where $J(x) = f(a) + f'(a)(x - a)$ is the linear approximation of $f(x)$ at $x = a$, i.e., the tangent line to $f$ going through $f(a)$.
 
-An example of using derivative information for finding an optimum is plotted below. Notice that this process is not perfect and different starting locations may lead to different optima.
+One important conclusion we gather from the above is that, if a given point $x$ is sufficiently close to $a$, $f(x)$ and $J(x)$ are close in value, and as such $J$ to approximate $f$. Clearly, this information is useful in our search for optimal points, although we also must take into account how far we move in the direction of interest.
+
+<!-- 
+An example of using derivative information for finding an optimum is plotted in {numref}`fig:optimisation-with-derivatives`. Notice that this process is not perfect and different starting locations may lead to different optima.
+
+
 
 ```{code-cell}
-:tags: [remove-input]
+---
+mystnb:
+  figure:
+    name: fig:optimisation-with-derivatives
+    caption: |
+      Using derivatives for finding optimal points. The lines indicate the trajectory of the search. The colours indicate the start of the methods from two distinct starting points. 
+tags: [remove-input]
+---
+
 f(x) = x^4 - 3*x^3 + x^2 + x
 xs = range(-1, 3, 100)
 
-fig, ax, plot = lines(xs, f)
+fig = Figure()
+ax = Axis(fig[1,1], xlabel = "x", ylabel = "f(x)", title = "Optimising f(x)")
+lines!(ax, xs, f)
 limits!(-1, 3, -2.5, 2)
+
 x1 = [2.5, 1.1, 2.3, 1.5, 2.08, 1.8, 2]
 x2 = [-0.6, 0.3, -0.4, 0, -0.2]
 
@@ -188,12 +230,20 @@ for (i, x) in enumerate([x1,x2])
 end
 
 fig
-```
+``` 
+-->
 
 The figure below shows the sine function, along with the tangent line. Notice how the orange line is a good approximation of the blue line close to the green dot. Also, notice how we can, by looking at the inclination of the tangent line tell whether the function is going up or down in value. Make sure you move the slider to see the tangent line at different points.
 
-```{code-cell} julia
-:tags: ["remove-input"]
+```{code-cell}
+---
+mystnb:
+  figure:
+    name: fig:function-examples-1
+    caption: |
+      Examples of functions. top-left: a "step" function; top-right: a piecewise linear function; bottom-left: sigmoid function; bottom-right: an exponential function.
+tags: [remove-input]
+---
 
 using WGLMakie, Bonito
 WGLMakie.activate!()
@@ -249,11 +299,6 @@ app = App() do session
     return grid
 end
 ```
-
-<!-- As an example, suppose we want to minimize a quadratic function {math}`f(x)=ax^2+bx+c` with {math}`a> 0`.
-Since this is a quadratic function, we can infer some global information, i.e. {math}`f` is a parabola, which means it has a single (global) minimum.
-If we had a guess {math}`x_0`, we could improve it by calculating the derivative at that point {math}`f(x_0)`. which would tell us which direction to move towards.
-We could even note that the derivative is 0 at the minimum, and thus solve this equation to record the minimum at {math}`-\frac{b}{2a}`. -->
 
 So far, we have been talking about functions of a single variable, but similar ideas extend to multivariate functions (that is, function with more than one (dimension) variable as their input (in their domain)).
 In fact, {prf:ref}`continuity_def` for continuity applies as written, assuming now {math}`X=\reals^n` for {math}`n\in\mathbb{N}^+`.
