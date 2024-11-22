@@ -305,31 +305,26 @@ In fact, {prf:ref}`continuity_def` for continuity applies as written, assuming n
 
 First, we must define the multidimensional equivalent to the tangent line. For that, we need to first the notion of partial derivatives, which is essentially taking derivatives with one of the components of $f$.
 
-````{prf:definition}
+````{prf:definition} Partial derivatives
 :label: partial_derivative
 
-Consider the function $f(x_1,x_2)$ such that {math}`f: X \subseteq \reals^2 \to \reals`. The *partial derivative* of $f$ with respect to $x_1$ is
+Consider the function $f(x)$ such that {math}`f: X \subseteq \reals^n \to \reals`. In this case, $x$ is the vector $(x_1, \dots, x_n)$. The *partial derivative* of $f$ with respect to $x_i$, for a given $i \in \braces{1,\dots,n}$ is
 
 ```{math}
-\frac{\partial f(x)}{\partial x_1} = \lim_{ h \to 0}\frac{f(x_1+h, x_2)-f(x_1, x_2)}{h},
-```
-provided this limit exists. Analogously, the derivative of $f$ with respect to $x_2$ is
-
-```{math}
-\frac{\partial f(x)}{\partial x_2} = \lim_{ h \to 0}\frac{f(x_1, x_2+h)-f(x_1, x_2)}{h},
+\frac{\partial f(x)}{\partial x_i} = \lim_{ h \to 0}\frac{f(x_1, \dots, x_i+h, \dots, x_n)-f(x)}{h},
 ```
 provided this limit exists. 
 
-The vector $\nabla f(x_1, x_2) = \left[\frac{\partial f(x)}{\partial x_1}, \frac{\partial f(x)}{\partial x_2}\right]$ is the *gradient* of $f$ at $(x_1, x_2)$.
+The vector $\nabla f(x) = \left[\frac{\partial f(x)}{\partial x_1}, \dots, \frac{\partial f(x)}{\partial x_n}\right]$ is the *gradient* of $f$ at $x = (x_1, \dots, x_n)$.
 ````
 
-The multidimensional equivalent to the tangent line, or the tangent hyperplane, is defined as
+The multidimensional equivalent to the tangent line, or the tangent hyperplane, at point $(a,b)$ is defined as
 
 ```{math}
-J(a, b) = f(a , b) + \nabla f(a,b)^\top (x_1 - a, x_2 - b),
+J(x) = f(a) + \nabla f(a)^\top (x - a),
 ```
 
-where $\nabla f(a, b)$ is the *gradient* of $f$ at $(a, b)$.
+where $x$ is now an $n$-dimensional vector and $\nabla f(a)$ is the *gradient* of $f$ at $(a)$.
 
 Here is how it looks like for a function $f(x,y) = -x^2 - y^2$. As before, notice how the inclination the plane has, generally governed by the gradient vector of the function, can be used to infer how the function behaves around the point (in orange).
 
@@ -420,31 +415,35 @@ Differentiability in the multidimensional case is similar to the univariate case
 ````{prf:definition} Differentiable functions (multiple variables)
 :label: differentiability_multi
 
-Consider the function {math}`f: X \subseteq \reals^2 \to \reals`. Suppose its partial derivatives are defined at $(a,b) \in x$. Let $J(a, b) = f(a, b) + \nabla f(a,b)^\top (x_1 - a, x_2 - b)$ with $\nabla f(a,b)$ being the gradient of $f$ at $(a,b)$.
+Consider the function {math}`f: X \subseteq \reals^n \to \reals`. Suppose its partial derivatives are defined at $a \in x$. Let $J(x) = f(a) + \nabla f(a)^\top (x - a)$ with $\nabla f(a)$ being the gradient of $f$ at $a$.
 
-We say that $f$ is differentiable at $(a,b)$ if
+We say that $f$ is differentiable at $a$ if
 
 ```{math}
-\lim_{(x_1, x_2) \to (a,b)} \frac{f(x_1, x_2) - J(x_1, x_2)}{||(x_1, x_2) - (a,b)||} = 0,
+\lim_{x \to a} \frac{f(x) - J(x)}{||x - a||} = 0,
 ```
 
-where $|| u ||$ denotes the Euclidean norm of the vector u. If either of the partial derivatives do not exist, or the above limit does not exist or is not 0, then $f$ is not differentiable at $(a,b)$. 
+where $|| u ||$ denotes the Euclidean norm of the vector $u$. If either of the partial derivatives do not exist, or the above limit does not exist or is not 0, then $f$ is not differentiable at $a$. 
 
-If $f$ is differentiable for all $(a,b) \in X$, we say that $f$ is differentiable over $X$.
+If $f$ is differentiable for all $a \in X$, we say that $f$ is differentiable over $X$.
 
 ````
 
 As we will see later, the gradient plays a **crucial role** in many of the optimisation methods that we will use. This is precisely because the gradient vector serves as an indicator of how the function behaves locally, pointing towards the direction of of "fastest" value increase. We will return to that point in part two. For the purpose of our discussion, let us now focus on how to use the gradient to find minima and maxima.
 
-## Function shapes, convexity and its role in optimisation
+## Convexity and its role in optimisation
 
-One crucial feature about gradients is that they can be used to identify points that are **candidate to being optimal**. To see that, assume that $f$ is differentiable, in line with {prf:ref}`differentiability_multi`. Assume that $f : \reals^2 \to \reals$ for simplicity and that we are at point $(a,b)$. For a sufficiently small step away from $(a,b)$ towards any point $(x_1, x_2)$, we have seen that $J(a, b) = f(a , b) + \nabla f(a,b)^\top (x_1 - a, x_2 - b)$ is an arbitrarily good approximation for $f(x_1,x_2)$. We can use this to realise something about optimality: if $(a,b)$ is to be an optimal point (say, a minimum point), we must have
+One crucial feature about gradients is that they can be used to identify points that are **candidate to being optimal**. To see that, assume that $f$ is differentiable, in line with {prf:ref}`differentiability_multi`. Assume that $f : \reals^n \to \reals$ and that we are at point $a$. For a sufficiently small step away from $a$ towards any other point $x$, we have seen that $J(x) = f(a) + \nabla f(a)^\top (x - a)$ is an arbitrarily good approximation for $f(x)$.
+
+We can use this to realise something about optimality: if $a$ is to be an optimal point (say, a minimum point), we must have
 
 ```{math}
-f(a,b) \le f(x_1, x_2), \text{ for all } (x_1,x_2) \in X,
+f(a) \le f(x), \text{ for all } x \in X \text{ arbitrarily close to } a.
 ```
 
-which, can only be true if $\nabla f(a,b) = 0$. Otherwise, we could move in its opposite direction and find another point $(x_1,x_2)$ where $f(x_1,x_2) < f(a,b)$. Thus, having zero gradients is a necessary condition for a point to be optimal. Cleary, verifying that the gradient is zero is not sufficient for one to state that $(a,b)$ is an optimal point, because one must also that into account curvature.
+Notice the "arbitrarily close" statement. If it holds, then $J(x)$ reliably approximates $f(x)$ and its expression can be used to infer the following: $f(a) \le f(x)$ (or J(a) \le J(x)) can only be true if $\nabla f(a) = 0$. Otherwise, we could move to a point $x$ a that makes the term $\nabla f(a)^\top (x - a)$ negative, implying that we found another point ($x$) where $f(x) < f(a)$, proving that $a$ is not a minimum. 
+
+This analysis demonstrates that having zero gradients is a **necessary condition** for a point to be optimal. However, verifying that the gradient is zero is not enough for one to state that $a$ is an optimal point, because one must also that into account the function curvature. In other words, although necessary, it is not a sufficient for confirming the optimality of a point $a$.
 
 The function plotted below illustrates some alternative cases. Notice that in two of the cases (purple and red) we can trust the zero-gradient condition to be the indication of optimality, while it is not the case for the saddle point in orange.
 
@@ -533,7 +532,7 @@ lines!(ax2, x, sin)
 ax3 = Axis3(fig[2,1], xlabel = "x", ylabel = "f(x)")
 surface!(ax3, x, x, (x,y) -> x^2 + y^2)
 
-ax4 = Axis3(fig[2,2, xlabel = "x", ylabel = "f(x)")
+ax4 = Axis3(fig[2,2], xlabel = "x", ylabel = "f(x)")
 surface!(ax4, x, x, f)
 
 fig
