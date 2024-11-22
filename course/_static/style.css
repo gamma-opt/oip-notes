@@ -20,3 +20,9 @@ table thead tr th.text-center {
   transform: scale(1.5) translate(-20px, -60px);
   clip-path: rect(30% auto auto auto);
 }
+
+#critical_points_caption {
+  position: relative;
+  color: rgb(68,68,68);
+  font-family: Source Sans Pro, sans-serif
+}

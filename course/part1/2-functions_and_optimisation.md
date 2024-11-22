@@ -433,7 +433,7 @@ As we will see later, the gradient plays a **crucial role** in many of the optim
 
 ## Convexity and its role in optimisation
 
-One crucial feature about gradients is that they can be used to identify points that are **candidate to being optimal**. To see that, assume that $f$ is differentiable, in line with {prf:ref}`differentiability_multi`. Assume that $f : \reals^n \to \reals$ and that we are at point $a$. For a sufficiently small step away from $a$ towards any other point $x$, we have seen that $J(x) = f(a) + \nabla f(a)^\top (x - a)$ is an arbitrarily good approximation for $f(x)$.
+One crucial feature about gradients is that they can be used to identify points that are **candidate to being optimal**. To see that, assume that $f$ is differentiable, in line with {prf:ref}`differentiability_multi`. Assume that $f : X \subseteq \reals^n \to \reals$ and that we are at point $a$. For a sufficiently small step away from $a$ towards any other point $x$, we have seen that $J(x) = f(a) + \nabla f(a)^\top (x - a)$ is an arbitrarily good approximation for $f(x)$.
 
 We can use this to realise something about optimality: if $a$ is to be an optimal point (say, a minimum point), we must have
 
@@ -441,7 +441,7 @@ We can use this to realise something about optimality: if $a$ is to be an optima
 f(a) \le f(x), \text{ for all } x \in X \text{ arbitrarily close to } a.
 ```
 
-Notice the "arbitrarily close" statement. If it holds, then $J(x)$ reliably approximates $f(x)$ and its expression can be used to infer the following: $f(a) \le f(x)$ (or J(a) \le J(x)) can only be true if $\nabla f(a) = 0$. Otherwise, we could move to a point $x$ a that makes the term $\nabla f(a)^\top (x - a)$ negative, implying that we found another point ($x$) where $f(x) < f(a)$, proving that $a$ is not a minimum. 
+Notice the "arbitrarily close" statement. If it holds, then $J(x)$ reliably approximates $f(x)$ and its expression can be used to infer the following: $f(a) \le f(x)$ (or $J(a) \le J(x)$) can only be true if $\nabla f(a) = 0$. Otherwise, we could move to a point $x$ a that makes the term $\nabla f(a)^\top (x - a)$ negative, implying that we found another point ($x$) where $f(x) < f(a)$, proving that $a$ is not a minimum.
 
 This analysis demonstrates that having zero gradients is a **necessary condition** for a point to be optimal. However, verifying that the gradient is zero is not enough for one to state that $a$ is an optimal point, because one must also that into account the function curvature. In other words, although necessary, it is not a sufficient for confirming the optimality of a point $a$.
 
@@ -468,9 +468,12 @@ record(fig, "course/_static/critical_points.mp4", azimuth_it) do az
 end
 ```
 
+<figure>
 <video id="critical_points" width="800" loop autoplay muted>
     <source src="../_static/critical_points.mp4" type="video/mp4">
 </video>
+<figcaption id="critical_points_caption">A two-dimensional function with all of its points with zero-gradient highlighted. In purple, maximum points; in red, minimum points; and in orange, a point that is neither minimum or maximum but does have zero-gradient. </figcaption>
+</figure>
 
 The next natural step after identifying points with zero gradient would be further analysing the function curvature, which can be done using second-order derivatives (i.e., the derivatives of derivatives). For example, consider the functions plotted below, where $x^2$ is convex and $-x^2$ is concave. Their derivatives are $2x$ and $-2x$ respectively, both of which are 0 when $x=0$. Yet their second derivatives are $2$ and $-2$, where the difference in the sign indicates exactly the difference in curvature. However, it turns out that most optimisation algorithms do not consider second-order information, simply because it is too expensive from a computational standpoint.
 
@@ -496,9 +499,13 @@ In part 2, we discuss in more details why one can use second-order derivatives t
 
 ```
 
-Still, not all is lost. Indeed, for a particular class of problems, it turns out that we can rely on the zero-gradient condition as a sufficient certificate to test optimality. These are so-called **convex problems**, which are optimisation problems involving convex functions. Let us first define a convex function.
+Still, not all is lost. Indeed, for a particular class of problems, it turns out that we can rely on the zero-gradient condition as a sufficient certificate to test optimality. These are so-called **(unconstrained) convex problems**, which are problems involving the optimisation of convex functions. Let us first define a convex function.
 
-````{prf:definition}
+```{attention}
+Notice the word *unconstrained*, which essentially means that the domain of $f$ is $X = \reals^n$. If the domain of $X \subset \doubleR$, then a different alternative optimality conditions need to be considered. Those will be discussed later in this course.
+```
+
+````{prf:definition} Convex functions
 :label: convex_function
 
 A function is convex if for all $x, y \in \reals^n$ and $\lambda \in [0,1]$ we have that
@@ -510,7 +517,7 @@ A function is convex if for all $x, y \in \reals^n$ and $\lambda \in [0,1]$ we h
 ````
 
 ```{attention}
-Notice we have defined it considering $n$ dimensions instead of one or two, as before. This is simply to make our notation more compact (and our results more general).
+Notice we have defined it considering $n$ dimensions, which makes our notation more compact and our results more general.
 ```
 
 According to definition {prf:ref}`convex_function`, a convex function is such that, if we take any two points and connect with a line, the line should sit above $f$ between these two points. This simple technique can be used to classify the functions plotted below, where the left column contains convex functions and the right non-convex.
