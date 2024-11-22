@@ -252,7 +252,7 @@ xlims = (-π, π)
 
 app = App() do session
     slider = Bonito.Slider(x; style=Styles("grid-column" => "2"))
-    fig, ax, lplot = lines(x, sin; linewidth = 3)
+    fig, ax, lplot = lines(x, sin; linewidth = 3, axis=(;xlabel="x", ylabel="f(x)"))
     xlims!(ax, xlims)
 
     p = @lift(Point($slider[], sin($slider[])))
@@ -309,10 +309,12 @@ First, we must define the multidimensional equivalent to the tangent line. For t
 :label: partial_derivative
 
 Consider the function $f(x_1,x_2)$ such that {math}`f: X \subseteq \reals^2 \to \reals`. The *partial derivative* of $f$ with respect to $x_1$ is
+
 ```{math}
 \frac{\partial f(x)}{\partial x_1} = \lim_{ h \to 0}\frac{f(x_1+h, x_2)-f(x_1, x_2)}{h},
 ```
 provided this limit exists. Analogously, the derivative of $f$ with respect to $x_2$ is
+
 ```{math}
 \frac{\partial f(x)}{\partial x_2} = \lim_{ h \to 0}\frac{f(x_1, x_2+h)-f(x_1, x_2)}{h},
 ```
@@ -413,9 +415,9 @@ end
 CairoMakie.activate!()
 ```
 
-With that, we are ready to define differentiability for the multidimensional case.
+Differentiability in the multidimensional case is similar to the univariate case, but has a few technicalities that goes beyond our needs. As a general guideline, if a function $f: \reals^n \to \reals$ is differentiable, then it has **unique** gradients everywhere, which is reassuring if we are planning to use gradients to guide our search for optimal solutions.
 
-````{prf:definition}
+````{prf:definition} Differentiable functions (multiple variables)
 :label: differentiability_multi
 
 Consider the function {math}`f: X \subseteq \reals^2 \to \reals`. Suppose its partial derivatives are defined at $(a,b) \in x$. Let $J(a, b) = f(a, b) + \nabla f(a,b)^\top (x_1 - a, x_2 - b)$ with $\nabla f(a,b)$ being the gradient of $f$ at $(a,b)$.
@@ -423,10 +425,12 @@ Consider the function {math}`f: X \subseteq \reals^2 \to \reals`. Suppose its pa
 We say that $f$ is differentiable at $(a,b)$ if
 
 ```{math}
-\lim_{(x_1, x_2) \to (a,b)} \frac{f(x_1, x_2) - J(x_1, x_2)}{||(x_1, x_2) - (a,b)||} = 0.
+\lim_{(x_1, x_2) \to (a,b)} \frac{f(x_1, x_2) - J(x_1, x_2)}{||(x_1, x_2) - (a,b)||} = 0,
 ```
 
-If either of the partial derivatives do not exist, or the above limit does not exist or is not 0, then $f$ is not differentiable at $(a,b)$. 
+where $|| u ||$ denotes the Euclidean norm of the vector u. If either of the partial derivatives do not exist, or the above limit does not exist or is not 0, then $f$ is not differentiable at $(a,b)$. 
+
+If $f$ is differentiable for all $(a,b) \in X$, we say that $f$ is differentiable over $X$.
 
 ````
 
@@ -434,7 +438,7 @@ As we will see later, the gradient plays a **crucial role** in many of the optim
 
 ## Function shapes, convexity and its role in optimisation
 
-One crucial feature about gradients is that they can be used to identify points that are candidate to being optimal. To see that, assume that $f$ is differentiable, in line with {prf:ref}`differentiability_multi`. Assume that $f : \reals^2 \to \reals$ for simplicity and that we are at point $(a,b)$. For a sufficiently small step away from $(a,b)$ towards any point $(x_1, x_2)$, we have seen that $J(a, b) = f(a , b) + \nabla f(a,b)^\top (x_1 - a, x_2 - b)$ is an arbitrarily good approximation for $f(x_1,x_2)$. We can use this to realise something about optimality: if $(a,b)$ is to be an optimal point (say, a minimum point), we must have
+One crucial feature about gradients is that they can be used to identify points that are **candidate to being optimal**. To see that, assume that $f$ is differentiable, in line with {prf:ref}`differentiability_multi`. Assume that $f : \reals^2 \to \reals$ for simplicity and that we are at point $(a,b)$. For a sufficiently small step away from $(a,b)$ towards any point $(x_1, x_2)$, we have seen that $J(a, b) = f(a , b) + \nabla f(a,b)^\top (x_1 - a, x_2 - b)$ is an arbitrarily good approximation for $f(x_1,x_2)$. We can use this to realise something about optimality: if $(a,b)$ is to be an optimal point (say, a minimum point), we must have
 
 ```{math}
 f(a,b) \le f(x_1, x_2), \text{ for all } (x_1,x_2) \in X,
@@ -520,16 +524,16 @@ According to definition {prf:ref}`convex_function`, a convex function is such th
 x = range(-pi, pi, 100)
 f(x,y) = (x^2-y^2)/2
 fig = Figure(size=(800,600))
-ax1 = Axis(fig[1,1])
+ax1 = Axis(fig[1,1], xlabel = "x", ylabel = "f(x)")
 lines!(ax1, range(1,10,100), exp)
 
-ax2 = Axis(fig[1,2])
+ax2 = Axis(fig[1,2], xlabel = "x", ylabel = "f(x)")
 lines!(ax2, x, sin)
 
-ax3 = Axis3(fig[2,1])
+ax3 = Axis3(fig[2,1], xlabel = "x", ylabel = "f(x)")
 surface!(ax3, x, x, (x,y) -> x^2 + y^2)
 
-ax4 = Axis3(fig[2,2])
+ax4 = Axis3(fig[2,2, xlabel = "x", ylabel = "f(x)")
 surface!(ax4, x, x, f)
 
 fig
