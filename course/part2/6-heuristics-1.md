@@ -13,6 +13,13 @@ kernelspec:
   name: julia-1.10
 ---
 
+<!-- 
+TODO's 
+[] Add pseudocode for line search
+[] Add illustrative example to Golden search (of a univariate function)
+[] Add illustration of Nelder-Mead steps
+-->
+
 # Heuristics
 
 *Heuristic* algorithms sacrifice accuracy for speed, by producing reasonably good solutions much quicker than an optimal algorithm may require.
