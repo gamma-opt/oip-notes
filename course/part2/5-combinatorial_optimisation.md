@@ -13,6 +13,15 @@ kernelspec:
   name: julia-1.10
 ---
 
+<!-- 
+TODO's 
+[] Clarify that the list of examples are combinatorial optimisations to which a known exact algorithm is known
+[] Provide a pseudocode for HK
+[] Include shortest path and Dijkstra
+[] Include a visualisation of the solution for the MST problem  
+-->
+
+
 # Combinatorial optimisation
 
 So far, we have discussed a few, sometimes overlapping, varieties of mathematical programming: linear optimisation, mixed-integer optimisation, and convex optimisation.
