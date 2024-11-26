@@ -16,9 +16,6 @@ kernelspec:
 <!-- 
 TODO's 
 [] Clarify that the list of examples are combinatorial optimisations to which a known exact algorithm is known
-[] Provide a pseudocode for HK
-[] Include shortest path and Dijkstra
-[] Include a visualisation of the solution for the MST problem  
 -->
 
 
@@ -115,7 +112,7 @@ Sometimes, a certain subset of the problem may have additional properties allowi
 For example, if we consider the set of all TSP problems where each problem instance is uniquely identified by a matrix of inter-city costs, some families of matrices impose efficiently solvable TSP problems.
 A specific example is the so called Monge matrices, which guarantee solutions to the TSP that are _pyramidal_, i.e. the solution is a tour $s=<1,i_1,\dots,i_r,n,j_1,\dots,j_{n-r-2}>$ where $i_1<i_2<\dots i_r$ and $j_1>j_2>\dots>j_{n-r-2}$ as if cities are visited first in increasing order, then the remaining in decreasing order.
 
-Another approach for some problems is dynamic programming but that is not in the scope of this course.
+Another approach for some problems is dynamic programming, which is a technique to break down a problems into a sequence of smaller subproblems or decisions over timesteps. An example is provided in {ref}`p2l5-tsp`, but we won't cover dynamic programming in detail.
 
 A final option is to abandon the search for exact solutions.
 In many cases, having a good enough solution is sufficient, or there may be time or other resource constraints that makes anything better an impossibility.
@@ -131,6 +128,102 @@ We will discuss such _heuristic_ algorithms in the next lecture.
 
 ## Exact Solution Examples
 
+### Shortest Path 
+
+Finding the quickest way home via GPS or a connection between two computers with the fewest hops in a network are only two examples of the ubiquitous problem of finding the shortest path.
+These examples along with many more problems are solved frequently using graphs.
+
+A _graph_ is a pair $G=(V,E)$ where $V$ is a set of _nodes_ (or _vertices_) and $E$ is a set of _edges_ connecting two nodes.
+Graphs are a very flexible mathematical structure that can be used in a variety of contexts. A graph is called _connected_ if every node is reachable from other nodes through some series of edges.
+
+A _weighted graph_ is a graph $G=(V,E,w)$ where every edge has an associated weight given by some function $w$.
+For example, the cities and roads of Finland could be considered as a weighted graph, where the cities are nodes, edges are present in between directly-connected cities, and edge-weights could be the distance in between the two cities.
+
+```{figure} ../figures/graph.svg
+:name: graphs
+A non-connected graph on the left and a connected, weighted graph on the right.
+```
+
+Given a weighted graph $G=(V,E,w)$, the shortest path between $u\in V$ and $v\in V$ is the path $P=(e_1, \dots, e_n)$ between them that minimizes $\sum_{i=1}^n w(e_i)$.
+Alternative variants of the shortest problem include finding the shortest path from an origin to all other nodes or the shortest path between all pairs of nodes.
+A classical algorithm to solve this problem is Dijkstra's algorithm, which uses a (min-)priority queue to keep track of the edges with the smallest weight.
+
+```{prf:algorithm} Dijkstra's Algorithm
+:label: dijkstra
+**Inputs** Graph $G$, weight function $w$, origin $o$, target $t$
+1. Create a priority queue $Q$.
+2. Create a vector to keep tract of distances.
+3. Add $o$ to $Q$ with priority $0$ and every other vertex with priority $\infty$.
+4. While $Q$ is not empty,
+    1. Extract from $Q$ the next node $u$.
+    2. For each neighbor $v$ of $u$.
+        1. `curr_dist` $=$ distance to $u + w(u,v)$.
+        2. If distance to $v$ is the least observed so far, record it and add $v$ to $Q$ with priority `curr_dist`.
+        3. If $v=t$, break
+5. Return distance of $t$
+```
+
+In Julia, implementations of {prf:ref}`dijkstra` that solves the single-source all-targets variant is provided by the [`Graphs.jl`](https://juliagraphs.org/Graphs.jl/stable/) package.
+
+```{code-cell}
+:tags: [remove-cell]
+using Random, StatsBase, Graphs, GraphMakie
+
+function generate_distance_matrix(n; random_seed = 1)
+    rng = Random.MersenneTwister(random_seed)
+    X_coord = 100 * rand(rng, n)
+    Y_coord = 100 * rand(rng, n)
+    d = [sqrt((X_coord[i] - X_coord[j])^2 + (Y_coord[i] - Y_coord[j])^2) for i in 1:n, j in 1:n]
+    return d, X_coord, Y_coord
+end
+
+n = 15
+d, xs, ys = generate_distance_matrix(n)
+
+rng = Random.MersenneTwister(42)
+
+g = complete_graph(n)
+rem = sample(rng, collect(edges(g)), 80; replace=false)
+for e in rem
+    rem_edge!(g, e.src, e.dst)
+end
+```
+
+```{code-cell}
+source = 11
+target = 15
+ds = dijkstra_shortest_paths(g, source, d)
+
+path = [15]
+path_edges = []
+source = 11
+curr = 15
+while curr != source
+    parent = ds.parents[curr]
+    e = parent < curr ? Edge(parent, curr) : Edge(curr, parent)
+    push!(path_edges, e)
+    curr = ds.parents[curr]
+    push!(path, curr)
+end
+path
+```
+
+```{code-cell}
+:tags: [remove-input]
+c = []
+elabs = []
+for e in edges(g)
+    if e in path_edges
+        push!(c, :red)
+    else
+        push!(c, :black)
+    end
+    push!(elabs, repr(Int(round(d[e.src,e.dst]))))
+end
+graphplot(g; nlabels=repr.(1:nv(g)), edge_color=c, elabels=elabs, elabels_color=:blue)
+```
+
+(p2l5-tsp)=
 ### TSP
 
 The Held-Karp algorithm is a dynamic programming algorithm to solve TSP exactly.
@@ -138,6 +231,18 @@ The key idea underlying the algorithm is that given a set of cities $S=\{s_1,\do
 Then, it must be the case that the shortest path from 1 to $s_i$ going through $S\setminus \{s_i\}$ must be $P$ with the last edge removed.
 
 This observation means that the solution of larger instances of a problem is directly related to smaller subproblems, which is exactly the kind of structure dynamic programming can exploit.
+
+```{prf:algorithm} Held-Karp Algorithm
+:label: held-karp
+**Inputs** Graph $G$, number of nodes $n$
+1. Pick an origin $o$
+2. Initialize distance to all other nodes from $o$
+3. For $i=2$ to $n-1$
+    1. For every subset $S$ of size $i$
+        1. For every element $k$ of $S$
+            1. Determine the shortest distance from $o$ to $k$ going through only $S$.
+4. Find the best cycle and return
+```
 
 An implementation of the algorithm is presented below for completeness, but we will not discuss it in depth since it is still too slow for larger instances of the problem. 
 {numref}`tsp_heldkarp` displays the output of an algorithm for a managable size of $n=20$.
@@ -227,17 +332,6 @@ end
 
 ### Minimum Spanning Trees
 
-A _graph_ is a pair $G=(V,E)$ where $V$ is a set of _nodes_ (or _vertices_) and $E$ is a set of _edges_ connecting two nodes.
-Graphs are a very flexible mathematical structure that can be used in a variety of contexts. A graph is called _connected_ if every node is reachable from other nodes through some series of edges.
-
-A _weighted graph_ is a graph $G=(V,E,w)$ where every edge has an associated weight given by some function $w$.
-For example, the cities and roads of Finland could be considered as a weighted graph, where the cities are nodes, edges are present in between directly-connected cities, and edge-weights could be the distance in between the two cities.
-
-```{figure} ../figures/graph.svg
-:name: graphs
-A non-connected graph on the left and a connected, weighted graph on the right.
-```
-
 A _minimum spanning tree_ (MST) of a connected, weighted graph $G=(V,E,w)$ is a subset of the edges $E'\subseteq E$ such that
 - $G'=(V,E')$ is connected,
 - $G'$ does not contain any cycles, and
@@ -264,18 +358,6 @@ Suppose for example we would like to obtain the MST for the below nodes.
 % using GeoMakie and NaturalEarth?
 ```{code-cell}
 :tags: [remove-input]
-using Random
-
-function generate_distance_matrix(n; random_seed = 1)
-    rng = Random.MersenneTwister(random_seed)
-    X_coord = 100 * rand(rng, n)
-    Y_coord = 100 * rand(rng, n)
-    d = [sqrt((X_coord[i] - X_coord[j])^2 + (Y_coord[i] - Y_coord[j])^2) for i in 1:n, j in 1:n]
-    return d, X_coord, Y_coord
-end
-
-n = 100
-d, xs, ys = generate_distance_matrix(n)
 
 fig,ax,plot = scatter(xs, ys)
 ```
