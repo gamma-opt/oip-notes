@@ -13,6 +13,16 @@ kernelspec:
   name: julia-1.10
 ---
 
+<!--
+TODOs
+[] Comment the code, based on what was done in the combinatorial optimisation lectures
+[] GRASP: after defining each function, we should run it to provide an concrete example of how it works
+[] The iteration counter is unnecessarily difficult programming wise. Add it to the main GRASP function so it is closer to the pseudocode
+[] In the pseudocode for simulated annealing we should add a step on the cooling of T
+[] We should add a picture illustrating the chromosome when we explain what they are
+[] The PSO part seem unfinished in comparison to the to the others. Why so?
+-->
+
 # Metaheuristics
 
 In [Lecture 16](./6-heuristics-1.md), we discussed heuristic methods, which are general approaches for obtaining good results for difficult problems.

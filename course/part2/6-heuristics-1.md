@@ -18,6 +18,7 @@ TODO's
 [] Add pseudocode for line search
 [] Add illustrative example to Golden search (of a univariate function)
 [] Add illustration of Nelder-Mead steps
+[] Comment the code, based on what was done in the combinatorial optimisation lectures
 -->
 
 # Heuristics
