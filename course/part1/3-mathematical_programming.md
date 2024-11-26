@@ -41,7 +41,7 @@ A mathematical programming model comprises four key ingredients:
 
 Notice that these are presented in a deliberate order. As a rule of thumb, whenever we start the process of modelling a problem, we will follow this list in this particular order.
 
-As the name suggests, the objective function is the function that describes our objective, which is to maximise or minimise some quantity that represents a measurement of performance. Thus, in mathematical programming, objective functions always comprise an objective (maximise or minimise) and a function $f$. For the majority of our models, the function to be optimised will be defined as $f : X \subseteq \reals^n \to \reals$.
+As the name suggests, the objective function is the function that describes our objective, which is to maximise or minimise some quantity that represents a measurement of performance. Thus, in mathematical programming, objective functions always comprise an objective (maximise or minimise) and a function $f$. For the majority of our models, the function to be optimised will be defined as $f : X \subset \reals^n \to \reals$.
 
 ## Defining domains by posing constraints
 
