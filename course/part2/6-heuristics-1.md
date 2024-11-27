@@ -83,8 +83,10 @@ function ternary_search(f, a, d; eps=1e-2)
     while abs(d-a) > eps
         b, c = pick_two_points(a, d)
         fb, fc = f(b), f(c)
+        # shorten to left
         if fb < fc
             d = c
+        # shorten to right
         else
             a = b
         end
@@ -160,16 +162,20 @@ where $\varphi$ is the golden ratio, hence the name of this method _golden secti
 ```{code-cell}
 :tags: [remove-output]
 function golden_section_search(f, a, d; eps=1e-2)
+    # calculate initial midpoints
     l = 1-1/MathConstants.golden
     b = (d-a)*l + a
     c = (d-a)*(1-l) + a
     fb, fc = f(b), f(c)
+
     while d-a>eps
+        # shorten to right
         if fb > fc
             a = b
             b, fb = c, fc
             c = (d-a)*(1-l) + a
             fc = f(c)
+        # shorten to left
         else
             d = c
             c, fc = b, fb
@@ -230,6 +236,7 @@ using Optim
 f(x) = (x[1]^2 + x[2] - 11)^2 + (x[1] + x[2]^2 - 7)^2
 x0 = [0.0, 0.0]
 
+# Optim.simplex requires a user-specified initial simplex
 struct InitialSimplex <: Optim.Simplexer end
 Optim.simplexer(S::InitialSimplex, initial_x) = [[-3.,-3.], [0,0], [-3,0]]
 

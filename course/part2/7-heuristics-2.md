@@ -36,6 +36,7 @@ Such packages in Julia include [`Metaheuristics.jl`](https://jmejia8.github.io/M
 
 Here are some functions we will need throughout the lecture for giving TSP examples.
 ```{code-cell}
+:tags: [remove-output]
 using Random, CairoMakie
 
 function generate_distance_matrix(n; random_seed = 1)
@@ -49,6 +50,7 @@ end
 n = 40
 d, X_coord, Y_coord = generate_distance_matrix(n)
 
+# compute the cost of a TSP cycle, given a vector of cities to visit in order
 function cost_f(solution, d)
     c = 0
     for i in 2:n
@@ -96,15 +98,20 @@ If $a=0$, then `cutoff = c_min` and thus solution construction will be purely gr
 If $a=1$, then `rcl` will contain every candidate, thus solution construction will be entirely random.
 ```{code-cell}
 function first_phase(d, n, a)
+    # always start from the first city
     solution = [1]
     for _ in 2:n
         curr_city = solution[end]
+        
+        # vector of (city_i, distance to 1)
         candidates = filter(x->!(x[1] in solution), collect(zip(1:n, d[curr_city, :])))
 
+        # find the bounds for the next step
         c_max = maximum(x->x[2], candidates)
         c_min = minimum(x->x[2], candidates)
         cutoff = c_min + a*(c_max - c_min)
         
+        # create rcl and pick randomly to add to solution
         rcl = [i for (i,c) in candidates if c <= cutoff]
         next_city = rand(rcl)
         push!(solution, next_city)
@@ -120,10 +127,16 @@ In this implementation, we remove a randomly selected city and insert it at a ra
 function second_phase(solution, d, n, n_iter)
     best = solution
     best_cost = cost_f(solution, d)
+
+    # mutate multiple times
     for _ in 1:n_iter
         neighbor = copy(solution)
+
+        # remove random city and insert back randomly
         removed = popat!(neighbor, rand(1:n))
         insert!(neighbor, rand(1:n), removed)
+
+        # save only if cost is decreased
         cost = cost_f(neighbor, d)
         if cost < best_cost
             best = neighbor
@@ -238,6 +251,8 @@ There is no universally good choice, but possible schedules worth trying include
 ```{code-cell}
 function create_neighbor(sol)
     c = copy(sol)
+    
+    #randomly select two cities and swap them
     i,j = randperm(length(sol))[1:2]
     c[i],c[j] = c[j],c[i]
     return c
@@ -249,6 +264,9 @@ function tsp_sa(d, n, n_iters)
         T = n_iters/it
         neighbor = create_neighbor(sol)
         delta = cost_f(neighbor, d) - cost_f(sol, d)
+        
+        # if new solution is better, accept
+        # otherwise, accept randomly
         if delta < 0 || rand() < exp(-delta/T)
             sol = neighbor
         end
@@ -327,6 +345,7 @@ abstract type Selection end
 struct RouletteWheelSelection <: Selection end
 function select(t::RouletteWheelSelection, fitness, N)
     s = sum(fitness)
+    # cumulative sum
     fitness_probs = cumsum(fitness ./ s)
     parent() = begin
         r = rand()
@@ -351,6 +370,7 @@ struct TournamentSelection <: Selection
 end
 function select(t::TournamentSelection, fitness, N)
     parents() = begin
+        # pick the best two out of a random selection
         perm = randperm(length(fitness))
         return sort(perm[1:t.size], by=x->fitness[x], rev=true)[1:2]
     end
@@ -376,8 +396,11 @@ abstract type Recombination end
 
 struct TwoPointCrossover <: Recombination end
 function recombine(t::TwoPointCrossover, parent_pair)
+    # randomly pick start and end
     n = length(parent_pair[1])
     s, e = randperm(n)[1:2]
+
+    # mark the selected region
     mask = falses(n)
     if s < e
         mask[s:e] .= 1
@@ -385,6 +408,8 @@ function recombine(t::TwoPointCrossover, parent_pair)
         mask[1:s] .= 1
         mask[e:n] .= 1
     end
+
+    # create the children
     child1 = copy(parent_pair[1])
     child2 = copy(parent_pair[2])
     child1[mask] = parent_pair[2][mask]
@@ -405,6 +430,7 @@ struct OrderCrossover <: Recombination
     size
 end
 function recombine(t::OrderCrossover, parent_pair)
+    # randomly make a selection
     n = length(parent_pair[1])
     values = randperm(n)[1:t.size]
 
@@ -413,9 +439,12 @@ function recombine(t::OrderCrossover, parent_pair)
     p1i = 1
     p2i = 1
     for i in 1:n
+        # if not selected value, copy normally
         if !(parent_pair[1][i] in values)
             push!(child1, parent_pair[1][i])
+        # if selected value
         else
+            # find the next selected value (so that we can swap)
             while !(parent_pair[2][p2i] in values)
                 p2i += 1
             end
@@ -423,6 +452,7 @@ function recombine(t::OrderCrossover, parent_pair)
             p2i += 1
         end
 
+        # same as above, for child2
         if !(parent_pair[2][i] in values)
             push!(child2, parent_pair[2][i])
         else
@@ -474,6 +504,7 @@ function mutate!(t::RotationMutation, chromosome)
     original = copy(chromosome)
     start = rand(1:n)
     selection = start:(start+t.size-1)
+    # if selection exceeds the end of the chromosome, wrap back to start
     if start + t.size - 1 > n
         rem = (start + t.size) % n
         selection = vcat(1:rem, start:n)
@@ -522,9 +553,14 @@ function tsp_ga(f, n_cities, n_iters, gen_size;
     fitnesses = f.(population)
     for _ in 1:n_iters
         parent_idxs = select(t_sel, fitnesses, gen_size/2)
+
+        # Ref() allows sharing the same element for vectorisation
         parents = getindex.(Ref(population), parent_idxs)
         offspring_pairs = recombine.(Ref(t_rec), parents)
+
+        # combine all chromosomes into one vector
         population = vcat(offspring_pairs...)
+        
         mutate!.(Ref(t_mut), population)
         fitnesses = f.(population)
     end
