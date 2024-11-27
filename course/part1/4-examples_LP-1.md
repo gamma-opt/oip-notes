@@ -121,9 +121,10 @@ Once the variables have been defined, we can pose our objective function. In thi
       & -115b_{51} -115b_{52} - 95b_{53} -125b_{54} -105b_{55} -135b_{56} \\
       & -5(s_{11}+\dots+s_{56}).
 ```
-which is composed of costs of purchasing the oil, storage costs, and income from selling the blended product.
 
-From our problem statement, we can see that there are five sources of constraints we must consider: linear production, processing limits, hardness constraints, storage continuity and storage limits.
+which is composed of the revenue from selling the blended product, discounted the costs of purchasing the oil and storage costs, respectively.
+
+From our problem statement, we can see that there are five sources of constraints we must consider: linear production, processing limits, hardness constraints, storage transference between months and storage limits.
 
 Linear production just means that we produce as much product as we use oils in any given month $j$
 
@@ -141,9 +142,19 @@ u_{3j}+u_{4j}+u_{5j} &\leq 250.
 The hardness constraints for month $j$ are also not complicated:
 
 ```{math}
-8.8u_{1j}+6.1u_{2j}+2.0u_{3j}+4.2u_{4j}+5.0u_{5j} &\leq 6y_j \\
-8.8u_{1j}+6.1u_{2j}+2.0u_{3j}+4.2u_{4j}+5.0u_{5j} &\geq 3y_j.
+8.8u_{1j}+6.1u_{2j}+2.0u_{3j}+4.2u_{4j}+5.0u_{5j} &\leq 6p_j \\
+8.8u_{1j}+6.1u_{2j}+2.0u_{3j}+4.2u_{4j}+5.0u_{5j} &\geq 3p_j.
 ```
+
+````{note}
+Notice that we are assuming that the hardness is calculated as the weighted sum of the hardness of each oil. Thus, we have that 
+
+```{math}
+3 \leq \frac{8.8u_{1j}+6.1u_{2j}+2.0u_{3j}+4.2u_{4j}+5.0u_{5j}}{p_j} \leq 6.
+````
+
+Posing these inequality directly would lead to a nonlinear model (because of the fraction involving decision variables). Luckily, that can be trivially circumvented by simply multiplying the limits by the decision variable $p_j$, yielding equivalent linear constraints.
+````
 
 For storage, we link these variables together by the relation
 ```{math}
