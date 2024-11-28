@@ -199,36 +199,43 @@ end
 
 ```{code-cell}
 source = 11
-target = 15
-ds = dijkstra_shortest_paths(g, source, d)
+ds = dijkstra_shortest_paths(g, source, d)  # g is some graph, d is the distance matrix
+```
 
-path = [15]
-path_edges = []
-source = 11
-curr = 15
+The output `ds` contains information about the solution such as parents of nodes in the shortest path and distances as documented [here](https://juliagraphs.org/Graphs.jl/stable/algorithms/shortestpaths/#Graphs.DijkstraState). We can extract the shortest path to a given target node, such as 15, via going backwards.
+
+```{code-cell}
+target = 15
+# initialize backwards search
+path = [target]
+curr = target
+
 while curr != source
     parent = ds.parents[curr]
-    e = parent < curr ? Edge(parent, curr) : Edge(curr, parent)
-    push!(path_edges, e)
-    curr = ds.parents[curr]
-    push!(path, curr)
+    push!(path, parent)
+    curr = parent
 end
-path
+reverse(path)
 ```
 
 ```{code-cell}
 :tags: [remove-input]
+c_blue = Makie.wong_colors()[1]
+c_orange = Makie.wong_colors()[2]
+
 c = []
 elabs = []
 for e in edges(g)
-    if e in path_edges
-        push!(c, :red)
+    # this is not correct in general cases and we could keep track of edges in the prev cell,
+    # but I didn't want to show a variable only to use it in a hidden cell
+    if e.src in path && e.dst in path
+        push!(c, c_orange)
     else
-        push!(c, :black)
+        push!(c, c_blue)
     end
     push!(elabs, repr(Int(round(d[e.src,e.dst]))))
 end
-graphplot(g; nlabels=repr.(1:nv(g)), edge_color=c, elabels=elabs, elabels_color=:blue)
+graphplot(g; nlabels=repr.(1:nv(g)), node_color=c_blue, edge_color=c, elabels=elabs, elabels_color=:black)
 ```
 
 (p2l5-tsp)=
@@ -254,11 +261,6 @@ This observation means that the solution of larger instances of a problem is dir
 
 An implementation of the algorithm is presented below for completeness, but we will not discuss it in depth since it is still too slow for larger instances of the problem. 
 {numref}`tsp_heldkarp` displays the output of an algorithm for a managable size of $n=20$.
-
-```{figure} ../figures/tsp_heldkarp.svg
-:name: tsp_heldkarp
-Output of the Held-Karp algorithm in a TSP instance with $n=20$.
-```
 
 ```julia
 using Combinatorics
@@ -336,6 +338,16 @@ function held_karp(d)
 
     return opt, reverse(opt_path)
 end
+```
+
+```{code-cell}
+:tags: [skip-execution]
+held_karp(d)  # d is some distance matrix
+```
+
+```{figure} ../figures/tsp_heldkarp.svg
+:name: tsp_heldkarp
+Output of the Held-Karp algorithm in a TSP instance with $n=20$.
 ```
 
 (p2l5-mst)=
