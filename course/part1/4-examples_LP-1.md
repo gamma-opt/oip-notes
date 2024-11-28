@@ -148,7 +148,7 @@ Notice that we are assuming that the hardness is calculated as the weighted sum 
 
 ```{math}
 3 \leq \frac{8.8u_{1j}+6.1u_{2j}+2.0u_{3j}+4.2u_{4j}+5.0u_{5j}}{p_j} \leq 6.
-````
+```
 
 Posing these inequality directly would lead to a nonlinear model (because of the fraction involving decision variables). Luckily, that can be trivially circumvented by simply multiplying the limits by the decision variable $p_j$, yielding equivalent linear constraints.
 ````
