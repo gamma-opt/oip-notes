@@ -13,12 +13,6 @@ kernelspec:
   name: julia-1.10
 ---
 
-<!-- 
-TODO's 
-[] Clarify that the list of examples are combinatorial optimisations to which a known exact algorithm is known
--->
-
-
 # Combinatorial optimisation
 
 So far, we have discussed a few, sometimes overlapping, varieties of mathematical programming: linear optimisation, mixed-integer optimisation, and convex optimisation.
@@ -107,12 +101,19 @@ In many algorithms, the constants hidden away by the asymptotic notation may be 
 Conversely, it is possible that an algorithm with an undesirable asymptotic complexity may work perfectly fine for your input sizes.
 ```
 
-When exhaustively searching for the exact solutions is difficult, there are a few approaches we can turn towards.
-Sometimes, a certain subset of the problem may have additional properties allowing for more efficient solutions.
+In continuous problems, the number of feasible solutions was not a problem.
+Even though there may be an infinite number of possibile solutions, we are able to exploit information given by objective and constraint functions to guide our search.
+In mixed-integer problems, this was rendered more difficult by the presence of integer variables, but we are still able to use the same techniques via relaxations and branching when needed.
+In combinatorial problems, there seldom are nice functions that we can analyse generically.
+
+In order to avoid exhaustively searching for the exact solution, there are a few approaches we can turn towards.
+Sometimes, the problem is such that it is easily solvable without going through all possibilities individually. Finding shortest paths and minimum spanning trees, examples given in {numref}`p2l5-sp` and {numref}`p2l5-mst` both have very natural algorithms that turn out yield optimal solutions.
+
+Similarly, in cases where the general problem is difficult, a certain subset of the problem may have additional properties allowing for more efficient solutions.
 For example, if we consider the set of all TSP problems where each problem instance is uniquely identified by a matrix of inter-city costs, some families of matrices impose efficiently solvable TSP problems.
 A specific example is the so called Monge matrices, which guarantee solutions to the TSP that are _pyramidal_, i.e. the solution is a tour $s=<1,i_1,\dots,i_r,n,j_1,\dots,j_{n-r-2}>$ where $i_1<i_2<\dots i_r$ and $j_1>j_2>\dots>j_{n-r-2}$ as if cities are visited first in increasing order, then the remaining in decreasing order.
 
-Another approach for some problems is dynamic programming, which is a technique to break down a problems into a sequence of smaller subproblems or decisions over timesteps. An example is provided in {ref}`p2l5-tsp`, but we won't cover dynamic programming in detail.
+Another approach for some problems is dynamic programming, which is a technique to break down a problems into a sequence of smaller subproblems or decisions over timesteps. An example is provided in {numref}`p2l5-tsp`, but we won't cover dynamic programming in detail.
 
 A final option is to abandon the search for exact solutions.
 In many cases, having a good enough solution is sufficient, or there may be time or other resource constraints that makes anything better an impossibility.
@@ -128,6 +129,7 @@ We will discuss such _heuristic_ algorithms in the next lecture.
 
 ## Exact Solution Examples
 
+(p2l5-sp)=
 ### Shortest Path 
 
 Finding the quickest way home via GPS or a connection between two computers with the fewest hops in a network are only two examples of the ubiquitous problem of finding the shortest path.
@@ -330,6 +332,7 @@ function held_karp(d)
 end
 ```
 
+(p2l5-mst)=
 ### Minimum Spanning Trees
 
 A _minimum spanning tree_ (MST) of a connected, weighted graph $G=(V,E,w)$ is a subset of the edges $E'\subseteq E$ such that
