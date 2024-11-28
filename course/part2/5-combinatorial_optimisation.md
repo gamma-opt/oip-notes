@@ -66,10 +66,16 @@ For a budget that would accept half of these selections, there would be $2^{n-1}
 
 While for small $n$ these numbers may not pose a problem, very quickly they exceed the realm of what is computable in a reasonable amount of time.
 Some common functions are plotted below.
-Note that the $y$-axis is on a $\log_2$ scale, so the difference between the lines is very large.
 
 ```{code-cell}
-:tags: [remove-input]
+---
+mystnb:
+  figure:
+    name: fig:function-examples-1
+    caption: |
+      Growth of different functions. Note that the $y$-axis is on a $\log_2$ scale, so the differences between the lines are very large. When $n=20$, $n!$ is more than 1 billion times the value of $e^n$.
+tags: [remove-input]
+---
 using CairoMakie
 
 x = 2:20
