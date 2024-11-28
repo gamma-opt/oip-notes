@@ -96,18 +96,15 @@ Recall our set of steps for modelling optimisation problems:
 3. Formulate **objective function**;
 4. Formulate **constraints**. 
 
-Listing the parameters has already been done for us, so we can proceed to defining our decision variables. 
-In this case, we want to decide how much oil of each type we would like to purchase in a month, how much of it to store and how much to use for processing.
-This is then repeated 6 times, one for each month in the half-year period.
-Thus we define
+Listing the parameters has already been done for us, so we can proceed to defining our decision variables. In this case, we want to decide how much oil of each type we would like to purchase in a month, how much of it to store and how much to use for processing.
+This is then repeated 6 times, one for each month between January and June. Thus we define
 
 - $b_{ij}$ - amount of oil $i$ purchased in month $j$,
 - $u_{ij}$ - amount of oil $i$ used for blending in month $j$,
 - $s_{ij}$ - amount of oil $i$ stored in month $j$,
 - $p_j$ - amount of product produced in month $j$,
 
-where we label oils 1 to 5 as vegetable oil 1 and 2, followed by non-vegetable oil 1, 2 and 3.
-This means we have 91 decision variables, all of which are non-negative.
+where we label oils 1 to 5 as vegetable oil 1 and 2, followed by non-vegetable oil 1, 2 and 3. This means we have 96 decision variables, all of which are non-negative.
 
 Once the variables have been defined, we can pose our objective function. In this case, our function is the total profit, which we would like to *maximize*. Thus, we have that
 
@@ -168,12 +165,12 @@ Thus we obtain for oil $i$
 
 ```{math}
 :label: p1l5:food_storage
- b_{i1} -u_{i1}-s_{i1} &= -500 \\
-s_{i1} + b_{i2} -u_{i2}-s_{i2} &= 0 \\
-s_{i2} + b_{i3} -u_{i3}-s_{i3} &= 0 \\
-s_{i3} + b_{i4} -u_{i4}-s_{i4} &= 0 \\
-s_{i4} + b_{i5} -u_{i5}-s_{i5} &= 0 \\
-s_{i5} + b_{i6} -u_{i6}\hspace{1.2cm} &=500.
++ 500  + b_{i1} &= u_{i1} + s_{i1}   \\
+s_{i1} + b_{i2} &= u_{i2} + s_{i2} \\
+s_{i2} + b_{i3} &= u_{i3} + s_{i3} \\
+s_{i3} + b_{i4} &= u_{i4} + s_{i4} \\
+s_{i4} + b_{i5} &= u_{i5} + s_{i5} \\
+s_{i5} + b_{i6} &= u_{i6} + 500.
 ```
 
 There is also a storage limit for each type of oil, which we can implement by constraining the variables
@@ -196,12 +193,12 @@ Putting it all together, the optimisation model that provides the maximum profit
       & -110b_{41} - 90b_{42} -100b_{43} -120b_{44} -110b_{45} - 80b_{46} \\
       & -115b_{51} -115b_{52} - 95b_{53} -125b_{54} -105b_{55} -135b_{56} \\
       & -5(s_{11}+\dots+s_{56}) \\
-\st & u_{11}+u_{21}+u_{31}+u_{41}+u_{51} = p_1 \\
-& u_{12}+u_{22}+u_{32}+u_{42}+u_{52} = p_2 \\
-& u_{13}+u_{23}+u_{33}+u_{43}+u_{53} = p_3 \\
-& u_{14}+u_{24}+u_{34}+u_{44}+u_{54} = p_4 \\
-& u_{15}+u_{25}+u_{35}+u_{45}+u_{55} = p_5 \\
-& u_{16}+u_{26}+u_{36}+u_{46}+u_{56} = p_6 \\
+\st & u_{11}+u_{21}+u_{31}+u_{41}+u_{51} - p_1 = 0 \\
+& u_{12}+u_{22}+u_{32}+u_{42}+u_{52} - p_2 = 0 \\
+& u_{13}+u_{23}+u_{33}+u_{43}+u_{53} - p_3 = 0 \\
+& u_{14}+u_{24}+u_{34}+u_{44}+u_{54} - p_4 = 0 \\
+& u_{15}+u_{25}+u_{35}+u_{45}+u_{55} - p_5 = 0 \\
+& u_{16}+u_{26}+u_{36}+u_{46}+u_{56} - p_6 = 0 \\
 & u_{11}+u_{21} \leq 200 \\
 & u_{12}+u_{22} \leq 200 \\
 & u_{13}+u_{23} \leq 200 \\
@@ -214,18 +211,18 @@ Putting it all together, the optimisation model that provides the maximum profit
 & u_{34}+u_{44}+u_{54} \leq 250 \\
 & u_{35}+u_{45}+u_{55} \leq 250 \\
 & u_{36}+u_{46}+u_{56} \leq 250 \\
-& 8.8u_{11}+6.1u_{21}+2.0u_{31}+4.2u_{41}+5.0u_{51} \leq 6y_1 \\
-& 8.8u_{12}+6.1u_{22}+2.0u_{32}+4.2u_{42}+5.0u_{52} \leq 6y_2 \\
-& 8.8u_{13}+6.1u_{23}+2.0u_{33}+4.2u_{43}+5.0u_{53} \leq 6y_3 \\
-& 8.8u_{14}+6.1u_{24}+2.0u_{34}+4.2u_{44}+5.0u_{54} \leq 6y_4 \\
-& 8.8u_{15}+6.1u_{25}+2.0u_{35}+4.2u_{45}+5.0u_{55} \leq 6y_5 \\
-& 8.8u_{16}+6.1u_{26}+2.0u_{36}+4.2u_{46}+5.0u_{56} \leq 6y_6 \\
-& 8.8u_{11}+6.1u_{21}+2.0u_{31}+4.2u_{41}+5.0u_{51} \geq 3y_1 \\
-& 8.8u_{12}+6.1u_{22}+2.0u_{32}+4.2u_{42}+5.0u_{52} \geq 3y_2 \\
-& 8.8u_{13}+6.1u_{23}+2.0u_{33}+4.2u_{43}+5.0u_{53} \geq 3y_3 \\
-& 8.8u_{14}+6.1u_{24}+2.0u_{34}+4.2u_{44}+5.0u_{54} \geq 3y_4 \\
-& 8.8u_{15}+6.1u_{25}+2.0u_{35}+4.2u_{45}+5.0u_{55} \geq 3y_5 \\
-& 8.8u_{16}+6.1u_{26}+2.0u_{36}+4.2u_{46}+5.0u_{56} \geq 3y_6 \\
+& 8.8u_{11}+6.1u_{21}+2.0u_{31}+4.2u_{41}+5.0u_{51} - 6y_1 \leq 0 \\
+& 8.8u_{12}+6.1u_{22}+2.0u_{32}+4.2u_{42}+5.0u_{52} - 6y_2 \leq 0 \\
+& 8.8u_{13}+6.1u_{23}+2.0u_{33}+4.2u_{43}+5.0u_{53} - 6y_3 \leq 0 \\
+& 8.8u_{14}+6.1u_{24}+2.0u_{34}+4.2u_{44}+5.0u_{54} - 6y_4 \leq 0 \\
+& 8.8u_{15}+6.1u_{25}+2.0u_{35}+4.2u_{45}+5.0u_{55} - 6y_5 \leq 0 \\
+& 8.8u_{16}+6.1u_{26}+2.0u_{36}+4.2u_{46}+5.0u_{56} - 6y_6 \leq 0 \\
+& 8.8u_{11}+6.1u_{21}+2.0u_{31}+4.2u_{41}+5.0u_{51} - 3y_1 \geq 0 \\
+& 8.8u_{12}+6.1u_{22}+2.0u_{32}+4.2u_{42}+5.0u_{52} - 3y_2 \geq 0 \\
+& 8.8u_{13}+6.1u_{23}+2.0u_{33}+4.2u_{43}+5.0u_{53} - 3y_3 \geq 0 \\
+& 8.8u_{14}+6.1u_{24}+2.0u_{34}+4.2u_{44}+5.0u_{54} - 3y_4 \geq 0 \\
+& 8.8u_{15}+6.1u_{25}+2.0u_{35}+4.2u_{45}+5.0u_{55} - 3y_5 \geq 0 \\
+& 8.8u_{16}+6.1u_{26}+2.0u_{36}+4.2u_{46}+5.0u_{56} - 3y_6 \geq 0 \\
 & b_{11} -u_{11}-s_{11} = -500 \\
 & b_{21} -u_{21}-s_{21} = -500 \\
 & b_{31} -u_{31}-s_{31} = -500 \\
@@ -264,7 +261,11 @@ Putting it all together, the optimisation model that provides the maximum profit
 \end{align*}
 ```
 
-Clearly, this model is far more complex than our {ref}`p1l4:first-model`, which is expected for being a more realistic one. We will hold on how to to solve this for now, and keep practicing the process of modelling itself.
+Clearly, this model is far more complex than our {ref}`p1l4:first-model`, which is expected for being a more realistic one. We will hold on how to to solve this for now, and keep practising the process of modelling itself.
+
+```{note}
+Notice that for formulating the complete model, we adopted the convention of stating the constraints with variables on the left-hand side and independent parameters (i.e., those that are not multiplied by a variable) on the right-hand side. This is a prevalent convention in many mathematical programming applications, to an extent that independent parameters in the constraints are often referred to as the *RHS term* (for right-hand side).
+```
 
 (p1l5:production)=
 ### Factory Planning
@@ -291,7 +292,7 @@ The time consumed by machine operations in hours and net profits in € are desc
 |       **Grinding**      | 0.5           | 0.7           | -             | -             | 0.3           | 0.2           | 0.5           |
 |  **Vertical drilling**  | 0.1           | 0.2           | -             | 0.3           | -             | 0.6           | -             |
 | **Horizontal drilling** | 0.2           | -             | 0.8           | -             | -             | -             | 0.6           |
-|        **Boring**       | 0.05          | 0.04          | -             | 0.7           | 0.1           | -             | 0.08          |
+|        **Boring**       | 0.05          | 0.03          | -             | 0.07          | 0.1           | -             | 0.08          |
 |       **Planing**       | -             | -             | 0.01          | -             | 0.05          | -             | 0.05          |
 ```
 
@@ -460,15 +461,14 @@ for the planer.
 Lastly, we need to link the manufacturing, holding and selling variables together. We can only sell or store what is already available, either freshly manufactured or from the previous month's inventory, which is 0 in the first month. Thus for Product 1, we have that
 
 ```{math}
-m_{11}-s_{11}-h_{11} &= 0 \\
-h_{11} + m_{12}-s_{12}-h_{12} &= 0 \\
-h_{12} + m_{13}-s_{13}-h_{13} &= 0 \\
-h_{13} + m_{14}-s_{14}-h_{14} &= 0 \\
-h_{14} + m_{15}-s_{15}-h_{15} &= 0 \\
-h_{15} + m_{16}-s_{16}-h_{16} &= 0 \\
+m_{11} &= s_{11} + h_{11} \\
+h_{11} + m_{12} &= s_{12} + h_{12} \\
+h_{12} + m_{13} &= s_{13} + h_{13} \\
+h_{13} + m_{14} &= s_{14} + h_{14} \\
+h_{14} + m_{15} &= s_{15} + h_{15} \\
+h_{15} + m_{16} &= s_{16} + h_{16} \\
 ```
-
-and identical constraints govern the other products.
+and identical constraints must be put in place for the other products $i \in \braces{2,3, \dots, 7}$.
 
 ```{admonition} Do the above constraints look familiar?
 :class: dropdown, note
