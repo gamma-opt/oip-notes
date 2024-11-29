@@ -13,14 +13,6 @@ kernelspec:
   name: julia-1.10
 ---
 
-<!-- 
-TODO's 
-[] Add pseudocode for line search
-[] Add illustrative example to Golden search (of a univariate function)
-[] Add illustration of Nelder-Mead steps
-[] Comment the code, based on what was done in the combinatorial optimisation lectures
--->
-
 # Heuristics
 
 *Heuristic* algorithms sacrifice accuracy for speed, by producing reasonably good solutions much quicker than an optimal algorithm may require.
@@ -77,22 +69,13 @@ Here, we present some methods for minimizing unimodal intervals. These methods c
 
 The most basic one is _ternary search_, where we continually pick two points within the interval.
 
-```{code-cell}
-:tags: [remove-output]
-function ternary_search(f, a, d; eps=1e-2)
-    while abs(d-a) > eps
-        b, c = pick_two_points(a, d)
-        fb, fc = f(b), f(c)
-        # shorten to left
-        if fb < fc
-            d = c
-        # shorten to right
-        else
-            a = b
-        end
-    end
-    return  (a+d)/2
-end
+```{prf:algorithm} Generic line search
+**Inputs** function $f$, interval $[a,d]$, tolerance $\epsilon$.
+1. While $|d-a|>\epsilon$,
+    1. Determine inner points $b$ and $c$.
+    2. If $f(b)<f(c)$, shorten towards left, i.e. $d\leftarrow c$
+    3. Otherwise, shorten towards right, i.e. $a\leftarrow b$. 
+2. Return $\frac{a+d}{2}$
 ```
 
 To see what is happening here, consider the points $b$ and $c$.
@@ -183,9 +166,13 @@ function golden_section_search(f, a, d; eps=1e-2)
             fb = f(b)
         end
     end
-    return (a-d)/2
+    return (a+d)/2
 end
 ```
+
+<video width="800" controls loop autoplay>
+    <source src="../_static/golden.mp4" type="video/mp4">
+</video>
 
 ### Nelder-Mead (multi-dimensional)
 
@@ -220,6 +207,12 @@ The algorithm then iteratively replaces the worst performing vertex with a new o
 2. If the reflection point is the new best one, the area beyond it may contain even better points. _Expansion_ explores exactly this prospect.
 3. If the reflection point is not better, then better points may be expected to be within the simplex, so _contraction_ proposes an inside point to replace the worst one.
 4. If the contraction point is not better, then _shrinkage_ moves all the points (except the best one) inside, hoping to find a better landscape.
+
+```{figure} ../figures/nelder_mead.drawio.svg
+:name: nm_ops
+
+Nelder-mead operations illustrated.
+```
 
 Convergence for Nelder-Mead is usually assesed using the sample standard deviation of the simplex vertices $s=\sqrt{\frac{1}{n+1}\sum^{n+1}_{i=1}(x_i - \bar{x})^2}$ (where $\bar{x}$ is the mean of the vertices), compared to some tolerance $\epsilon$.
 The idea here is that a low standard deviation indicates that the simplex is on a flat region, where it is unclear which direction would improve the search for an optimum.
