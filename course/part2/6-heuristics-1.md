@@ -15,7 +15,7 @@ kernelspec:
 
 # Heuristics
 
-*Heuristic* algorithms sacrifice accuracy for speed, by producing reasonably good solutions much quicker than an optimal algorithm may require.
+**Heuristic** algorithms sacrifice accuracy for speed, by producing reasonably good solutions much quicker than an optimal algorithm may require.
 
 ## Solution construction v. improvement
 Many heuristics fall under a _constructive_ versus _local_ search duality.

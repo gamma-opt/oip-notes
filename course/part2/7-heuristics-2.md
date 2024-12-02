@@ -16,7 +16,7 @@ kernelspec:
 # Metaheuristics
 
 In [Lecture 16](./6-heuristics-1.md), we discussed heuristic methods, which are general approaches for obtaining good results for difficult problems.
-In this lecture, we will talk about _metaheuristics_, which can be thought of as "template algorithms" that use heuristic ideas on a high-level, so that they can be adapted to work for many problems.
+In this lecture, we will talk about **metaheuristics**, which can be thought of as "template algorithms" that use heuristic ideas on a high-level, so that they can be adapted to work for many problems.
 
 A big focus of these algorithms is balancing exploration versus exploitation: making sure that we get the best result available without being stuck in a local optimum.
 Keep this in mind throughout the lecture, many algorithms that fall under the umbrella of metaheuristics can be thought of as greedy approach plus some mechanism to add diversity to the solution and explore the solution space globally.
