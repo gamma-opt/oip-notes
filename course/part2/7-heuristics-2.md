@@ -13,13 +13,6 @@ kernelspec:
   name: julia-1.10
 ---
 
-<!--
-TODOs
-[] Comment the code, based on what was done in the combinatorial optimisation lectures
-[] GRASP: after defining each function, we should run it to provide an concrete example of how it works
-[] The PSO part seem unfinished in comparison to the to the others. Why so?
--->
-
 # Metaheuristics
 
 In [Lecture 16](./6-heuristics-1.md), we discussed heuristic methods, which are general approaches for obtaining good results for difficult problems.
@@ -93,7 +86,13 @@ In the first phase, we construct a solution using a distance matrix $d$ and some
 In the below code, this is achieved by obtaining a range of the candidate costs and allowing only a fraction of this range, which is controlled by $a\in [0,1]$.
 If $a=0$, then `cutoff = c_min` and thus solution construction will be purely greedy.
 If $a=1$, then `rcl` will contain every candidate, thus solution construction will be entirely random.
+
+```{figure} ../figures/grasp_first.drawio.svg
+Illustration of the RCL in the first phase of the GRASP algorithm.
+```
+
 ```{code-cell}
+:tags: [remove-output]
 function first_phase(d, n, a)
     # always start from the first city
     solution = [1]
@@ -121,6 +120,7 @@ In the second phase, the solution is mutated in a neighborhood.
 In this implementation, we remove a randomly selected city and insert it at a random location, but one can imagine other descriptions of neighborhood and appropriate mutations.
 % TODO change to use lin-kernighan?
 ```{code-cell}
+:tags: [remove-output]
 function second_phase(solution, d, n, n_iter)
     best = solution
     best_cost = cost_f(solution, d)
@@ -146,6 +146,7 @@ end
 
 Putting the two phases together we get the GRASP algorithm.
 ```{code-cell}
+:tags: [remove-output]
 function tsp_grasp(d, a, terminate, second_phase_iters=100)
     n = size(d)[1]
     best = nothing
@@ -201,7 +202,8 @@ end
 Lastly, we can add an _outer constructor_ to make initializing `IterationCounter` more convenient, since iterations should start from 0.
 
 ```{code-cell}
-IterationCounter(x::Int) = IterationCounter(0, x);
+:tags: [remove-output]
+IterationCounter(x::Int) = IterationCounter(0, x)
 ```
 
 Let's see what result we get.
@@ -268,6 +270,7 @@ There is no universally good choice, but possible schedules worth trying include
 - Move budget: setting $T=T_0(1-k/K)^\alpha$ after every $m$ moves, where $k$ is the number of moves made so far and $K$ is the total number of moves allowed. $\alpha$ here is some positive hyperparameter. 
 
 ```{code-cell}
+:tags: [remove-output]
 function create_neighbor(sol)
     c = copy(sol)
     
@@ -363,6 +366,7 @@ One example method for selection is **roulette wheel selection**, also known as 
 This is akin to spinning a roulette wheel where the slices are bigger for individuals with higher fitness.
 
 ```{code-cell}
+:tags: [remove-output]
 abstract type Selection end
 
 struct RouletteWheelSelection <: Selection end
@@ -388,6 +392,7 @@ If the subset to be selected is large, this reduces to greedy selection since in
 With a smaller size, the selection pressure decreases, adding diversity to the solution evolution.
 
 ```{code-cell}
+:tags: [remove-output]
 struct TournamentSelection <: Selection 
     size
 end
@@ -415,6 +420,7 @@ A popular bitstring recombination operation is two-point crossover, where a star
 ```
 
 ```{code-cell}
+:tags: [remove-output]
 abstract type Recombination end
 
 struct TwoPointCrossover <: Recombination end
@@ -449,6 +455,7 @@ Example of an order crossover where $S=\{1,3,4,7\}$ is selected. For the top off
 ```
 
 ```{code-cell}
+:tags: [remove-output]
 struct OrderCrossover <: Recombination 
     size
 end
@@ -502,6 +509,7 @@ Bitflip mutation example.
 ```
 
 ```{code-cell}
+:tags: [remove-output]
 abstract type Mutation end
 
 struct BitflipMutation <: Mutation 
@@ -518,6 +526,7 @@ Two common examples of permutation mutations are rotations and swaps.
 In a rotation, a subsequence of the chromosome is randomly selected, along with a rotation number $k$. Then, within the subsequence, every item is shifted to some direction $k$ times, wrapping over to the start of the subsequence when needed. The rest of the chromosome is left intact.
 
 ```{code-cell}
+:tags: [remove-output]
 struct RotationMutation <: Mutation 
     size
     k
@@ -541,6 +550,7 @@ end
 In a swap, two items (or non-overlapping subsequences) are randomly selected and swapped.
 
 ```{code-cell}
+:tags: [remove-output]
 struct SwapMutation <: Mutation end
 function mutate!(t::SwapMutation, chromosome)
     p1, p2 = randperm(length(chromosome))[1:2]
@@ -559,6 +569,7 @@ Finally, we need a method for initialising the first population.
 As long as the individuals are sufficiently spread, the exact mechanism of initialisation should not be critical to performance.
 
 ```{code-cell}
+:tags: [remove-output]
 function initialise(n_cities, gen_size)
     [randperm(n_cities) for _ in 1:gen_size]
 end
@@ -567,6 +578,7 @@ end
 Combining everything together according to {prf:ref}`genetic_alg`, we get
 
 ```{code-cell}
+:tags: [remove-output]
 function tsp_ga(f, n_cities, n_iters, gen_size; 
                 t_sel=RouletteWheelSelection(),
                 t_rec=OrderCrossover(10),
@@ -682,7 +694,8 @@ Next, we need to implement the operations discussed above.
 In order to add a new method to an arithmetic operation function in Julia, we need to import it from `Base`, and define the new method for the types we desire.
 For example, for the difference operation we can do the following.
 
-```{code-cell}:tags: [remove-output]
+```{code-cell}
+:tags: [remove-output]
 import Base: -
 
 function -(x::Union{Particle,Permutation}, y::Particle)
