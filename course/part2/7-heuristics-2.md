@@ -17,9 +17,6 @@ kernelspec:
 TODOs
 [] Comment the code, based on what was done in the combinatorial optimisation lectures
 [] GRASP: after defining each function, we should run it to provide an concrete example of how it works
-[] The iteration counter is unnecessarily difficult programming wise. Add it to the main GRASP function so it is closer to the pseudocode
-[] In the pseudocode for simulated annealing we should add a step on the cooling of T
-[] We should add a picture illustrating the chromosome when we explain what they are
 [] The PSO part seem unfinished in comparison to the to the others. Why so?
 -->
 
@@ -171,16 +168,27 @@ function tsp_grasp(d, a, terminate, second_phase_iters=100)
 end
 ```
 
-In the code above, the termination criterion implementation is left to the user, it could be anything from a simple iteration count to something more involved looking at improvements across iterations.
-A simple example is provided by the following.
+One aspect of the code worth expanding upon is the termination criterion.
+Heuristic methods often lack guarantees in both improving at every iteration and eventually converging to an optimal solution.
+In absence of these, the question of when to stop becomes even more important.
+Some ideas of how to answer this question include running the algorithm for a set number of iterations or duration of time, or stopping when we observe that iterates stop improving across a number of iterations.
+For the sake of completeness,  we implement the first idea.
+While this could be trivially achieved in the function `tsp_grasp` with a for-loop, here we conform to the `terminate` interface, so that different methods as described before can be generically without having to modify the code later.
+
+First, we need a way of keeping track of the current iteration along with some user-specified maximum.
+A good way of organizing this distinct but related pieces of information is to create a `struct`.
 ```{code-cell}
 mutable struct IterationCounter
     iters::Int
     limit::Int
 end
+```
+Here, the `mutable` keyword allows the structure to be mutated after its creation.
 
-IterationCounter() = IterationCounter(0, 100)
+The `terminate` variable needs to be callable, with the current iterate as an argument.
+In the case of iterations, the iterate itself doesn't matter, we only need to check if the algorithm has passed enough iterations or not.
 
+```{code-cell}
 function (c::IterationCounter)(_)
     if c.iters > c.limit
       return true
@@ -190,12 +198,23 @@ function (c::IterationCounter)(_)
 end
 ```
 
+Lastly, we can add an _outer constructor_ to make initializing `IterationCounter` more convenient, since iterations should start from 0.
+
+```{code-cell}
+IterationCounter(x::Int) = IterationCounter(0, x);
+```
+
 Let's see what result we get.
+% GRASP was giving weird performance, especially with bad neighbor generation.
+% I didn't want to talk about random seeding etc (though maybe I should).
+% So I obtained a figure in a notebook and put it here.
 ```{code-cell}
 :tags: [skip-execution]
-count = IterationCounter(0, 1000)
+count = IterationCounter(1000)
 path = tsp_grasp(d, .3, count, 1000)
-
+```
+```{code-cell}
+:tags: [skip-execution, remove-cell]
 fig, ax, plot = scatter(X_coord, Y_coord)
 lines!(ax, X_coord[path], Y_coord[path], color = 1, colormap = :tab10, colorrange = (1, 10))  # reorder vector using permutation
 endpoints = path[[1,n]]
@@ -227,7 +246,7 @@ Ideally, the high mobility at high temperatures will allow the algorithm to disc
 **Inputs** Objective function $f$
 1. Generate a random solution as current state $x$.
 2. While the termination criterion is unmet
-    1. Get the current temperature $T$.
+    1. Get the current temperature $T$ according to the cooling schedule.
     2. Create a random neighbor $x'$ of the current state $x$.
     3. Calculate performance difference $\Delta=f(x')-f(x)$.
     4. If $\Delta<0$ (i.e. $x'$ is better than $x$), accept it as current state.
@@ -327,6 +346,10 @@ Most frequently, bit strings are used to represent solutions.
 For example in a 0-1 knapsack problem this would be natural, since every bit could correspond to whether an item is included in the selection or not.
 For TSP, it may be easier to consider permutations as we have done in earlier examples.
 Alternative representations are also possible, as long as recombination and mutation operations can be clearly defined.
+
+```{figure} ../figures/chromosomes.drawio.svg
+Example chromosome representations.
+```
 
 #### Selection
 
@@ -572,7 +595,11 @@ end
 ```{code-cell}
 :tags: [skip-execution]
 fitness(x) = -cost_f(x, d)
-tsp_ga(fitness, n, 100, 100)
+tsp_ga(fitness, n, 1000, 1000; t_mut=SwapMutation(), t_rec=OrderCrossover(20), t_sel=TournamentSelection(100))
+```
+
+```{figure} ../figures/tsp_ga.svg
+GA algorithm output for TSP with $n=40$.
 ```
 
 ### Particle swarm optimisation
@@ -604,10 +631,16 @@ $b_p$ and $b_g$ are user-defined weights that control the contribution of the lo
 However, these are augmented by $r_p$ and $r_g$, which are randomly generated in $[0,1]$, adding stochastic variety to the movement.
 The user-defined inertia $a$ ensures that the movement of the particle is not wholly independent from the previous movement.
 
+<video width="800" controls loop autoplay>
+    <source src="../_static/pso.mp4" type="video/mp4">
+</video>
+
 Another important aspect of PSO is the social interaction provided by the topology of the swarm.
 In the basic algorithm in {prf:ref}`alg_pso`, we have used a global topology, i.e. every individual can communicate with one another, since the swarm's best solution is accessible to all.
 One can imagine that this is not ideal in all problems, for example a local minimum that is significantly better than the current best solution may attract the entire swarm to it too fast before sufficient exploration can take place.
 Such a scenario can be avoided if the communication of particles is constrained to a local neighborhood or some grouping of the particles independent of their current location.
+
+#### PSO for permutations
 
 It should be noted that the continuous velocity update in {eq}`pso_update_continuous` may not be appropriate for problems in discrete space, such as TSP.
 In such situations, good update rules may be problem-specific.
@@ -620,10 +653,10 @@ Then, we define
 - and the addition of a swap sequence and a position (i.e. a permutation) as the application of each swap in the sequence on the permutation in order.
 
 One way of implementing these in Julia is to create a `struct` to represent each particle and define the above operations for this new object type, along with other functions for convenience.
+First, we define the `Particle` struct, with fields to keep track of the current permutation and velocity, along with the best permutation so far.
 
 ```{code-cell}
-import Base: *, -, +
-
+:tags: [remove-output]
 const Swap = Tuple{Int, Int}
 const SwapSequence = Vector{Swap}
 const Permutation = Vector{Int}
@@ -633,20 +666,24 @@ mutable struct Particle
     vel::SwapSequence
     best::Permutation
     best_f::Float64
+
     Particle(perm, vel, best, best_f) = perm[sortperm(perm)] == 1:length(perm) ? new(perm, vel, best, best_f) : error("invalid permutation")
 end
 
 Particle(perm, best_f) = Particle(perm, [], perm, best_f)
+```
 
-Base.getindex(x::Particle, i::Int) = x.perm[i]
-Base.setindex!(x::Particle, val::Int, key::Int) = (x.perm[key] = val; val)
-Base.copy(x::Particle) = Particle(copy(x.perm), copy(x.vel), copy(x.best), x.best_f)
-Base.length(x::Particle) = length(x.perm)
-Base.keys(x::Particle) = keys(x.perm)
-Base.iterate(x::Particle) = iterate(x.perm)
-Base.iterate(x::Particle, i::Int) = iterate(x.perm, i)
+Here, we also create type aliases to make the job of writing code easier.
+However, it should be kept in mind that just because the type of an object is `Permutation` doesn't mean it is actually a permutation.
+So we include an _inner constructor_ for `Particle`, which checks that its first input is indeed a permutation.
+Finally, there is an outer constructor to make initialization of the struct easier.
 
+Next, we need to implement the operations discussed above.
+In order to add a new method to an arithmetic operation function in Julia, we need to import it from `Base`, and define the new method for the types we desire.
+For example, for the difference operation we can do the following.
 
+```{code-cell}:tags: [remove-output]
+import Base: -
 
 function -(x::Union{Particle,Permutation}, y::Particle)
     y = copy(y) # we don't want to mutate the original y
@@ -660,6 +697,13 @@ function -(x::Union{Particle,Permutation}, y::Particle)
     end
     seq
 end
+```
+
+Similarly, we can implement the remaining operations.
+
+```{code-cell}
+:tags: [remove-output]
+import Base: *,  +
 
 function *(a::Float64, seq::SwapSequence)
     if a <= 0 || a > 1
@@ -682,7 +726,31 @@ function +(x::Particle, seq::SwapSequence)
     end
     x
 end
+```
 
+Trying to use these operations, i.e. executing `particle_1 - particle_2` right now will probably not work.
+This is because there are a number of operations that still need defining.
+For example, we have made use of `copy(x::Particle)` or `x::Particle[i]` multiple times, but have provided no definition.
+Such missing functions can be detected by trying to execute the code and inspecting the error.
+Repeating this process a number of times, we have the following.
+
+```{code-cell}
+:tags: [remove-output]
+Base.getindex(x::Particle, i::Int) = x.perm[i]
+Base.setindex!(x::Particle, val::Int, key::Int) = (x.perm[key] = val; val)
+Base.copy(x::Particle) = Particle(copy(x.perm), copy(x.vel), copy(x.best), x.best_f)
+Base.length(x::Particle) = length(x.perm)
+Base.keys(x::Particle) = keys(x.perm)
+Base.iterate(x::Particle) = iterate(x.perm)
+Base.iterate(x::Particle, i::Int) = iterate(x.perm, i)
+```
+
+Here, all these functions essentially forward the operation to the permutation of the `Particle`.
+
+As a final step before the PSO algorithm itself, we define a function to create a population of `Particle`s.
+
+```{code-cell}
+:tags: [remove-output]
 function initialize(swarm_size, n_particle, cost_f)
     swarm::Vector{Particle} = []
     for _ in 1:swarm_size
@@ -693,15 +761,26 @@ function initialize(swarm_size, n_particle, cost_f)
 end
 ```
 
+With all the above defined, we can finally implement the PSO algorithm.
+
 ```{code-cell}
+:tags: [remove-output]
 function pso(f; inertia, attr_l, attr_g, swarm_size, n_particle, n_iters)
-    swarm::Vector{Particle} = initialize(swarm_size, n_particle, f)
+    # initialize the swarm
+    swarm = initialize(swarm_size, n_particle, f)
+
+    # initialize the global best
     f_g, i_g = findmin(f, swarm)
     swarm_best = copy(swarm[i_g])
+
     for _ in 1:n_iters
         for i in 1:length(swarm)
             particle = swarm[i]
+
+            # calculate velocity
             v = inertia*particle.vel + attr_l*rand()*(particle.best - particle) + attr_g*rand()*(swarm_best - particle)
+
+            # update
             particle += v
             particle.vel = v
             cost = f(particle)
@@ -719,4 +798,15 @@ function pso(f; inertia, attr_l, attr_g, swarm_size, n_particle, n_iters)
     end
     return swarm_best, f_g
 end
+```
+
+And it's time to run it.
+
+```{code-cell}
+:tags: [skip-execution]
+sol, f_x, = pso(cost_f; inertia=0.3,attr_l=0.4,attr_g=0.6, swarm_size=1000, n_particle=40, n_iters=10000)
+```
+
+```{figure} ../figures/tsp_pso.svg
+PSO algorithm output for TSP with $n=40$.
 ```
