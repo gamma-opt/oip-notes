@@ -170,7 +170,7 @@ function golden_section_search(f, a, d; eps=1e-2)
 end
 ```
 
-<video width="800" controls loop autoplay>
+<video width="800" controls loop autoplay muted>
     <source src="../_static/golden.mp4" type="video/mp4">
 </video>
 
@@ -263,7 +263,7 @@ record(fig, "neldermead.mp4", tr; framerate=framerate) do s
 end
 ```
 
-<video width="800" controls loop autoplay>
+<video width="800" controls loop autoplay muted>
     <source src="../_static/neldermead.mp4" type="video/mp4">
 </video>
 

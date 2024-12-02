@@ -631,7 +631,7 @@ $b_p$ and $b_g$ are user-defined weights that control the contribution of the lo
 However, these are augmented by $r_p$ and $r_g$, which are randomly generated in $[0,1]$, adding stochastic variety to the movement.
 The user-defined inertia $a$ ensures that the movement of the particle is not wholly independent from the previous movement.
 
-<video width="800" controls loop autoplay>
+<video width="800" controls loop autoplay muted>
     <source src="../_static/pso.mp4" type="video/mp4">
 </video>
 
