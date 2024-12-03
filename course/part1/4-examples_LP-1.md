@@ -581,7 +581,7 @@ Putting this all together, the optimisation model for the maximum profit product
 ```
 
 (p1l5:distribution)=
-### Distribution Problem
+### Distribution Planning
 
 In this problem, we are searching for a minimum cost distribution routing from two factories, in Helsinki and Jyväskylä, to depots and customers.
 More specifically, there are four depots where we can store our product: in Turku, Tampere, Kuopio and Oulu.
@@ -634,8 +634,6 @@ What distribution pattern would minimize total cost?
 
 #### Solution
 
-% Add note about solving this as a minimum cost flow problem?
-
 With the parameters described as above, we need to define some decision variables.
 - $x_{ij}$ - Amount supplied from factory $i$ to depot $j$, $i=1,2$, $j=1,2,3,4$,
 - $y_{ik}$ - Amount supplied from factory $i$ to customer $k$, $i=1,2$, $k=1,2,3,4,5,6$, and
@@ -657,33 +655,33 @@ Our objective is to minimize distribution costs, which is given by
 There are a few constraints we need to account for.
 Both factories have a capacity limiting their supply.
 ```{math}
-x_{11}+x_{12}+x_{13}+x_{14}+y_{11}+y_{12}+y_{13}+y_{14}+y_{15}+y_{16} \leq 150000 \\
-x_{21}+x_{22}+x_{23}+x_{24}+y_{21}+y_{22}+y_{23}+y_{24}+y_{25}+y_{26} \leq 200000
+x_{11}+x_{12}+x_{13}+x_{14}+y_{11}+y_{13}+y_{14}+y_{16} \leq 150000 \\
+x_{21}+x_{22}+x_{23}+x_{24}+y_{21} \leq 200000
 ```
 
 We also need to make sure depot throughput is obeyed, both in terms of what the depots are receiving
 ```{math}
-x_{11}+x_{21} \leq 70000 \\
+x_{11} \leq 70000 \\
 x_{12}+x_{22} \leq 50000 \\
 x_{13}+x_{23} \leq 100000 \\
 x_{14}+x_{24} \leq 40000
 ```
 and in terms of what they are supplying
 ```{math}
-z_{11}+z_{12}+z_{13}+z_{14}+z_{15}+z_{16} &= x_{11}+x_{21} \\
-z_{21}+z_{22}+z_{23}+z_{24}+z_{25}+z_{26} &= x_{12}+x_{22} \\
-z_{31}+z_{32}+z_{33}+z_{34}+z_{35}+z_{36} &= x_{13}+x_{23} \\
-z_{41}+z_{42}+z_{43}+z_{44}+z_{45}+z_{46} &= x_{14}+x_{24}.
+z_{12}+z_{13}+z_{14}+z_{16} &= x_{11} \\
+z_{21}+z_{22}+z_{23}+z_{24}+z_{25} &= x_{12}+x_{22} \\
+z_{32}+z_{33}+z_{35}+z_{36} &= x_{13}+x_{23} \\
+z_{43}+z_{44}+z_{45}+z_{46} &= x_{14}+x_{24}.
 ```
 
 The last constraint is to make sure customers receive sufficient supply.
 ```{math}
-y_{11}+y_{21}+z_{11}+z_{21}+z_{31}+z_{41} = 50000 \\
-y_{12}+y_{22}+z_{12}+z_{22}+z_{32}+z_{42} = 10000 \\
-y_{13}+y_{23}+z_{13}+z_{23}+z_{33}+z_{43} = 40000 \\
-y_{14}+y_{24}+z_{14}+z_{24}+z_{34}+z_{44} = 35000 \\
-y_{15}+y_{25}+z_{15}+z_{25}+z_{35}+z_{45} = 60000 \\
-y_{16}+y_{26}+z_{16}+z_{26}+z_{36}+z_{46} = 20000
+y_{11}+y_{21}+z_{21} = 50000 \\
+z_{12}+z_{22}+z_{32} = 10000 \\
+y_{13}+z_{13}+z_{23}+z_{33}+z_{43} = 40000 \\
+y_{14}+z_{14}+z_{24}+z_{44} = 35000 \\
+z_{25}+z_{35}+z_{45} = 60000 \\
+y_{16}+z_{16}+z_{36}+z_{46} = 20000
 ```
 
 Our full model is thus
@@ -695,18 +693,18 @@ Our full model is thus
  & +1.5z_{32}+2.0z_{33}+0.5z_{35}+1.5z_{36} + 0.2z_{43}+1.5z_{44}+0.5z_{45}+1.5z_{46} \\
  \st &x_{11}+x_{12}+x_{13}+x_{14}+y_{11}+y_{12}+y_{13}+y_{14}+y_{15}+y_{16} \leq 150000 \\
   & x_{21}+x_{22}+x_{23}+x_{24}+y_{21}+y_{22}+y_{23}+y_{24}+y_{25}+y_{26} \leq 200000 \\
-  & x_{11}+x_{21} \leq 70000 \\
+  & x_{11} \leq 70000 \\
   & x_{12}+x_{22} \leq 50000 \\
   & x_{13}+x_{23} \leq 100000 \\
   & x_{14}+x_{24} \leq 40000 \\
-  & z_{11}+z_{12}+z_{13}+z_{14}+z_{15}+z_{16} = x_{11}+x_{21} \\
-  & z_{21}+z_{22}+z_{23}+z_{24}+z_{25}+z_{26} = x_{12}+x_{22} \\
-  & z_{31}+z_{32}+z_{33}+z_{34}+z_{35}+z_{36} = x_{13}+x_{23} \\
-  & z_{41}+z_{42}+z_{43}+z_{44}+z_{45}+z_{46} = x_{14}+x_{24} \\
-  & y_{11}+y_{21}+z_{11}+z_{21}+z_{31}+z_{41} = 50000 \\
-  & y_{12}+y_{22}+z_{12}+z_{22}+z_{32}+z_{42} = 10000 \\
-  & y_{13}+y_{23}+z_{13}+z_{23}+z_{33}+z_{43} = 40000 \\
-  & y_{14}+y_{24}+z_{14}+z_{24}+z_{34}+z_{44} = 35000 \\
-  & y_{15}+y_{25}+z_{15}+z_{25}+z_{35}+z_{45} = 60000 \\
-  & y_{16}+y_{26}+z_{16}+z_{26}+z_{36}+z_{46} = 20000.
+  & z_{12}+z_{13}+z_{14}+z_{16} = x_{11} \\
+  & z_{21}+z_{22}+z_{23}+z_{24}+z_{25} = x_{12}+x_{22} \\
+  & z_{32}+z_{33}+z_{35}+z_{36} = x_{13}+x_{23} \\
+  & z_{43}+z_{44}+z_{45}+z_{46} = x_{14}+x_{24} \\
+  & y_{11}+y_{21}+z_{21} = 50000 \\
+  & z_{12}+z_{22}+z_{32} = 10000 \\
+  & y_{13}+z_{13}+z_{23}+z_{33}+z_{43} = 40000 \\
+  & y_{14}+z_{14}+z_{24}+z_{44} = 35000 \\
+  & z_{25}+z_{35}+z_{45} = 60000 \\
+  & y_{16}+z_{16}+z_{36}+z_{46} = 20000.
 ```
