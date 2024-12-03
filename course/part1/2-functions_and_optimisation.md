@@ -233,7 +233,7 @@ fig
 ``` 
 -->
 
-The figure below shows the sine function, along with the tangent line. Notice how the orange line is a good approximation of the blue line close to the green dot. Also, notice how we can, by looking at the inclination of the tangent line tell whether the function is going up or down in value. Make sure you move the slider to see the tangent line at different points.
+The figure below shows the sine function, along with the tangent line at a given point. Notice how the orange line is a good approximation of the blue line close to the green dot. Also, notice how we can, by looking at the inclination of the tangent line tell whether the function is going up or down in value. Make sure you move the slider to see the tangent line at different points.
 
 ```{code-cell}
 ---
@@ -241,7 +241,7 @@ mystnb:
   figure:
     name: fig:function-examples-2
     caption: |
-      Examples of functions. top-left: a "step" function; top-right: a piecewise linear function; bottom-left: sigmoid function; bottom-right: an exponential function.
+      Sine function and the tangent line at various points.
 tags: [remove-input]
 ---
 
