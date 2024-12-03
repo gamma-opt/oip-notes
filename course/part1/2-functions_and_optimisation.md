@@ -289,7 +289,7 @@ app = App() do session
     grid = Grid(
       slider, 
       DOM.div(fig; style=Styles("grid-column" => "1 / 4", "justify-self" => "center")); 
-      width="800px", 
+      width="780px", 
       height="500px", 
       justify_content="center",
       rows = "25px 1fr",
@@ -502,7 +502,7 @@ In part 2, we discuss in more details why one can use second-order derivatives t
 Still, not all is lost. Indeed, for a particular class of problems, it turns out that we can rely on the zero-gradient condition as a sufficient certificate to test optimality. These are so-called **(unconstrained) convex problems**, which are problems involving the optimisation of convex functions. Let us first define a convex function.
 
 ```{attention}
-Notice the word *unconstrained*, which essentially means that the domain of $f$ is $X = \reals^n$. If the domain of $X \subset \doubleR$, then a different alternative optimality conditions need to be considered. Those will be discussed later in this course.
+Notice the word *unconstrained*, which essentially means that the domain of $f$ is $X = \reals^n$. If the domain of $X \subset \reals$, then a different alternative optimality conditions need to be considered. Those will be discussed later in this course.
 ```
 
 ````{prf:definition} Convex functions
