@@ -19,6 +19,7 @@ In this lecture, we develop further the notion of modelling problem using intege
 
 First, we start by introducing the famous **Travelling Salesperson Problem**, which can be formulated as an integer programming model. Then we expand some of our previous examples from the previous lectures, such that they include additional decisions that can be modelled using integer variables.
 
+(tsp-mip)=
 ## Travelling Salesperson Problem
 
 The travelling salesperson problem (TSP) is one of the most famous combinatorial optimisation problems, perhaps due to its interesting mix of simplicity while being computationally challenging. Assume that we must visit a collection of {math}`n` cities at most once, and return to our initial point, forming a so-called **tour**. When travelling from city {math}`i` to a city {math}`j`, we incur in the cost {math}`C_{ij}`, representing, for example, distance or travel time. Our objective is to minimise the total cost of our tour.
