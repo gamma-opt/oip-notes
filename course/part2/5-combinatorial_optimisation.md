@@ -71,7 +71,7 @@ Some common functions are plotted below.
 ---
 mystnb:
   figure:
-    name: fig:function-examples-1
+    name: fig:function-growth
     caption: |
       Growth of different functions. Note that the $y$-axis is on a $\log_2$ scale, so the differences between the lines are very large. When $n=20$, $n!$ is more than 1 billion times the value of $e^n$.
 tags: [remove-input]
