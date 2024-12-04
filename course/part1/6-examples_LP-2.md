@@ -18,15 +18,15 @@ kernelspec:
 In this lecture, we revisit more of our previous examples and implement them with the objective of exercising the process of modelling and implementing optimisation models. Our objective with this is to create familiarity with mathematical programming modelling while introducing problems whose structure frequently appears in practice.
 
 (p1l6:production)=
-## Production Planning
+## Factory planning
 
 Now, we revisit the example in {numref}`p1l5:production`. Our goal is to make a factory production plan over a period of six months, so that we maximize profits. In {numref}`production_variables`, the relevant symbols are defined, where the indexing sets are
 
-- $I$ - set of products,
-- $J$ - set of months, and
-- $K$ - set of machine types.
+- $i \in I$ - set of products,
+- $j \in J$ - set of months, and
+- $k \in K$ - set of machine types.
 
-```{table} Variables in the Production Planning problem
+```{table} Variables in the production planning problem
 :name: production_variables
 | **Symbol** |                                   **Value**                                   |   **Variable name**  |
 |:----------:|:-----------------------------------------------------------------------------:|:--------------------:|
@@ -37,10 +37,10 @@ Now, we revisit the example in {numref}`p1l5:production`. Our goal is to make a 
 |  $U_{ki}$  |    Usage of machines of type $k$ required to produce a unit of product $i$    | `machine_usage[k,i]` |
 |    $N_k$   |                    Number of machines of type $k$ available                   |    `n_machines[k]`   |
 | $M_{jk}$   | Number of machines of type $k$ that is scheduled for maintenance in month $j$ | `maintenance[j,k]`   |
-| $C_H$      | Cost of holding a product                                                     | `holding_cost`       |
+| $C^H$      | Cost of holding a product                                                     | `holding_cost`       |
 | $L_{j,i}$  | Market limits of selling product $i$ in month $j$                             | `market_limits[j,i]` |
-| $L_H$      | Holding limit per product                                                     | `holding_limit`      |
-| $T_H$      | Holding target per product at the end of June                                 | `holding_target`     |
+| $L^H$      | Holding limit per product                                                     | `holding_limit`      |
+| $T^H$      | Holding target per product at the end of June                                 | `holding_target`     |
 ```
 
 ```{note}
@@ -54,16 +54,16 @@ We adopt the convention of using **capital letters** for symbols referring to **
 Given the definitions in {numref}`production_variables`, the statement of the symbolic formulation for the example in {numref}`p1l5:production` is given by
 
 ```{math}
-\maxi & \sum_{i,j} P_i s_{ij} - \sum_{i,j} C_H h_{ij} \\
+\maxi & \sum_{i,j} P_i s_{ij} - \sum_{i,j} C^H h_{ij} \\
 \st & s_{i,j} \leq L_{j,i}, \forall i\in I, j \in J \\
 & \sum_i U_{ki} m_{ij} \leq 384*(N_k - M_{jk}), \forall k\in K, j\in J \\
 & m_{i1} - s_{i1} - h_{i1} = 0, \forall i\in I \\
 & h_{i(j-1)} + m_{ij} - s_{ij} - h_{ij} = 0, \forall i \in I, j \in J\setminus\{1\} \\
-& h_{i6} = T_H, \forall i \in I \\
-& h_{ij} \leq L_H, \forall i\in I, j\in J \\
-& m_{ij} \geq 0, \forall i\in I, j\in J \\
-& h_{ij} \geq 0, \forall i\in I, j\in J \\
-& s_{ij} \geq 0, \forall i\in I, j\in J.
+& h_{i6} = T^H, \forall i \in I \\
+& h_{ij} \leq L^H, \forall i\in I, \forall j\in J \\
+& m_{ij} \geq 0, \forall i\in I, \forall j\in J \\
+& h_{ij} \geq 0, \forall i\in I, \forall j\in J \\
+& s_{ij} \geq 0, \forall i\in I, \forall j\in J.
 ```
 
 Now, we implement the above model using Julia and `JuMP`.
@@ -196,13 +196,13 @@ display(c)
 
 Next, we present the implementation of the (symbolic) mathematical programming model for the distribution problem presented in {numref}`p1l5:distribution`.The index sets are
 
-- $I$ - set of factories
-- $J$ - set of depots
-- $K$ - set of customers.
+- $i \in I$ - set of factories
+- $j \in J$ - set of depots
+- $k \in K$ - set of customers.
 
 In {numref}`distribution_variables` we present the list of parameters and variables used in the model.
 
-```{table} Variables in the Distribution problem
+```{table} Variables in the distribution problem
 :name: distribution_variables
 | **Symbol** |                    **Value**                   |  **Variable name**  |
 |:----------:|:----------------------------------------------:|:-------------------:|
@@ -221,16 +221,16 @@ The model formulation is given by
 
 ```{math}
 \mini & \sum_{i,j, f2d_{ij}\neq 0} f2d_{ij}x_{ij} + \sum_{i,k, f2c_{ik}\neq 0} f2c_{ik}y_{ik} + \sum_{j,k, d2c_{jk}\neq 0} d2c_{jk}z_{jk} \\
-\st & \sum_{j} x_{ij} + \sum_{k} x_{ik} \leq C_i, \forall i \in I \\
-& \sum_{i} x_{ij} \leq T_j, \forall j \in J\\
+\st & \sum_{j} x_{ij} + \sum_{k} y_{ik} \leq C_i, \forall i \in I \\
+& \sum_{i} x_{ij} \leq T_j, \forall j \in J \\
 & \sum_{k} z_{jk} = \sum_{i} x_{ij}, \forall j \in J \\
 & \sum_{i} y_{ik} + \sum_{j} z_{jk} = D_k, \forall k \in K \\
-& x_{ij} = 0, \forall i \in I, j \in J, \text{ if }f2d_{ij} \text{ is impossible} \\
-& y_{ik} = 0, \forall i \in I, k \in K, \text{ if }f2c_{ik} \text{ is impossible} \\
-& z_{jk} = 0, \forall j \in J, k \in K, \text{ if }d2c_{jk} \text{ is impossible} \\
-& x_{ij} \geq 0, \forall i \in I, j \in J \\
-& y_{ik} \geq 0, \forall i \in I, k \in K \\
-& z_{jk} \geq 0, \forall j \in J, k \in K
+& x_{ij} = 0, \forall i \in I, \forall j \in J, \text{ if }f2d_{ij} \text{ is impossible} \\
+& y_{ik} = 0, \forall i \in I, \forall k \in K, \text{ if }f2c_{ik} \text{ is impossible} \\
+& z_{jk} = 0, \forall j \in J, \forall k \in K, \text{ if }d2c_{jk} \text{ is impossible} \\
+& x_{ij} \geq 0, \forall i \in I, \forall j \in J \\
+& y_{ik} \geq 0, \forall i \in I, \forall k \in K \\
+& z_{jk} \geq 0, \forall j \in J, \forall k \in K
 ```
 
 In `JuMP`, we can implement the model as follows.
