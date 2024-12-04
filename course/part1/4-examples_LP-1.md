@@ -61,6 +61,7 @@ The prices for the oils are given in {numref}`table_food_manufacture`.
 | *May*      | 100   | 120   | 150   | 110   | 105   |
 | *June*     | 90    | 100   | 140   | 80    | 95    |
 ```
+
 The final product sells at €150 per ton.
 
 We can process a maximum of 200 tons of vegetable oil and 250 tons of non-vegetable oil in any given month. In addition, we can store up to 1000 tons of each raw oil for later use at a cost of €5 per ton per month.
@@ -91,7 +92,7 @@ Assume that all production in a given month is sold. Also, at the start of Janua
 
 Recall our set of steps for modelling optimisation problems:
 
-1. List **parameters**;
+1. List **input data**;
 2. Define **decision variables**; 
 3. Formulate **objective function**;
 4. Formulate **constraints**. 
@@ -337,7 +338,7 @@ The factory works 24 days a month, each day containing two 8 hour shifts. For si
 
 Once again, our list guides us.
 
-1. List **parameters**;
+1. List **input data**;
 2. Define **decision variables**; 
 3. Formulate **objective function**;
 4. Formulate **constraints**.
@@ -613,16 +614,19 @@ The costs associated with the distribution of the products are given in {numref}
 ```
 
 Each factory has a monthly supply capacity:
+
 - Helsinki: 150000 tons
 - Jyväskylä: 200000 tons
 
 Each depot has a monthly throughput limit:
+
 - Turku: 70000 tons
 - Tampere: 50000 tons
 - Kuopio: 100000 tons
 - Oulu: 40000 tons
 
 Lastly, each customer has a montly demand that must be met exactly:
+
 - C1: 50000 tons
 - C2: 10000 tons
 - C3: 40000 tons
@@ -634,7 +638,8 @@ What distribution pattern would minimize total cost?
 
 #### Solution
 
-With the parameters described as above, we need to define some decision variables.
+With the input data described as above, we need to define some decision variables.
+
 - $x_{ij}$ - Amount supplied from factory $i$ to depot $j$, $i=1,2$, $j=1,2,3,4$,
 - $y_{ik}$ - Amount supplied from factory $i$ to customer $k$, $i=1,2$, $k=1,2,3,4,5,6$, and
 - $z_{jk}$ - Amount supplied from depot $j$ to customer $k$, $j=1,2,3,4$, $k=1,2,3,4,5,6$,
@@ -685,6 +690,7 @@ y_{16}+z_{16}+z_{36}+z_{46} = 20000
 ```
 
 Our full model is thus
+
 ```{math}
 \mini &f(x_{ij}, y_{ij}, z_{ij}) = \\
 & 0.5x_{11}+0.5x_{12}+1.0x_{13}+0.2x_{14} + 0.3x_{22}+0.5x_{23}+0.2x_{24} \\

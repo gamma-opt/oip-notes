@@ -34,7 +34,7 @@ The modelling of real-world problems as optimisation problems is, in general, us
 
 A mathematical programming model comprises four key ingredients:
 
-1. **Parameters**, which represent the input data and information that defines the problem statement. These are typically elements in the problem that are beyond our control, such as unity costs, revenues, efficiency rates, limits, and so forth.  
+1. **Input data**, which represent the input data and information that defines the problem statement. These are typically elements in the problem that are beyond our control, such as unity costs, revenues, efficiency rates, limits, and so forth.  
 2. **Decision variables** $x$, which represent the elements of the problem that we control. These can represent production amounts, flows in a network, dimensions of a structure, or any other element that is part of the decisions we wish to make.
 3. **Objective function** $f$ represents a measure of performance associated with a candidate solution $x$. Examples include maximising profits, utility, return on investment, or satisfaction, and minimising costs, redundancy, waste, or risk.
 4. **Constraints** $X$, which express the rules or conditions that a solution must satisfy for it to be considered valid.
@@ -77,7 +77,7 @@ Let us consider an example. A carpenter wants to plan his production of tables a
 
 To produce one table, the carpenter needs 3 hours of work and 7 units of wood. To produce one chair, the carpenter requires 5 hours of work and 4 units of wood. Weekly, the carpenter has 40 hours of labour available and 60 units of wood. Our task is to formulate a mathematical program that maximises the carpenter's weekly outcome.
 
-Following our list of steps, we first must identify the problem's parameters. They are summarised in the table below:
+Following our list of steps, we first must identify the problem's data. They are summarised in the table below:
 
 ```{list-table} Problem parameters
 

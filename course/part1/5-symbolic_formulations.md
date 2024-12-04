@@ -25,12 +25,12 @@ A best-practice approach is to have the **model data** separated from the **mode
 
 ### Model data
 
-The model data, or input data, is represented by **indices** and their **sets** and **parameters**.
+The input data, or model data, is represented by **indices** and their **sets** and **parameters**.
 
 - **Indices and sets**: represent entities in the problem that are discrete and can be grouped by what they represent in the model.
 - **Parameters**: are numerical values representing quantities that are associated with indices or combinations of indices.
 
-We have come across these before. For example, in the transportation problem, we defined the plants as $i = 1, 2, 3$. If we define the set $I = \braces{1,2,3}$, then we can say that the cities are defined as $i \in I$. Now, we can represent the production capacity of each plant as $C_i$ for $i \in I$.
+We have come across these before. For example, in the {ref}`p1l5:distribution` problem, we defined the factories as $i = 1:Helsinki, 2:Jyväskylä$. If we define the set $I = \braces{1,2}$, then we can say that the cities are defined as $i \in I$. Now, we can represent the monthly supply capacity of each plant as $C_i$ for all $i \in I$, or equivalently $\forall i \in I$.
 
 ```{note}
 It is a convention to represent sets with capital letters and indices with lower case letters (often the same).
@@ -40,19 +40,25 @@ It is a convention to represent sets with capital letters and indices with lower
 
 The model formulation is composed by **variables**, **objective function**, and **constraints**. We have considered their role in detail before, so we now focus on how to pose them such that they are independent of the input data.
 
-Let us start with **decision variables**. The convention is to index decision variables with the defined indices. So, suppose we have a index set $j \in J$, representing some entity in our model. Then, to define a decision variable for each of these, we define $x_j$, $\forall j \in J$. This indicates that we have a decision variable $x$ for each index $j$ in the set $J$.
+Let us start with **decision variables**. Most of the time, our decision variables will be indexed with the defined indices. So, suppose we have a index set $j \in J$, representing some entity in our model. Then, to define a decision variable for each of these, we define $x_j$, $\forall j \in J$. This indicates that we have a decision variable $x$ for each index $j$ in the set $J$.
 
-This can be extended to as many indices as necessary. Going back to our transportation problem, where we had $i \in I$ plants and $j \in J$ demand points, our flow variables could be represented as $x_{ij}$, $\forall i \in I, j \in J$.
+This can be extended to as many indices as necessary. Going back to our distribution planning problem, where we had $i \in I$ factories and $j \in J$ depots, our flow variables could be represented as $x_{ij}$, $\forall i \in I, j \in J$.
 
-Once we have variables defined, we can use them to pose objective functions. A compact way to do so is to express them as summation of products between parameters and variables (recall our linearity premise discussed in {numref}`p1l4-linear_models`). Coming back to our variable $x_j$, $\forall j \in J$, suppose we have a cost coefficient $c_j$, $j \in J$, associated with each. Then, our objective function can be posed as
+Once we have variables defined, we can use them to pose objective functions. A compact way to do so is to express them as summation of products between parameters and variables (recall our linearity premise discussed in {numref}`p1l4-linear_models`). Coming back to our variable $x_j$, $\forall j \in J$, suppose we have a cost coefficient $C_j$, $j \in J$, associated with each. Then, our objective function can be posed as
 
 ```{math}
-\mini_{x} c_1x_1 + c_2x_2 + \dots + c_{|J|}x_{|J|} \equiv \mini_{x} \sum_{j \in J} c_jx_j.
+\mini_{x} C_1x_1 + C_2x_2 + \dots + C_{|J|}x_{|J|} \equiv \mini_{x} \sum_{j \in J} C_jx_j.
 ```
 
 Notice a couple of nice features about this way of posing our objective function. First, there is the fact that it is a much more compact notation, which can be quickly read by a human. Second, it **remains compact**, regardless of the cardinality of the index set $J$ (represented $| \ \cdot \ |$).
 
-The same logic can be applied to constraints, being the main difference that we must consider not only the summation domains, but also the **replication** domain (or the indexing) of the constraints. Suppose we have a parameter $a_{ij}$, for $i \in I, j \in J$ multiplying our variables $x_j$, $j \in J$ and that their combined sum must be less or equal a quantity $b_i$, defined for each $i \in I$. For simplicity, assume for now that $|I| = |J| = 2$. Assume that each constraint must be summed in the domain of $i \in I$ and replicated $j \in J$. Since we have two indices for each set, we would have the following constraints
+```{note}
+
+The use of the decision variable $x$ as an subscript in $\mini_{x}$ is a handy reminder of which symbols are the decision variables when it is not obvious from context alone. 
+
+```
+
+The same logic can be applied to constraints, being the main difference that we must consider not only the summation domains, but also the **replication** domain (or the indexing) of the constraints. Suppose we have a parameter $a_{ij}$, for $i \in I, j \in J$ multiplying our variables $x_j$, with $j \in J$, and that their combined sum must be less or equal a quantity $b_i$, defined for each $i \in I$. For simplicity, assume for now that $|I| = |J| = 2$. Assume that each constraint must be summed in the domain of $i \in I$ and replicated $j \in J$. Since we have two indices for each set, we would have the following constraints
 
 ```{math}
 \begin{aligned}
@@ -75,27 +81,28 @@ Let us revisit our food manufacture problem ({numref}`p1l5:food`) and pose it as
 
 ### Indices and sets
 
-The transportation problem has two sets of entities: a set of oils $i \in I$ and a set of time periods (months) $j \in J$.
-In the case of months, there is a clear ordering for the elements, so we may refer to the first and last items as $J_1$ and $J_m$.
+The food manufacture problem has two sets of entities: a set of oils $i \in I = \{1,2,\dots,5\}$ and a set of time periods (months) $j \in J=\{1,2,\dots,6\}$.
+In the case of months, there is a clear ordering for the elements, so the index $j-1$ has a defined meaning, i.e., the month before $j$.
 
 ### Parameters
 
 There are 10 (groups of) parameters:
 
 - Oil prices for different months, which we represent by $C_{ij}$, for each $i \in I$, $j\in J$,
-- Oil hardnesss $H_i$, for $i \in I$,
-- Hardness upper and lower limits $H_u$ and $H_d$, respectively,
-- Blended product price $C_P$,
-- Monthly processing limits $L_1$ for vegetable oils and $L_2$ for non-vegetable oils,
+- Oil hardness $H_i$, for $i \in I$,
+- Hardness lower and upper limits $H^L$ and $H^U$, respectively,
+- Blended product price $P$,
+- Monthly processing limits $L^1$ for vegetable oils and $L^2$ for non-vegetable oils,
 - Number of vegetable oil options $N$, which implies the number of non-vegetable oil options is $|I|-N$.
 - Monthly storage limit per oil $S$,
-- Initial oil inventory $B$,
-- Target oil inventory $T$, and
-- Store cost per ton per month $C_S$.
+- Initial oil inventory $S^0$,
+- Target oil inventory $S^T$, and
+- Store cost per ton per month $C^S$.
 
 ### Variables
 
 Our blending model has four types of decision variables:
+
 - $b_{ij}$ - amount of oil $i$ purchased in month $j$,
 - $u_{ij}$ - amount of oil $i$ used for blending in month $j$,
 - $s_{ij}$ - amount of oil $i$ stored in month $j$, and
@@ -109,7 +116,7 @@ Our objective is to maximize profit, which is defined as
 
 ```{math}
 :label: p1l6:obj
-\maxi \sum_{j \in J} C_Pp_j - \sum_{i \in I} \sum_{j \in J} C_{ij}b_{ij} - \sum_{i \in I} \sum_{j\in J}C_S s_{ij}.
+\maxi \sum_{j \in J} Pp_j - \sum_{i \in I} \sum_{j \in J} C_{ij}b_{ij} - \sum_{i \in I} \sum_{j\in J}C^S s_{ij}.
 ```
 
 Notice how we need a double summation for two terms since we have two indices to sum over.
@@ -129,8 +136,8 @@ There are five main constraint sets in the transportation problem:
 ```{math}
 \begin{rcases}
 \begin{aligned}
-\sum_{i=1}^N u_{ij} &\leq L_1 \\
-\sum_{i=N+1}^{|I|} u_{ij}&\leq L_2
+\sum_{i=1}^N u_{ij} &\leq L^1 \\
+\sum_{i=N+1}^{|I|} u_{ij}&\leq L^2
 \end{aligned}
 \end{rcases} \forall j \in J
 ```
@@ -139,19 +146,19 @@ There are five main constraint sets in the transportation problem:
 
 ```{math}
 \begin{rcases}
-\sum_{i \in I} H_iu_{ij} \leq H_u y_j \\
-\sum_{i \in I} H_iu_{ij} \geq H_d y_j \\
+\sum_{i \in I} H_iu_{ij} \leq H^U y_j \\
+\sum_{i \in I} H_iu_{ij} \geq H^L y_j \\
 \end{rcases} \forall j \in J
 ```
 
-- **Storage continuity**: Using and storing product must happen correctly.
+- **Storage balance**: Using and storing product must happen correctly.
 
 ```{math}
 \begin{rcases}
 \begin{aligned}
-B + b_{i1}-u_{i1}-s_{i1} &= 0 \\
-s_{i(j-1)} + b_{ij} -u_{ij} - s_{ij} &= 0, \forall j \in J\setminus\{J_1,J_m\} \\
-s_{i5} + b_{i6} -u_{i6} &= T
+S^0 + b_{ij}-u_{ij}-s_{ij} &= 0, j=1 \\
+s_{i(j-1)} + b_{ij} -u_{ij} - s_{ij} &= 0, \forall j \in \{2,3,\dots,6\} \\
+s_{i5} + b_{i6} -u_{i6} &= S^T, j=6
 \end{aligned}
 \end{rcases} \forall i \in I
 ```
@@ -164,20 +171,21 @@ s_{ij}\leq S, \forall i \in I, j \in J.
 \end{align}
 ```
 
-Putting the whole model together, we obtain
+Putting the whole model together, we obtain the following model formulation. Notice that we have reorganised some of the constraints such that it resembles how it is implemented, which we will do next.
 
 ```{math}
-\maxi & \sum_{j \in J} C_Pp_j - \sum_{i \in I} \sum_{j \in J} C_{ij}b_{ij} - \sum_{i \in I} \sum_{j\in J}C_S s_{ij} \\
+\maxi & \sum_{j \in J} Pp_j - \sum_{i \in I} \sum_{j \in J} C_{ij}b_{ij} - \sum_{i \in I} \sum_{j\in J}C^S s_{ij} \\
 \st & \sum_{i \in I} u_{ij} = p_j, \forall j \in J \\
-& \sum_{i=1}^N u_{ij} \leq L_1, \forall j \in J \\
-& \sum_{i=N+1}^{|I|} u_{ij} \leq L_2, \forall j \in J \\
-& \sum_{i \in I} H_iu_{ij} \leq H_u y_j, \forall j \in J \\
-& \sum_{i \in I} H_iu_{ij} \geq H_d y_j, \forall j \in J \\
-& B + b_{i1}-u_{i1}-s_{i1} = 0, \forall i \in I \\
-& s_{i5} + b_{i6} -u_{i6} = T, \forall i \in I \\
-& s_{i(j-1)} + b_{ij} -u_{ij} - s_{ij} = 0, \forall i \in I, \forall j \in J\setminus\{J_1,J_m\} \\
-& b_{ij}, u_{ij}, s_{ij}, p_j \geq 0, \forall i \in I, j \in J \\
-& s_{ij} \leq 1000, \forall i \in I, j \in J
+& \sum_{i=1}^N u_{ij} \leq L^1, \forall j \in J \\
+& \sum_{i=N+1}^{|I|} u_{ij} \leq L^2, \forall j \in J \\
+& \sum_{i \in I} H_iu_{ij} \leq H^U y_j, \forall j \in J \\
+& \sum_{i \in I} H_iu_{ij} \geq H^D y_j, \forall j \in J \\
+& S^0 + b_{i1}-u_{i1}-s_{i1} = 0, \forall i \in I, j = 1 \\
+& s_{i5} + b_{i6} -u_{i6} = S^T, \forall i \in I, j = 6 \\
+& s_{i(j-1)} + b_{ij} -u_{ij} - s_{ij} = 0, \forall i \in I, \forall j \in \{2,3,4,5\} \\
+& s_{ij} \leq S, \forall i \in I, \forall j \in J \\
+& b_{ij}, u_{ij}, s_{ij}, p_j \geq 0, \forall i \in I, \forall j \in J. \\
+
 ```
 
 ## Code
@@ -199,7 +207,7 @@ Some design patterns to make this process easy and robust is described [in this 
 One pattern we make use is to declare a data structure for the parameters.
 ```
 
-Let us first define a class (or strucvture, in Julia parlance) that will store our input data.
+Let us first define a class (or structure, in Julia parlance) that will store our input data.
 
 ```{code-cell}
 :tags: [remove-output]
