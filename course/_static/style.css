@@ -9,6 +9,13 @@
 }
 
 /* 
+  Add some space for visual effect
+*/
+.qe-toolbar__inner>ul>li.btn__minus {
+  margin-right: 2rem;
+}
+
+/* 
   quantecon theme aligns table headers to left
   this restores (part of) default behavior
 */

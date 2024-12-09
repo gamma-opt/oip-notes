@@ -13,11 +13,15 @@
  * - the PDF button being the 12th item in that list.
  * 
  * The event listener makes sure the above function is called when the page is loaded.
+ * 
+ * EDIT: Added the contrast button as well, since dark mode doesn't work well with some elements.
  */
 
 function removePdfButton() {
     const toolbar = document.getElementsByClassName("qe-toolbar__links")[0];
+    const contrast_button = toolbar.childNodes[9];
     const pdf_button = toolbar.childNodes[11];
+    toolbar.removeChild(contrast_button);
     toolbar.removeChild(pdf_button);
 }
 
