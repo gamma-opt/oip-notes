@@ -60,7 +60,7 @@ Introducing integer variables is a deceptively simple intervention from a modell
 
 ## Modelling true/false statements using binary variables
 
-One particular type of integer decision variables considerably augment our modelling capabilities. Specifically, binary variables, i.e., $x \in \{0,1\}$ are useful for modelling on/off or true/false decisions, which often play central roles in modelling real-world problems.
+One particular type of integer decision variables considerably augment our modelling capabilities. Specifically, binary variables, i.e., $y \in \{0,1\}$ are useful for modelling on/off or true/false decisions, which often play central roles in modelling real-world problems.
 
 More generally, binary variables are well-suited to the expression of logical statements. Some examples are:
 
@@ -68,14 +68,14 @@ More generally, binary variables are well-suited to the expression of logical st
 - No more than five of the ingredients in this class may be included in the blend.
 - Either operation A must be finished before operation B starts or vice versa.
 
-These statements can be formulated in propositional logic using **connectives**, such as $\land$ (and), $\lor$ (or), $\implies$ (implies) and $\neg$ (not). We can formulate these expressions into constraint equations as follows. Suppose $X_i$ stands for the proposition $\delta_i=1$, where $\delta_i$ are binary variables.
+These statements can be formulated in propositional logic using **connectives**, such as $\land$ (and), $\lor$ (or), $\implies$ (implies) and $\neg$ (not). We can formulate these expressions into constraint equations as follows. Suppose $X_i$ stands for the proposition $y_i=1$, where $y_i$ are binary variables.
 Then
 
 ```{math}
-X_1\lor X_2 &\text{ is equivalent to } \delta_1+\delta_2\geq 1, \\
-X_1\land X_2 &\text{ is equivalent to } \delta_1=1,\delta_2=1 \text{ or }\delta_1\delta_2=1, \\
-\neg X_1 &\text{ is equivalent to } \delta_1=0, \\
-X_1\implies X_2 &\text{ is equivalent to } \delta_1-\delta_2\leq 0.
+X_1 \lor X_2 &\text{ is equivalent to } y_1 + y_2 \geq 1, \\
+X_1 \land X_2 &\text{ is equivalent to } y_1=1, y_2=1, \\
+\neg X_1 &\text{ is equivalent to } y_1=0, \\
+X_1 \implies X_2 &\text{ is equivalent to } y_1 \leq y_2.
 ```
 
 Let us give a couple of examples of some modelling capabilities possible because of binary variables.
@@ -114,7 +114,7 @@ For that, we must define two additional binary variables, namely $y_t$ and $y_c$
 &7x_t + 4x_c \leq 60\\
 & x_t \le My_t \\
 & x_c \le My_c \\
-&x_t, x_c \geq 0 \\
+&x_t, x_c \in \mathbb{Z}_+ \\
 &y_t, y_c \in \{0,1\}.
 ```
 
@@ -148,6 +148,7 @@ Here, we observe that the high fixed costs for table production is sufficient to
 
 More generally to the above capabilities, binary variables provide a mechanism to model making choices and incorporate restrictions to the process.
 In our carpenting example, we are already making a decision between one of four possibilities:
+
 - purchase no tools.
 - purchase both tools,
 - purchase the chair tool only, and
@@ -187,7 +188,7 @@ To model this accurately, we would need to start keeping track of how many table
 In this example however, we do not necessarily need this additional complexity. It may be reasonable to assume that we would not want to purchase both table tools and only one would be sufficient. This way, we would only have to "activate" the correct constraint using big M and solve the above problem.
 
 ```{note}
-This phenomena is a manifestation of a phenomena known in economics as the **substitution theorem** {cite}`brownlie_substitution_1960`, which state that, given a more efficient selection of a resource, no combination of this choice and ay other worse choices may be selected.
+This phenomena is a manifestation of a phenomena known in economics as the **substitution theorem** {cite}`brownlie_substitution_1960`, which state that, given a more efficient selection of a resource, no combination between this choice and any other worse (less efficient) choices may be selected.
 ```
 
 In order to restrict which tool is purchased, we impose an _exclusive-OR_ condition:
