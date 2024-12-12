@@ -177,20 +177,21 @@ function get_subtours(x::Matrix{Int}, n::Int)
     subtour = [1]
     curr = 1
     visited = Set(1)
-    queue = collect(1:n)
+    remaining = collect(2:n)
     while true
         next = argmax(x[curr,:])
         if next in visited  # completed a subtour
+            # node next closes a subtour
             push!(subtour, next)
             push!(subtours, copy(subtour))
+            # if n nodes have been checked, return
             if length(visited) == n
                 return subtours
             end
-            
+            # picks the last node non-visited node in remaining
             while curr in visited
-                curr = pop!(queue)
+                curr = pop!(remaining)
             end
-
             # prepare new subtour
             subtour = [curr]
             push!(visited, curr)
@@ -241,7 +242,7 @@ We can see the evolution of the solution at every iteration.
     <source src="../_static/tsp_cuts.mp4" type="video/mp4">
 </video>
 
-## Revisiting the food manufacture problem
+## Revisiting the Food Manufacturing Problem
 
 Recall the  {ref}`p1l5:food` problem. Suppose we want to add some additional conditions on the problem:
 
@@ -303,15 +304,17 @@ which we can rewrite as
 (d_{1j} + d_{2j} \geq 1) \implies d_{5j} = 1
 ```
 
-and
+<!-- and
 
 ```{math}
 (d_{1j} + d_{2j} < 1) \lor d_{5j} = 1.
-```
+``` 
+-->
 
-In words, the first statement says that if one or both of $d_{1j}$ or $d_{2j}$ are 1, then $d_{5j}$ must be 1. The second statement says that if $d_{1j}$ and $d_{2j}$ are less than 1, i.e., they are 0, the statement is already satisfied and, as such, there is nothing to be stated regarding the value of $d_{5j}$. This can formulated mathematically as follows.
+In words, the statement states that if one or both of $d_{1j}$ or $d_{2j}$ are 1, then $d_{5j}$ must be 1. This can formulated mathematically as follows.
+%The second statement says that if $d_{1j}$ and $d_{2j}$ are less than 1, i.e., they are 0, the statement is already satisfied and, as such, there is nothing to be stated regarding the value of $d_{5j}$.
 
-Let us start with the latter case first. On one hand, assuming that $d_{1j}$ or $d_{2j}$ are not 1, we have that the left-hand side is 1. Thus, we do not care about what value $d_{5j}$ would take, other than it can be 0 or 1. Thus, we would end up with a mathematical statement such as
+<!-- Let us start with the latter case first. On one hand, assuming that $d_{1j}$ or $d_{2j}$ are not 1, we have that the left-hand side is 1. Thus, we do not care about what value $d_{5j}$ would take, other than it can be 0 or 1. Thus, we would end up with a mathematical statement such as
 
 ```{math}
 0\leq d_{5j}
@@ -319,7 +322,8 @@ Let us start with the latter case first. On one hand, assuming that $d_{1j}$ or 
 
 which is trivially satisfied.
 
-In the former case, we may have that the left-hand side takes value 1 or 2, but now $d_{5j}$ can only be 1. For this to fit into the above form, we have to multiply the right-hand side of the constraint by 2, yielding.
+In the former case, w -->
+We may have that the left-hand side takes value 1 or 2. On the other hand, $d_{5j}$ can only beat most 1. For this to fit into the above form, we have to multiply the right-hand side of the constraint by 2, yielding.
 
 ```{math}
 (1\text{ or } 2) \leq 2d_{5j},
@@ -375,21 +379,22 @@ cost_storing = 5
 I,J = size(cost)
 
 model = Model(HiGHS.Optimizer)
+set_silent(model)
 
-@variable(model, d[1:I, 1:J], Bin)  # new
+@variable(model, d[1:I, 1:J], Bin)  # new variable
 @variable(model, b[1:I, 1:J] >= 0)
 @variable(model, u[1:I, 1:J] >= 0)
 @variable(model, storage_limit >= s[1:I, 1:J] >= 0)
 @variable(model, p[1:J] >= 0)
 
-
 @objective(model, Max, price_product*sum(p) - sum(cost[i,j]*b[i,j] for i in 1:I, j in 1:J) - cost_storing*sum(s))
-
-@constraint(model, c_cond1_ul_veg[i in 1:n_veg, j in 1:J], u[i,j] <= process_limit_veg*d[i,j]) # new
-@constraint(model, c_cond1_ul_non[i in n_veg+1:I, j in 1:J], u[i,j] <= process_limit_non*d[i,j]) # new
-@constraint(model, c_cond1_ll[i in 1:I, j in 1:J], u[i,j] >= 20*d[i,j]) # new
-@constraint(model, c_cond2[j in 1:J], sum(d[:,j]) <= 3)
-@constraint(model, c_cond3[j in 1:J], d[1,j]+d[2,j] <= 2*d[5,j])
+# new constraints
+@constraint(model, c_cond1_ul_veg[i in 1:n_veg, j in 1:J], u[i,j] <=    process_limit_veg*d[i,j]) 
+@constraint(model, c_cond1_ul_non[i in n_veg+1:I, j in 1:J], u[i,j] <= process_limit_non*d[i,j]) 
+@constraint(model, c_cond1_ll[i in 1:I, j in 1:J], u[i,j] >= 20*d[i,j]) 
+@constraint(model, c_cond2[j in 1:J], sum(d[:,j]) <= 3) 
+@constraint(model, c_cond3[j in 1:J], d[1,j]+d[2,j] <= 2*d[5,j]) 
+#original constraints
 @constraint(model, c_production[j in 1:J], sum(u[:,j]) == p[j])
 @constraint(model, c_processing_veg[j in 1:J], sum(u[begin:n_veg,j]) <= process_limit_veg)
 @constraint(model, c_processing_non[j in 1:J], sum(u[n_veg+1:end,j]) <= process_limit_non)
@@ -399,7 +404,6 @@ model = Model(HiGHS.Optimizer)
 @constraint(model, c_storage[i in 1:I, j in 2:J], s[i,j-1]+b[i,j]-u[i,j]-s[i,j] == 0)
 @constraint(model, c_storage_end[i in 1:I], s[i,J] == target_oil)
 
-set_attribute(model, "output_flag", false) # Remove the solver printed statement
 optimize!(model)
 @assert is_solved_and_feasible(model)
 ```
@@ -454,7 +458,7 @@ resize_to_layout!(f)
 f
 ```
 
-## Production planning 2
+## Revisiting the Factory Planning Problem
 
 Recall the problem {ref}`p1l5:production`.
 Now, instead of the given maintenance schedule, suppose it is up to us to find one that is performed while maximising profits. The following requirements must be observed when devising the maintenance plan:
@@ -468,16 +472,16 @@ Now, we need to keep track of how many machines are down for maintenance. As suc
 
 - $d_{kj}$ - number of machines of type $k$ that are down for maintenance in month $j$,
 
-where $k=1,\dots,5$ represents (1) grinders, (2) vertical drills, (3) horizontal drills, (4) borers and (5) planers, respectively.
+where $k \in K = \{1,2,\dots,5\}$ represents (1) grinders, (2) vertical drills, (3) horizontal drills, (4) borers and (5) planers, respectively.
 Of course, $d_{kj}$ are integer variables, and each type $k$ will impose a different upper bound, based on the number of machines available in total.
 
 With these variables defined, we can impose the appropriate number of maintenances with the constraints
 
 ```{math}
-\sum^6_{j=1}d_{kj} = \begin{cases}2 &\text{ for }i=1,2, \\
-3 &\text{ for }i=3, \\
-1 &\text{ for }i=4, \\
-1 &\text{ for }i=5.
+\sum^6_{j=1}d_{kj} = \begin{cases}2 &\text{ for }k=1,2, \\
+3 &\text{ for }k=3, \\
+1 &\text{ for }k=4, \\
+1 &\text{ for }k=5.
 \end{cases}
 ```
 
@@ -493,10 +497,10 @@ For the case of grinders as an example, before we had
 0.5m_{16}+0.7m_{26}+0.3m_{56}+0.2m_{66}+0.5m_{76}\leq 1536,
 ```
 
-indicating that in periods $j=1,5$ there was maintenance planned for the grinders. Now, we have a uniform number of available hours minus the downtime per grinder in maintenance (recall that each grinder works 2 shifts times 8 hours per shift times 24 days ina month, totalling 384 per month). This can be stated as 
+indicating that in periods $j=1,5$ there was maintenance planned for the grinders. Now, we have a uniform number of available hours minus the downtime per grinder in maintenance (recall that each grinder works 2 shifts times 8 hours per shift times 24 days ina month, totalling 384 per month). This can be stated as
 
 ```{math}
-0.5m_{1j}+0.7m_{2j}+0.3m_{5j}+0.2m_{6j}+0.5m_{7j}\leq 1536 -384 d_{1,j}, \forall j \in \braces{1, \dots, 6}.
+0.5m_{1j}+0.7m_{2j}+0.3m_{5j}+0.2m_{6j}+0.5m_{7j}\leq 1536 -384 d_{1j}, \forall j \in J = \braces{1, \dots, 6}.
 ```
 
 Naturally, the same must be considered for the remaining machine types. Now we can solve the modified problem
@@ -529,15 +533,16 @@ holding_target = 50
 days_per_month = 24
 shifts_per_day = 2
 hours_per_shift = 8
-
-model = Model(HiGHS.Optimizer)
-set_attribute(model, "output_flag", false)
 ```
 
 ```{code-cell}
 :tags: ["remove-output"]
 
+# The data is the same as before, except for the number of maintenances
 maintenance = [2, 2, 3, 1, 1]
+
+model = Model(HiGHS.Optimizer)
+set_silent(model)
 
 @variable(model, 0 <= d[k in 1:K, 1:J] <= n_machines[k], Int) # new
 @variable(model, 0 <= m[1:I, 1:J])
