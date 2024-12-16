@@ -49,6 +49,15 @@ println("Number of items: $(N)")
 Let us take a look at the data. We plot each point in terms of the pair $(\text{profit}, \text{rating})$, with the size of the dot representing the items weight.
 
 ```{code-cell}
+---
+mystnb:
+  figure:
+    name: fig:instance-visualisation
+    caption: |
+      Plotting the available items according to their profit and rating. Size of the dots indicate their weight
+tags: [remove-input]
+---
+
 using CairoMakie
 
 f = Figure()
@@ -82,10 +91,18 @@ A solution $x$ **dominates** solution $x'$ if
 $x'$ is **dominated** by $x$ if and only if $x$ dominates $x'$.
 ```
 
-Let us illustrate the notion of domination considering our knapsack example. For that, consider the following two solutions for the knapsack problem, where represent in orange the items selected in each solution.
+Let us illustrate the notion of domination considering our knapsack example. For that, consider the following two solutions for the knapsack problem, where represent in orange the items selected in each solution (see {numref}`fig:two-solutions`).
 
 ```{code-cell}
-:tags: ["remove-input"]
+---
+mystnb:
+  figure:
+    name: fig:two-solutions
+    caption: |
+      Selecting two solutions and comparing their objectives.
+tags: [remove-input]
+---
+
 sol_a = [1, 2, 3, 5, 6, 8, 10, 11, 15, 16, 17]
 sol_b = [1, 2, 3, 4, 5, 6, 8, 10, 11, 15, 16]
 sol_a_p = sum(profit[sol_a])
@@ -111,7 +128,7 @@ f
 **Solution A** on the left leads to a profit of {eval}`sol_a_p` and a desirability rating of {eval}`sol_a_d` at total weight {eval}`sol_a_w`.
 Whereas **Solution B** has a profit of {eval}`sol_b_p`, rating {eval}`sol_b_d`, and total weight {eval}`sol_b_w`. Both solutions are feasible: each item is selected once and their total weights are under the capacity of {eval}`capacity`. However, Solution A is better than Solution B in both objectives. Thus Solution A **dominates** Solution B and, as such, we confidently prefer it between the two.
 
-We can also visualise this on what is called the objective space_. In that, we can plot each solution (i.e., selected items) considering their objective values as coordinates. In the objective space, we can plot the regions in which other solutions would dominate and be dominated by a given solution. 
+We can also visualise this on what is called the **objective space**. In that, we can plot each solution (i.e., selected items) considering their objective values as coordinates. In the objective space, we can plot the regions in which other solutions would dominate and be dominated by a given solution.
 
 For two linear objectives, these are two of the **quadrants** formed by a vertical and a horizontal line that crosses the coordinates, or objective values, of the solution. Which of the quadrants hold the dominated and dominating solutions depends whether the objectives are being minimised or maximised. In the knapsack example, since we want to maximise both objectives, the dominated solutions would be in the lower left quadrant, while the dominating solutions would be in the top right quadrant.
 
@@ -155,12 +172,12 @@ The Pareto frontier represents the collection of best solutions for different tr
 
 ## Ideal and Nadir points
 
-There are two important reference points in multi-objective optimisation: the ideal (sometimes called utopic) and nadir points. The **ideal point** coordinates are obtained by optimising each objective individually. The nadir point coordinates are somewhat more involved. For that, assume that while calculating the ideal value for each objective $f_i(x)$, $i \in \braces{1,\dots, n}$, we table the values of the other objectives $f_j(x)$, with $j \neq i$. The nadir point coordinates are given by the worst values observed for each objective.
+There are two important reference points in multi-objective optimisation: the ideal (sometimes called utopic) and nadir points. The **ideal point** coordinates are obtained by optimising each objective individually. The **nadir point** coordinates are somewhat more involved to calculate. For that, assume that while calculating the ideal value for each objective $f_i(x)$, $i \in \braces{1,\dots, n}$, we table the values of the other objectives $f_j(x)$, with $j \neq i$. The nadir point coordinates are given by the **worst** values observed for each objective.
 
 {numref}`tab-ideal_nadir` illustrates the process of obtaining the ideal and nadir coordinates. In the table, $f_i(x_i^*)$ represents the optimal objective value for the optimisation of objective function $f_i(x)$ with $x_i^*$ being its optimal solution. In turn, $f_j(x_i^*)$ represents how the optimal solution $x_i^*$ for objective function $f_i$ performs in terms of the objective $f_j(x)$. Finally, assuming we are maximising, the coordinates of the ideal and nadir points would be given by
 
-- Ideal: main-diagonal values of  {numref}`tab-ideal_nadir` $(f_1(x_1^*), f_2(x_2^*), \dots ,f_n(x_n^*)$.
-- Nadir: minimum value in each column in {numref}`tab-ideal_nadir` $(\min_{i\in\braces{1,\dots,n}} f_1(x_i^*), \min_{i\in\braces{1,\dots,n}} f_2(x_i^*), \dots, \min_{i\in\braces{1,\dots,n}} f_n(x_i^*))$. 
+- **Ideal**: main-diagonal values of  {numref}`tab-ideal_nadir` $(f_1(x_1^*), f_2(x_2^*), \dots ,f_n(x_n^*))$.
+- **Nadir**: minimum value in each column in {numref}`tab-ideal_nadir` $(\min_{i\in\braces{1,\dots,n}} f_1(x_i^*), \min_{i\in\braces{1,\dots,n}} f_2(x_i^*), \dots, \min_{i\in\braces{1,\dots,n}} f_n(x_i^*))$. 
 
 ```{Table} Objective function values
 :name: tab-ideal_nadir
@@ -175,10 +192,18 @@ There are two important reference points in multi-objective optimisation: the id
 
 Notice that the nadir and ideal points provide bounds on the objective function values of each Pareto-optimal solution. In some cases, they can be useful for scaling the objective values, which may help defining relative preferences between objectives.
 
-Below, we have the nadir and ideal points for our knapsack data.
-The pareto boundary lies within the rectangle defined by the two points, which we will see later in this lecture.
+{numref}`fig:ideal-nadir` illustrates the nadir and ideal points for our knapsack data. The pareto boundary lies within the rectangle defined by the two points, which we will see later in this lecture.
+
 ```{code-cell}
-:tags: ["remove-cell"]
+---
+mystnb:
+  figure:
+    name: fig:ideal-nadir
+    caption: |
+      Plotting the nadir and ideal points (in the objective space) for our bi-objective knapsack example.
+tags: [remove-input]
+---
+
 using JuMP, HiGHS
 function weighted_method_knapsack(lambda)
     m = Model(HiGHS.Optimizer)
@@ -230,13 +255,14 @@ The notion of domination can be used to state our preference for solutions that 
 The **weighted** method, also known as the weighted-sum method, uses a vector of weights $\lambda$ to turn the multi-objective problem into a single-objective one.
 
 ```{math}
-\maxi_{x\in\mathcal{X}} \sum^n_{i=1}\lambda_i f_i(x)
+\maxi_{x\in X} \sum^n_{i=1}\lambda_i f_i(x),
 ```
 
-The weights should be nonnegative and sum to one, and they can be interpreted as preference ratios associated with different objectives.
-Thus, every weight specification represents a trade-off, and the corresponding optimization problem can be solved to obtain a Pareto-optimal solution. Then, the weights can be varied, and for each set of weights $\lambda_i$, $i \in \braces{1,\dots,n}$, the optimisation problem returns a solution in the Pareto frontier.
+where $X$ represents the problem's constraints. The weights should be nonnegative and sum to one, and they can be interpreted as preference ratios associated with different objectives. Thus, every weight specification represents a trade-off, and the corresponding optimisation problem can be solved to obtain a Pareto-optimal solution.
 
-Returning to our knapsack example problem, we may implement this as follows. In the implementation, we have $n = 2$ and $\lambda_1 = 0.7$ and $\lambda_2 = 1 - \lambda_1 = 0.3$. 
+In practice, the weights can be varied, and for each set of weights $\lambda_i$, $i \in \braces{1,\dots,n}$, the optimisation problem returns a solution in the Pareto frontier.
+
+Returning to our knapsack example problem, we may implement this as follows. In the implementation, we have $n = 2$ and $\lambda_1 = 0.7$ and $\lambda_2 = 1 - \lambda_1 = 0.3$.
 
 ```{code-cell}
 using JuMP, HiGHS
@@ -268,7 +294,15 @@ print("Items: ", sol_c)
 Let us plot the solutions on the decision space. Also, we now plot the dominated (in red) and dominating (in blue) solution quadrants for both Solution A and the new Solution C.
 
 ```{code-cell}
-:tags: ["remove-input"]
+---
+mystnb:
+  figure:
+    name: fig:weighted-method-solutions
+    caption: |
+      Plotting solutions A, B and C. Solutions A and C were obtained using the weighted method. Notice how they are both non-dominated
+tags: [remove-input]
+---
+
 sol_c_p = sum(profit[sol_c])
 sol_c_d = sum(rating[sol_c])
 y_ul = sol_c_d+5
@@ -308,14 +342,14 @@ In the $\epsilon$-constraint method, one of the objective functions is optimised
 :label: constraint_prob
 
 \maxi &f_1(\mathbf{x}) \\
-\st &f_2(\mathbf{x})\leq \epsilon_2 \\
-&f_3(\mathbf{x})\leq \epsilon_3 \\
+\st &f_2(\mathbf{x})\ge \epsilon_2 \\
+&f_3(\mathbf{x})\ge \epsilon_3 \\
 &\dots \\
-&f_n(\mathbf{x})\leq \epsilon_n \\
-&x \in \mathcal{X}
+&f_n(\mathbf{x})\ge \epsilon_n \\
+&x \in X,
 ```
 
-where $\epsilon_i$ are the user-specified thresholds for each objective $i \in  \braces{1,\dots,n}$. and $\mathcal{X}$ is the feasible space of the multiobjective problem. The thresholds are typically set as fractions of the the ideal value for objective $i$ or minimal requirements for the value of the non-optimised objectives.
+where $\epsilon_i$ are the user-specified minimum thresholds for each objective $i \in  \braces{1,\dots,n}$ and $X$ is the feasible regions of the multiobjective problem. The thresholds are typically set as fractions of the the ideal value for objective $i$ or minimal requirements for the value of the non-optimised objectives.
 
 Let us again return to our knapsack example. This time, we will use a package that implements multi-objective methods, including the $\epsilon$-constraint method. For that, we use the package [`MultiObjectiveAlgorithms.jl`](https://jump.dev/JuMP.jl/stable/packages/MultiObjectiveAlgorithms).
 
@@ -356,7 +390,14 @@ print("Items: ", [i for i in 1:N if value(x[i]; result = 7) > 0.9])
 This is our Solution A again, so both methods agree it is on the Pareto frontier. In fact, we can plot all the solutions that were obtained.
 
 ```{code-cell}
-:tags: ["remove-input"]
+---
+mystnb:
+  figure:
+    name: fig:epsilon-solutions
+    caption: |
+      Plotting all 9 solutions identified by the $\epsilon$-constrained method. Notice how they are all between the ideal and nadir references. Also, notice taht solution 1 and 9 are those obtained when maximising $f_2$ and $f_1$, respectively
+tags: [remove-input]
+---
 N_res = result_count(m)
 
 f = Figure()
@@ -365,16 +406,18 @@ ax = Axis(f[1,1],
     ylabel="Rating")
 scatter!(ax,
     [value(profit_expr; result = i) for i in 1:N_res],
-    [value(rating_expr; result = i) for i in 1:N_res];
+    [value(rating_expr; result = i) for i in 1:N_res],
+    markersize=30
     )
 text!(ax,
     [value(profit_expr; result = i) for i in 1:N_res],
-    [value(rating_expr; result = i) for i in 1:N_res];
-    text = map(x->x!="7" ? x : x*" (A)",string.(1:N_res))
+    [value(rating_expr; result = i) for i in 1:N_res],
+    text = map(x->x!="7" ? x : x*" (A)",string.(1:N_res)),
+    offset=(14,-8)
 )
-scatter!(ax, [sum(profit[sol1]), sum(profit[sol2])], [sum(rating[sol2]), sum(rating[sol1])], color = [2,3], colormap = :tab10, colorrange = (1, 10))
-text!(ax, [sum(profit[sol1])], [sum(rating[sol2])], text="Ideal", offset=(-14, -20))
-text!(ax, [sum(profit[sol2])], [sum(rating[sol1])], text=" Nadir", offset=(-22, 5))
+scatter!(ax, [sum(profit[sol1]), sum(profit[sol2])], [sum(rating[sol2]), sum(rating[sol1])], color = [2,3], colormap = :tab10, colorrange = (1, 10), markersize=30)
+text!(ax, [sum(profit[sol1])], [sum(rating[sol2])], text="Ideal", offset=(-14, -30))
+text!(ax, [sum(profit[sol2])], [sum(rating[sol1])], text=" Nadir", offset=(-22, 13))
 f
 ```
 
