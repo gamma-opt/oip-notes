@@ -334,7 +334,7 @@ class BNC(Scene):
         self.replace_text(text, r"But notice the constraints we added to get here: $x_1\leq 8$ and $x_2\geq 5$.")
         self.play(FadeToColor(VGroup(l_02, l_24), color=YELLOW))
         self.wait()
-        self.replace_text(text, "There imply that $x_1=8$.", wait=2 )
+        self.replace_text(text, "They imply that $x_1=8$.", wait=2 )
         self.replace_text(text, "However, $x_1=8$ means that by the third constraint ...")
         opt.save_state()
         self.play(FadeToColor(lp[3], color=YELLOW))
