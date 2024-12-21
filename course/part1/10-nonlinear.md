@@ -39,8 +39,8 @@ For now, what you need to keep in mind is this: the line that separates mathemat
 
 We say that an optimisation problem is a **convex** if it has
 
-- A convex objective function to be minimised or a concave objective function to be maximised;
-- A convex feasibility set.
+- A **convex objective** function to be minimised or a concave objective function to be maximised;
+- A **convex feasibility** set.
 
 More formally, let our optimisation problem be defined in the following general way:
 
@@ -62,11 +62,11 @@ The mathematical optimisation problem {eq}`opt-problem` is a convex optimisation
 We discussed the notion of convexity in {numref}`p1l2`, and concluded that for convex functions, first-order optimality (zero-gradient) conditions are sufficient to certify the optimality of a candidate solution. It turns out that, if the subdomain (in in our case, the feasibility set) is a convex set, a generalisation of these first-order conditions (known as Karush-Kuhn-Tucker, or KKT conditions) exist and are also **necessary and sufficient** for optimality. Interior point methods, the flagship method for nonlinear optimisation problems, are engineered to search for points that satisfy KKT conditions.
 
 ```{warning}
-Interior point methods, or any other optimisation methods can be very well used to solve nonconvex optimisation problems. The issue is that, for these problems, the KKT conditions are necessary (i.e., they have to hold) but not sufficient to certificate optimality of the solution found. It is up to the user to know whether that solution can be certified as a global optimal solution.  
+Interior point methods, or any other optimisation methods can be very well used to solve nonconvex optimisation problems. The issue is that, for these problems, the KKT conditions are necessary (i.e., they have to hold) **but not sufficient** to certificate optimality of the solution found. It is up to the user to know whether that solution can be certified as a global optimal solution.  
 ```
 
 ```{note}
-Linear functions are convex, and thus, linear programming problems are convex problems. That is why both interior point method and the simplex method can be safely employed for finding global optimal solutions.
+Linear functions are convex, and thus, linear programming problems are convex problems. That is why both interior point method and the simplex method can be safely employed for finding (global) optimal solutions for linear programming problems.
 ```
 
 ### Objective function as a convex function
@@ -86,7 +86,9 @@ f(x) = c^\top x + x^\top Qx,
 where $x$ represents our decision variables (a $n$-dimensional vector assuming we have $n$ decision variables), $c$ is an $n$-dimensional vector of parameters and $Q$ is the matrix of the quadratic form.
 
 ```{note}
-The matrix of the quadratic form $ax_1 + bx_1x_2 + cx_2$ is given by: {math}`\begin{bmatrix} a & \frac{b}{2} \\ \frac{b}{2} & c \end{bmatrix}`. This generalises for $n$ dimensions: the main diagonal has the coefficient of the quadratic terms and for the $q_{ij}x_ix_j$ we have $q_{ij} / 2$ in the $i^\text{th}$ row and $j^\text{th}$ column as well as the $j^\text{th}$ row and $i^\text{th}$ column.
+The matrix of the quadratic form $ax_1^2 + bx_1x_2 + cx_2^2$ is given by: {math}`\begin{bmatrix} a & \frac{b}{2} \\ \frac{b}{2} & c \end{bmatrix}`. 
+
+**This generalises for $n$ dimensions:** let $q_{ij}$ be the element of $Q$ in row $i$ and column $j$. The main diagonal has the coefficient of the quadratic terms $q_{ii}x_i^2$, $i=1,...,n$, and for the $q_{ij}x_ix_j$ we have $q_{ij} / 2$ in the $i^\text{th}$ row and $j^\text{th}$ column  as well as the $j^\text{th}$ row and $i^\text{th}$ column of $Q$.
 ```
 
 The quadratic function $f$ is convex depending on the matrix $Q$. The technical term is that $Q$ needs to be positive semidefinite (PSD), which roughly means that when we multiply $Q$ by a vector $x$, it does not flip the sign of any of the coordinates of $x$. There are many ways one can attest whether the matrix $Q$ is PSD, but perhaps the simpler is to use a linear algebra package to check if its eigenvalues are non-negative (i.e., positive or zero).
@@ -101,9 +103,8 @@ Notice that our standard form is a minimisation. When **maximising**, we want th
 More seldom, one may see the need of using other functions that are not quadratic. Some other common convex functions include:
 
 - *Powers*: $x^a$ is concave for $ 0 \le a \le 1$ and convex for $a \ge 1$ or $a \le 0$;
-- *Exponential*: $e^{ax}$ is convex for any $x \in \reals$;
+- *Exponential*: $e^{ax}$ with $a > 0$ is convex for any $x \in \reals$;
 - *Logarithms:* $\log x$ is concave and $x \log x$ is convex for $x > 0$;
-- *Nonnegative weighted sums*: the sum of convex functions, when weighted by non-negative terms is convex. 
 
 Below is a plot of these functions, which showcase well their convex nature.
 
@@ -158,19 +159,19 @@ Remember that if $g$ is convex, $-g$ is concave. Thus we can infer that, by mult
 
 ### Classification as an optimisation problem
 
-One of the most classical problems in machine learning is that of **binary classification**, where given some data that is partitioned into two classes, the goal is to obtain a function $f$ that separates the partitions.
+One of the most classical problems in machine learning is that of **binary classification**, where given some $n$ data points $(x^1, x^2, ..., x^n)$, the goal is to obtain a function $f$ that separates the partitions.
 Specifically, we will now focus on linear classification, where we seek an affine function $f(x)=a^\top x - b$, or equivalently the parameters $a$ and $b$, that gives us an appropriate classifier, i.e.,
 
 ```{math}
-f(x_i) = \begin{cases} 
-1&\text{if } a^\top x_i - b > 0 \\
--1&\text{if } a^\top x_i - b < 0.
+f(x^i) = \begin{cases} 
+1&\text{if } a^\top x^i - b > 0 \\
+-1&\text{if } a^\top x^i - b < 0.
 \end{cases}
 ```
 
 For example, our problem may be of detecting spam in emails, where we'd like to distinguish between regular ones and emails that can be ignored (i.e., spam). Our features then may be the word count, count of repeated word stems and/or others.
 
-Suppose we have the following data we would like to classify, based on two features and with the colors indicating the true classification $y_i, i\in I$.
+Suppose we have the following data we would like to classify, based on two features and with the colors indicating the true classification $y^i, i\in I=\{1,2,\dots,n\}$.
 
 ```{code-cell}
 :tags: [remove-output]
@@ -388,14 +389,16 @@ We do not know the true function that describes the price elasticity and product
 With that, our complete model is given by
 
 ```{math}
-\maxi &\sum p_i x_i \\
+\maxi &\sum_{i \in \{m,b,c1,c2\}} p_i x_i \\
 \st & 0.04 x_m + 0.8 x_b + 0.35 x_{c1} + 0.25 x_{c2} \leq 600 \\
 & 0.09 x_m + 0.02 x_b + 0.3 x_{c1} + 0.4 x_{c2} \leq 750 \\
 & 4820 p_m + 320 p_b + 210 p_{c1} + 70 p_{c2} \leq 1939.49 \\
 & \frac{x_m - 4820}{4820} = -0.4\frac{p_m-0.297}{0.297} \\
 & \frac{x_b - 320}{320} = -2.7\frac{p_b-0.72}{0.72} \\
 & \frac{x_{c1} - 210}{210} = -1.1\frac{p_{c1}-1.05}{1.05} + 0.1\frac{p_{c2}-0.815}{0.815} \\
-& \frac{x_{c2} - 70}{70} = -0.4\frac{p_{c2}-0.815}{0.815} + 0.4\frac{p_{c1}-1.05}{1.05}
+& \frac{x_{c2} - 70}{70} = -0.4\frac{p_{c2}-0.815}{0.815} + 0.4\frac{p_{c1}-1.05}{1.05} \\
+& p_i \ge 0, \ \forall i \in \{m,b,c1,c2\} \\
+& x_i \ge 0, \ \forall i \in \{m,b,c1,c2\}
 ```
 
 We can implement this in `JuMP` as follows.
@@ -418,7 +421,7 @@ model = Model(Ipopt.Optimizer)
 set_silent(model)
 
 @variable(model, x[1:4] >= 0)
-@variable(model, p[1:4])
+@variable(model, p[1:4] >= 0)
 
 @objective(model, Max, sum(x.*p))
 
@@ -462,6 +465,7 @@ fig
 ```
 
 ```{code-cell}
+:tags: [remove-input]
 using Printf
 @printf "Revenue (last year): %i \n" sum(price.*cons.*1000000)
 @printf "Revenue (this year): %i" sum(new_price.*new_cons.*1000000)
