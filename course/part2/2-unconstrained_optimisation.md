@@ -17,7 +17,7 @@ kernelspec:
 
 ## Gradient descent and variants
 
-We have seen in [Lec. 1](1-basics_of_calculus.md) that the gradient {math}`\nabla f(x_0)` describes the direction of steepest ascent at some point {math}`x_0`.
+We have seen in {numref}`p2l1` that the gradient {math}`\nabla f(x_0)` describes the direction of steepest ascent at some point {math}`x_0`.
 A consequence of this is that the negative gradient {math}`-\nabla f(x_0)` corresponds to the direction of the steepest descent at {math}`x_0`.
 
 ````{admonition} Why? Linearity of Differentiation
@@ -51,12 +51,25 @@ First is that it is specifically for gradient **descent**, since in line 2.1 the
 Gradient ascent is the same algorithm with the sign flipped.
 Second is that the derivative is normalized with its norm.
 This is due to the fact that we are only interested in the direction information from the derivative, and the magnitude is decided by the step size in line 2.2.
-This decision can be made dynamically at every step, using exact or inexact line search methods, or a set learning rate may be set as an algorithm parameter.
+This decision can be made dynamically at every step, using exact or inexact line search methods (TODO: Add ref to heuristics lecture), or a set learning rate may be set as an algorithm parameter.
 
 Gradient descent is simple and straightforward, it be highly sensitive to the step size selection or the curvature of the objective function.
 However, it also provides a solid foundation for extensions.
 One ubiquitious example is _stochastic_ gradient descent, where the gradient is approximated by a random selection of partial derivatives, reducing the computational burden significantly.
 % Differentiate between SGD vs batch GD?
+% TODO: Is there normalization in SGD?
+```{prf:algorithm} Stochastic Gradient descent
+:label: alg:sgd
+**Inputs** Objective {math}`f`, initial point {math}`x_0`, convergence criterion `converged`.
+1. {math}`k=0`
+2. **while** not `converged()`:
+    1. Pick an observation $i$ randomly.
+    2. {math}`d=-\frac{\nabla_i f(x_k) }{ \|\nabla_i f(x_k) \| }`
+    3. Determine step size / learning rate {math}`\lambda`
+    4. {math}`x_{k+1}=x_k+\lambda d`
+    5. {math}`k=k+1`
+3. **return** {math}`x_k`.
+```
 
 Another variation is the _momentum method_, which modify the update step to incorporate information about previous iterations, imitating accelaration and deceleration caused for example by gravity on an object falling down a slope.
 If the slope remains the same, the object will gain speed, and if the slope direction changes, the object won't abandon its previous direction entirely.
@@ -75,7 +88,57 @@ If the slope remains the same, the object will gain speed, and if the slope dire
 ```
 Here, the momentum decay factor {math}`\beta` is between 0 and 1 and controls the momentum influence.
 
-Add RMSProp or directly go to Adam?
+Going back to the determination of the learning rate, line search may not work well for all complicated functions.
+An alternative idea is to determine it based on gradient information.
+For example, we can start with an aggressive learning rate, and decrease it once loss decreases significantly, such as in {numref}`fig:adaptive-lr`.
+
+```{code-cell}
+---
+mystnb:
+  figure:
+    name: fig:adaptive-lr
+    caption: |
+      The learning rate is constant in the flat region but decreases once loss starts to decrease.
+tags: [remove-input]
+---
+using CairoMakie
+
+x = range(-5, 5, 101)
+f = x -> -exp(-x^2)
+df = x -> 2x*exp(-x^2)
+fig = Figure()
+
+ax = Axis(fig[1,1])
+lines!(ax, x, f)
+
+xs = [-5, -4, -3, -2, -1.25, -1, -0.80, -0.65, -0.55, -0.47, -0.40]
+scatter!(ax, xs, f; color = Makie.wong_colors()[2])
+
+fig
+```
+
+There are multiple ways of implementing such a mechanism, one is to keep a decaying average of the previous gradients
+```{math}
+\lambda^k = \beta_\lambda \lambda^{k-1}+(1-\beta_\lambda)\nabla f(x_k)
+```
+where $0\leq \beta_\lambda\leq 1$ is some decay parameter.
+Here, with more iterations, older values of the gradient will be practically zero, thus only the more recent figures will affect the final result.
+Consequently, if a flat region is encountered after a rapid descent, the learning rate will go up again as needed.
+Combining this idea of the "adaptive gradient" with momentum gives a commonly used optimizer called _Adam_ (from "adaptive moments").
+
+```{prf:algorithm} Adam
+:label: alg:adam
+**Inputs** Objective {math}`f`, initial point {math}`x_0`, convergence criterion `converged`, momentum decay {math}`\beta`, base learning rate $\lambda$, learning rate decay {math}`\beta_\lambda`.
+1. {math}`k=0, m_0=0`
+2. **while** not `converged()`:
+    1. {math}`d=-\frac{\nabla f(x_k) }{ \|\nabla f(x_k) \| }`
+    2. {math}`\lambda^k = \lambda (\delta+\beta_\lambda \lambda^{k-1}+(1-\beta_\lambda) \nabla f(x_k)^2)^{-1/2}`
+    3. {math}`m_{k+1} = \beta m_k + \lambda d`
+    4. {math}`x_{k+1}=x_k+m_{k+1}`
+    5. {math}`k=k+1`
+3. **return** {math}`x_k`.
+```
+Here, $\delta$ is a small scalar used to ensure we don't divide by 0.
 
 Adapted from [Emilien Dupont's code](https://emiliendupont.github.io/2018/01/24/optimization-visualization/).
 
@@ -465,7 +528,28 @@ Notice that the "pure" Newton's method has embedded in the direction of the step
 3. **return** {math}`x_k`.
 ```
 
-Should we talk about DFP first before BFGS?
+While Newton's method can be very effective, computing the Hessian and its inversion may be prohibitively expensive for large problems.
+Quasi-Newton methods circumvent this problem by approximating the Hessian instead of calculating it directly, making them a lot more efficient.
+Instead of the Newton way of obtaining the direction by solving $d= -H^{-1}(x_k)\nabla f(x_k)$,
+BFGS approximates $H^{-1}(x_k)$ with $B_k$ complemented with an update rule.
+
+```{prf:algorithm} BFGS algorithm
+:label: alg:bfgs
+**Inputs:** Objective {math}`f`, initial point {math}`x_0`, initial inverse Hessian approximation {math}`B_0`, convergence criterion `converged`.
+1. {math}`k = 0`
+2. **while** not `converged()`:
+    1. Compute direction {math}`d_k = -B_k \nabla f(x_k)`
+    2. Determine step size / learning rate {math}`\lambda`
+    3. Compute {math}`s_k = \lambda d_k`
+    4. Update {math}`x_{k+1} = x_k + s_k`
+    5. Compute {math}`y_k = \nabla f(x_{k+1}) - \nabla f(x_k)`
+    6. Update inverse Hessian approximation:
+       ```{math}
+       B_{k+1} = B_k + \left(1 + \frac{y_k^\top B_k y_k}{y_k^\top s_k}\right) \frac{s_k s_k^\top}{s_k^\top y_k} - \frac{B_k y_k s_k^\top + s_k y_k^\top B_k}{s_k^\top y_k}
+       ```
+    7. {math}`k = k + 1`
+3. **return** {math}`x_k`.
+```
 
 ```{raw} html
 <body>

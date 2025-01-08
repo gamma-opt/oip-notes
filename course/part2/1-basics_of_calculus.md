@@ -13,6 +13,7 @@ kernelspec:
   name: julia-1.10
 ---
 
+(p2l1)=
 # Basics of calculus for optimisation
 
 ## Revisit unconstrained optimality conditions (and gradients)
