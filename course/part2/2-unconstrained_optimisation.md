@@ -56,8 +56,13 @@ This decision can be made dynamically at every step, using exact or inexact line
 Gradient descent is simple and straightforward, it be highly sensitive to the step size selection or the curvature of the objective function.
 However, it also provides a solid foundation for extensions.
 One ubiquitious example is _stochastic_ gradient descent, where the gradient is approximated by a random selection of partial derivatives, reducing the computational burden significantly.
-% Differentiate between SGD vs batch GD?
-% TODO: Is there normalization in SGD?
+
+```{margin}
+Note the normalization by the norm in {prf:ref}`alg:sgd` line 2.2.
+Here the idea is the same as before: the normalized gradient provides the direction, and the step size provides the magnitude.
+In many implementations of SGD however, the gradient is left unnormalized, in which case step size is influenced or even fully determined by its magnitude.
+```
+
 ```{prf:algorithm} Stochastic Gradient descent
 :label: alg:sgd
 **Inputs** Objective {math}`f`, initial point {math}`x_0`, convergence criterion `converged`.
@@ -124,6 +129,9 @@ There are multiple ways of implementing such a mechanism, one is to keep a decay
 where $0\leq \beta_\lambda\leq 1$ is some decay parameter.
 Here, with more iterations, older values of the gradient will be practically zero, thus only the more recent figures will affect the final result.
 Consequently, if a flat region is encountered after a rapid descent, the learning rate will go up again as needed.
+```{margin}
+Using the decaying average of gradients without momentum leads to an algorithm called _RMSProp_.
+```
 Combining this idea of the "adaptive gradient" with momentum gives a commonly used optimizer called _Adam_ (from "adaptive moments").
 
 ```{prf:algorithm} Adam
@@ -140,9 +148,14 @@ Combining this idea of the "adaptive gradient" with momentum gives a commonly us
 ```
 Here, $\delta$ is a small scalar used to ensure we don't divide by 0.
 
+```{margin}
 Adapted from [Emilien Dupont's code](https://emiliendupont.github.io/2018/01/24/optimization-visualization/).
+```
 
 % This requires `d3.v4.js `, which is currently provided via _config.yml.
+% TODO: Add number of steps
+% TODO: Add marker to final point to show where it converged
+% TODO: Add multiple functions to choose from?
 ```{raw} html
 <body>
 <div id="d3-gd"></div>
@@ -653,31 +666,6 @@ function get_bfgs_path(f, x0, y0, num_steps, tol) {
         y0 = y1;
     }
     return bfgs_history;
-}
-</script>
-```
-
-## Playground
-
-WIP
-
-Considerations:
-- security: This is all client-side so I expect it should be fine to evaluate arbitrary input from users. The only concern I can imagine is that if the expression is for some reason very complicated, it could take up too much CPU and freeze. This may be prevented with something like [this](https://github.com/josdejong/workerpool).
-- domain: The function domain is right now hardcoded to `[-2,2]**2`. I think it may be annoying to make it
-
-```{raw} html
-Enter a math expression: <input type="text" id="eq-box"/> <button onclick="onClick()">Draw</button>
-<div id="d3-custom"></div>
-
-<script>
-function onClick() {
-    const inputBox = document.getElementById("eq-box");
-    const val = inputBox.value;
-    const f = math.evaluate("f(x,y)=" + val);
-    f_values = get_values(f, nx, ny);
-    console.log(f_values.slice(0,5));
-    d3.select("#d3-custom").selectAll("*").remove() 
-    create_interactive_plot("#d3-custom", gradient_container, f);
 }
 </script>
 ```
