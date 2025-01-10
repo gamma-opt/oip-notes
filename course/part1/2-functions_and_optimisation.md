@@ -13,7 +13,6 @@ kernelspec:
   name: julia-1.10
 ---
 
-
 (p1l2)=
 # Functions and optimisation
 
@@ -122,6 +121,7 @@ Take, for example, continuity, which roughly means that the graph of the functio
 ````{prf:definition} Continuous functions
 :label: continuity_def
 
+
 A function $f:X \to \reals$ is continuous at point $a \in X$ if 
 
 ```{math}
@@ -129,6 +129,7 @@ A function $f:X \to \reals$ is continuous at point $a \in X$ if
 ```
 
 We say that $f$ is *continuous* over $X$ if it is continuous at all points $a \in X$. 
+
 ````
 
 ```{note}
