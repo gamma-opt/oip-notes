@@ -33,3 +33,7 @@ table thead tr th.text-center {
   color: rgb(68,68,68);
   font-family: Source Sans Pro, sans-serif
 }
+
+div.algorithm {
+  --pst-icon-admonition-default: "\f121"
+}
