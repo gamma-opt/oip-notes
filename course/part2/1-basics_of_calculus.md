@@ -115,7 +115,7 @@ Let $f$ be $n$-times differentiable on an open interval containing $x$ and $a$. 
 where $R_{n+1}(x)$ represents the residual associated with the $n+1$-order and subsequent terms.
 ````
 
-The Taylor expansion is exact, once an infinite number of terms are considered. Its practical use however is as an $n^\text{th}$-order  **approximation**, which corresponds to the Taylor expansion to the $n^\text{th}$ order, without the residual term. The figure below illustrates how the Taylor approximation can be used to approximate the function. Notice how well it approximates the function in the vicinity of the point of interest (our $a$) and how it becomes a better approximation as higher orders are considered. 
+The Taylor expansion is exact, once an infinite number of terms are considered. Its practical use however is as an $n^\text{th}$-order  **approximation**, which corresponds to the Taylor expansion to the $n^\text{th}$ order, without the residual term. The figure below illustrates how the Taylor approximation can be used to approximate the function. Notice how well it approximates the function in the vicinity of the point of interest (our $a$) and how it becomes a better approximation as higher orders are considered.
 
 Adapted from [Michael Schlottke-Lakemper's code](https://gist.github.com/sloede/a680cf36245e1794801a6bcd4530487a).
 
@@ -219,10 +219,82 @@ App() do session::Session
 end
 ```
 
-## Revisit unconstrained optimality conditions (and gradients)
+## Unconstrained optimality conditions
+
+Let us now devise the optimality conditions that a candidate point must satisfy in a more general (i.e., multidimensional) setting. For that, let our function of interest be of the form $f : \mathbb{R}^n \to \mathbb{R}$. As we seen in {ref}`p1l2:lecture`, the partial derivatives of $f$ with respect to each of its components $x_i$, $i \in \{1,\dots,n\}$, is 
+
+```{math}
+\frac{\partial f(x)}{\partial x_i} = \lim_{ h \to 0}\frac{f(x_1, \dots, x_i+h, \dots, x_n)-f(x_1, \dots, x_n)}{h}.
+```
+
+Then, we also seen that the gradient of $f$ at $x$ is defined as
+
+```{math}
+\nabla f(x) = \left[\frac{\partial f(x)}{\partial x_1}, \dots, \frac{\partial f(x)}{\partial x_i}, \dots, \frac{\partial f(x)}{\partial x_n} \right].
+```
+
+The gradient plays the role of our first-order derivative information for multi-dimensional functions. For second-order derivative information, we rely on the Hessian matrix, which is defined as
+
+```{math}
+\nabla^2f(x) = H(x) = 
+\begin{bmatrix} 
+  \frac{\partial^2 f(x)}{\partial x_1^2} & \dots & \frac{\partial^2 f(x)}{\partial x_1\partial x_n} \\
+  \vdots   & \ddots & \vdots \\
+  \frac{\partial^2 f(x)}{\partial x_n\partial x_1} & \dots & \frac{\partial^2 f(x)}{\partial x_n^2}
+\end{bmatrix}.
+```
+
+Analogous to the univariate case, gradients and Hessian describe the function's local growth behaviour and shape (more precisely, curvature), respectively.
+
+One last point worth mentioning relates to second-order Taylor approximations for multivariate functions. Most optimisation techniques will consider second order approximations of the functions being optimised. As such, gradients and Hessian will frequently be mentioned and utilised in our derivations. The second-order approximation of $f$ at $x_0$ is given by
+
+```{math}
+f(x) = f(a) + \nabla f(a)^\top (x - a) + \frac{1}{2}(x - a)^\top H(a)(x - a).
+```
+
+```{note} Second-order expansion of $f$
+
+Analogously to the univariate case, the second-order Taylor expansion of $f$ at $a$ is given by
+
+$$
+f(x) = f(a) + \nabla f(a)^\top (x - a) + \frac{1}{2}(x - a)^\top H(a)(x - a) + o(\| x - a \|^2)
+$$
+
+where the residual $o(\| x - a \|^2)$ is presented in the [little-o notation](https://en.wikipedia.org/wiki/Big_O_notation\#Little-o_notation)m which essentially means that the residual goes to zero ``faster'' than $\| x - a \|^2$ and as such, can be safely ignored for small $\Delta x = x -a$.  
+```
 
 
-## Second-order optimality condition and Hessians
+## Unconstrained optimality conditions
+
+In {ref}`p1l2:lecture`, we briefly hinted to the zero-gradient condition as a necessary condition for optimality. Here, we look in further detail why this is the case. To be able to do so, we must define the notion of **descent direction**.
+
+```{prf:definition}
+:label: descent_direction
+
+Let $f : \reals^n \to \reals$ be differentiable. The vector $d = (x - x_0)$ is a descent direction for $f$ at $x_0$ if $\nabla f(x_0)^\top d < 0$.
+```
+
+Some points are worth highlighting in {ref}`descent_direction`. First, the vector $d$ gives the straight direction that must be followed for one to go from point $x_0$ to point $x$. Also, the sign of the scalar product $\nabla f(x_0)^\top d$ holds a relationship with the angle formed between the vectors $\nabla f(x_0)$ and $d$: a negative value indicates that they form an angle greater than $90^\circ$ whilst a positive value indicate angle of less than $90^\circ$. 
+
+When we say that $d$ is a descent direction, it means that the direction $d$ holds a component in the **opposite** direction of the gradient $\nabla f(x_0)$ and, as such, any movement in that direction from $x_0$ will lead to a point in which the function $f$ value decreases.
+
+Analogously, we can think of ascent directions, which are those for which $\nabla f(x_0)^\top d > 0$. In that case, any movement in the direction of $d$ would increase the function value in relation to $f(x_0)$. 
+
+```{note}
+Notice that for every ascent direction $d$ there is an descent direction $-d$.
+````
+
+% TODO: include figures from introduction to optimisation showing descent direction. We can consider enriching it to include the eigenvectors scaled by eigenvalues of the Hessian
+
+With the notion of descent direction at hand, it becomes clear that a minimum point is one for which no descent direction can be identified. And, for that to be the case in unconstrained settings, where from $x_0$ we can move towards any point $x \in \reals^n$, this will only be the case when $\nabla f(x) = 0$. For completeness, we state the so called first-order necessary optimality conditions
+
+```{prf:theorem} First-order optimality conditions
+
+Let $f : \reals^n \to \reals be differentiable. If $\overline{x}$ is a local optimum, then $\nabla f(\overline{x}) = 0$.
+```
+
+
+
 
 
 ## Constrained optimality conditions: Karush-Kuhn-Tucker
