@@ -1,3 +1,4 @@
 .*
 course/_build
 Manifest.toml
+*.json

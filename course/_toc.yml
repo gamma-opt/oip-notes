@@ -2,7 +2,7 @@ format: jb-book
 root: intro
 parts:
 - caption: The Fundamentals of Mathematical Optimisation Modelling
-  numbered: true
+  numbered: 3
   chapters:
   - file: part1/1-intro
   - file: part1/2-functions_and_optimisation
@@ -15,7 +15,7 @@ parts:
   - file: part1/9-multiobjective
   - file: part1/10-nonlinear
 - caption: Advanced Mathematical Optimisation Modelling
-  numbered: true
+  numbered: 3
   chapters:
   - file: part2/1-basics_of_calculus
   - file: part2/2-unconstrained_optimisation
