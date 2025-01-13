@@ -159,6 +159,7 @@ Adapted from [Emilien Dupont's code](https://emiliendupont.github.io/2018/01/24/
 ```{raw} html
 <body>
 <div id="d3-gd"></div>
+<select name="gd-func"></select>
 </body>
 <style>
 .sgd {
@@ -257,6 +258,38 @@ function hess_f(f,x,y) {
 }
 
 
+const func_names = ["Two Gaussians", "Rosenbrock", "Himmelblau"];
+const funcs = {
+    "Two Gaussians": [
+        function f(x,y) {
+            return -2 * Math.exp(-((x - 1) * (x - 1) + y * y) / .2) + -3 * Math.exp(-((x + 1) * (x + 1) + y * y) / .2) + x * x + y * y;
+        }, get_values
+    ],
+    "Rosenbrock":
+        function f(x,y) {
+            return (1-x)*(1-x) + 100*(y-x*x)*(y-x*x);
+        },
+    "Himmelblau":
+        function f(x,y) {
+            return (6.25*x*x+2*y-11)*(6.25*x*x+2*y-11) + (2.5*x+4*y*y-7)*(2.5*x+4*y*y-7);
+        }
+}
+
+d3.select('select[name="gd-func"]')
+    .on('change', function() {
+        const func = d3.select(this).property('value');
+        create_interactive_plot("#d3-gd", gradient_container, funcs[func]);
+        })
+    .selectAll('option')
+    .data(func_names)
+    .enter()
+    .append('option')
+    .attr('value', d=>d)
+    .text(d => d);
+
+
+
+
 /* Returns values of f(x,y) at each point on grid as 1 dim array. */
 function get_values(fun, nx, ny) {
     let grid = new Array(nx * ny);
@@ -271,15 +304,16 @@ function get_values(fun, nx, ny) {
     return grid;
 }
 
-let f_values = get_values(f, nx, ny);
 
-function draw_contour(selector, mousedown_fn) {
+function draw_contour(selector, mousedown_fn, obj_f) {
     const svg = d3.select(selector)
                   .append("svg")
                   .attr("width", width)
                   .attr("height", height);
 
     const function_g = svg.append("g").on("mousedown", mousedown_fn);
+
+    let f_values = get_values(obj_f, nx, ny);
 
     function_g.selectAll("path")
             .data(contours(f_values))
@@ -354,7 +388,7 @@ const gradient_container = {
 }
 
 function create_interactive_plot(selector, method_container, obj_f) {
-    const svg = draw_contour(selector, mouse_fn);
+    const svg = draw_contour(selector, mouse_fn, obj_f);
     let draw_state = create_menu(svg, Object.keys(method_container));
     const path_g = svg.append("g");
 
@@ -490,12 +524,6 @@ function draw_path(path_data, type, path_g) {
                    .duration(path_data.length * drawing_time)
                    .attr("stroke-opacity", 0.5);
 }
-
-/*
- * Start minimization from click on contour map
- */
-
-
 
 </script>
 ```
