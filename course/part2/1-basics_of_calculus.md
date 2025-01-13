@@ -19,12 +19,12 @@ Before we proceed further, we will need to revisit (or visit for the first time)
 
 ## One-dimensional function calculus
 
-In {ref}`p1l2`, we discussed some central aspects related to analysing functions and, very importantly, we discussed the notion of derivatives and gradients.
+In [Lecture 2](../part1/2-functions_and_optimisation.md), we discussed some central aspects related to analysing functions and, very importantly, we discussed the notion of derivatives and gradients.
 
 As a refresher, let us revisit the main definitions we will be using. We start with continuity and differentiation, since our focus will be placed for now on differentiable functions. First, we exclusively focus on one-dimensional functions.
 
 ````{prf:definition}
-:label: continuity_def
+:label: p2l1:continuity_def
 
 Let {math}`f:\reals \to \reals` be a function. We say that {math}`lim_{x \to a} f(x) = c` if, as $x$ becomes closer to $a$, $f(x)$ becomes closer to $c$ (i.e., asymptotically). Moreover, $f$ is continuous at point {math}`a \in \reals` if 
 ```{math}
@@ -33,7 +33,7 @@ Let {math}`f:\reals \to \reals` be a function. We say that {math}`lim_{x \to a} 
 If {math}`\lim_{x \to a}f(x) = f(a)` for all $a \in \reals$, we say that the function is continuos.
 ````
 
-If a function is continuos, we can hope for it to be differentiable as well. Let's us restate a slightly different definition of  differentiability than that presented in {ref}`p1l2`.
+If a function is continuos, we can hope for it to be differentiable as well. Let's us restate a slightly different definition of  differentiability than that presented in [Lecture 2](../part1/2-functions_and_optimisation.md).
 
 
 ````{prf:definition}
@@ -221,7 +221,7 @@ end
 
 ## Unconstrained optimality conditions
 
-Let us now devise the optimality conditions that a candidate point must satisfy in a more general (i.e., multidimensional) setting. For that, let our function of interest be of the form $f : \mathbb{R}^n \to \mathbb{R}$. As we seen in {ref}`p1l2`, the partial derivatives of $f$ with respect to each of its components $x_i$, $i \in \{1,\dots,n\}$, is 
+Let us now devise the optimality conditions that a candidate point must satisfy in a more general (i.e., multidimensional) setting. For that, let our function of interest be of the form $f : \mathbb{R}^n \to \mathbb{R}$. As we seen in [Lecture 2](../part1/2-functions_and_optimisation.md), the partial derivatives of $f$ with respect to each of its components $x_i$, $i \in \{1,\dots,n\}$, is 
 
 ```{math}
 \frac{\partial f(x)}{\partial x_i} = \lim_{ h \to 0}\frac{f(x_1, \dots, x_i+h, \dots, x_n)-f(x_1, \dots, x_n)}{h}.
@@ -266,7 +266,7 @@ where the residual $o(\| x - a \|^2)$ is presented in the [little-o notation](ht
 
 ## Unconstrained optimality conditions
 
-In {ref}`p1l2`, we briefly hinted to the zero-gradient condition as a necessary condition for optimality. Here, we look in further detail why this is the case. To be able to do so, we must define the notion of **descent direction**.
+In [Lecture 2](../part1/2-functions_and_optimisation.md), we briefly hinted to the zero-gradient condition as a necessary condition for optimality. Here, we look in further detail why this is the case. To be able to do so, we must define the notion of **descent direction**.
 
 ```{prf:definition}
 :label: descent_direction
