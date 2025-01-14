@@ -41,7 +41,7 @@ If a function is continuos, we can hope for it to be differentiable as well. Let
 
 A function {math}`f:\reals \to \reals` is differentiable if the derivative
 ```{math}
-f'(a) = \lim_{ \Delta x \to 0}\frac{f(a + \Delta x )-f(a)}{\Delta}
+f'(a) = \lim_{ \Delta x \to 0}\frac{f(a + \Delta x )-f(a)}{\Delta x}
 ```
 exists for all $x \in \reals$.
 ````
@@ -55,7 +55,7 @@ The importance of differentiability is that the derivative provides information 
 - if $f'(x) > 0$, the function is **increasing** at $x$. That is, for an arbitrarily small $\epsilon > 0$, $f(x + \epsilon) > f(x)$.
 - Likewise, $f'(x) < 0$ means that the function is **decreasing** at $x$.
 
-Another important notion that we wil use is that of $n^\text{th}$-order derivatives. Let us first define it formally.
+Another important notion that we will use is that of $n^\text{th}$-order derivatives. Let us first define it formally.
 
 ````{prf:definition}
 The $n^\text{th}$-order derivative $f^{(n)}(a)$ of $f$ at $a$ is the derivative of $f^{(n-1)}(a)$ at $a$. As a convention, we assume $f^{(0)}(a) = f(a)$.
@@ -73,9 +73,9 @@ We can use derivatives to infer whether points are locally optimal. Let us first
 A point $a$ is locally optimal for $f$ if, within a neighbourhood $N$ of arbitrary size, we have that $f(a) \le f(x)$ (local minimum) or $f(a) \ge f(x)$ (local maximum) for all $x \in N$.
 ````
 
-Notice two things about definition {prf:ref}`local_optima`. First is the fact that a point can a local maxima or a local minima. If it is both at once, we must have that $f(a) = f(x)$ for $x \in N$. The second is that if the neighbourhood can be set as large as the whole set or real numbers, then we can say that these are **global** optima.
+Notice two things about definition {prf:ref}`local_optima`. First is the fact that a point can a local maximum or a local minimum. If it is both at once, we must have that $f(a) = f(x)$ for $x \in N$. The second is that if the neighbourhood can be set as large as the whole set or real numbers, then we can say that these are **global** optima.
 
-Points that are candidates to optimal points share one thing in common: at them, the function changes from increasing to decreasing (minimum; the opposite for maximum). The points at which this change in function value tendency happens are those where $f'(x) = 0$.
+Points that are candidates to optimal points share one thing in common: at them, the function changes from increasing to decreasing (for minima; the opposite for maxima). The points at which this change in function value tendency happens are those where $f'(x) = 0$.
 
 ````{note}
 One way of seeing this is thinking about the first-order Taylor approximation of $f$ at a candidate point $a$. The first-order approximation would be given as
@@ -109,7 +109,7 @@ Let $f$ be $n$-times differentiable on an open interval containing $x$ and $a$. 
 \begin{align}
   f(x) = & f(a) + f'(a)(x - a) + \frac{1}{2}f''(a)(x - a)^2 + ... \\
          & + \frac{1}{n!}f^{(n)}(x - a)^n + R_{n+1}(x) \\
-         & = \sum_{i=0}^n \frac{1}{i!}f^{(i)}(a)(x-a)^i + R_{n+1}(x), 
+       = & \sum_{i=0}^n \frac{1}{i!}f^{(i)}(a)(x-a)^i + R_{n+1}(x), 
 \end{align}
 ```
 where $R_{n+1}(x)$ represents the residual associated with the $n+1$-order and subsequent terms.
@@ -252,7 +252,8 @@ One last point worth mentioning relates to second-order Taylor approximations fo
 f(x) = f(a) + \nabla f(a)^\top (x - a) + \frac{1}{2}(x - a)^\top H(a)(x - a).
 ```
 
-```{note} Second-order expansion of $f$
+```{admonition} Note: Second-order expansion of $f$
+:class: note
 
 Analogously to the univariate case, the second-order Taylor expansion of $f$ at $a$ is given by
 
