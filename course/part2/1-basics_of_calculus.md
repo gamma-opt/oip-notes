@@ -279,7 +279,7 @@ $$
 where the residual $o(\| x - a \|^2)$ is presented in the [little-o notation](https://en.wikipedia.org/wiki/Big_O_notation\#Little-o_notation) which essentially means that the residual goes to zero ``faster'' than $\| x - a \|^2$ and as such, can be safely ignored for small $\Delta x = x -a$.  
 ```
 
-## Unconstrained optimality conditions
+## Optimality conditions and descent directions
 
 In [Lecture 2](../part1/2-functions_and_optimisation.md), we briefly hinted to the zero-gradient condition as a necessary condition for optimality. Here, we look in further detail why this is the case. To be able to do so, we must define the notion of **descent direction**.
 
