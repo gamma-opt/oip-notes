@@ -263,7 +263,6 @@ $$
 where the residual $o(\| x - a \|^2)$ is presented in the [little-o notation](https://en.wikipedia.org/wiki/Big_O_notation\#Little-o_notation) which essentially means that the residual goes to zero ``faster'' than $\| x - a \|^2$ and as such, can be safely ignored for small $\Delta x = x -a$.  
 ```
 
-
 ## Unconstrained optimality conditions
 
 In [Lecture 2](../part1/2-functions_and_optimisation.md), we briefly hinted to the zero-gradient condition as a necessary condition for optimality. Here, we look in further detail why this is the case. To be able to do so, we must define the notion of **descent direction**.
@@ -294,6 +293,165 @@ With the notion of descent direction at hand, it becomes clear that a minimum po
 Let $f : \reals^n \to \reals$ be differentiable. If $\overline{x}$ is a local optimum, then $\nabla f(\overline{x}) = 0$.
 ```
 
-## Constrained optimality conditions: Karush-Kuhn-Tucker
+## Constrained optimality conditions
 
-## Interpretations of the KKT conditions
+Constrained problems are, in general, more challenging to solve. In the presence of constraints, first-order conditions for the equivalent unconstrained problem may never be achieved, meaning that we must consider not only objective function shapes but also the feasible set geometry.
+
+% Add figure from introopt showing the optimal point for a nonlinear problem (2nd slide)
+
+We must thus consider an alternative framework for optimality conditions. In that, we must consider both objective function optimality and constraint satisfaction simultaneously. The theoretical framework that allows for analysing constrained optimisation problems from that perspective is know and Lagrangian duality. 
+
+### Equality-constrained problems
+
+Let us develop the analysis ourselves. We start with equality constraint problems of the form
+
+```{math}
+\begin{align*}
+  \mini z = & f(x) \\
+  \st h_i(x) = 0, i \in [l],
+\end{align*}
+```
+
+where $f: \reals^n \rightarrow \reals$ and $h:\reals^n \rightarrow \reals^l$, all differentiable.
+
+We start by associating with each equality constraint a (Lagrangian) multiplier, $\mu_i$, $i \in [l]$, defining the so-called Lagrangian function
+
+```{math}
+L(x,\mu) = f(x) + \sum_{i=1}^l \mu_i h_i(x).
+```
+
+With that at hand, we can analyse it under the frame of unconstrainted optimisation again, since $L(x, \mu)$ is effectively an unconstrained function. Notice that the terms $h_i(x)$, for all $i \in [l]$, act as a infeasibility measure in this case which we hope to minimise. Also, notice that no sign constraints are imposed to the multipliers $\mu_i$, $i \in [l]$.
+
+First-order optimality conditions require that $\nabla L(x,\mu) = 0$, which, in turn, leads to
+
+```{math}
+\begin{align*}
+& \frac{\partial L(x, \mu)}{\partial x} = 0 \Rightarrow \nabla f(x) + \sum_{i=1}^l \mu_i \nabla h_i(x)  = 0\\
+& \frac{\partial L(x, \mu)}{\partial \mu_i} = 0 \Rightarrow h_i(x) = 0, i =1,\dots, l.
+\end{align*}
+```
+
+These conditions tells us the following: that we are looking for a point that satisfy the constraints $h_i(x) = 0$, $\forall i \in [l]$ and that is such that the gradient of the objective function ($\nabla f(x)$) is the opposite of a scaled combination of the gradients of the constraints ($\nabla f(x) = - \sum_{i=1}^l \mu_i \nabla h_i(x)$). Notice that they yield $n + m$ equations with $n + m$ unknowns. Thus, if we can find a solution $(x,\mu)$ to these equations, we have also found a point that satisfy the optimality conditions! Theorem {prf:ref}`thm-eq_const` formally state optimality conditions for constrained problems with equality constraints only.
+
+````{prf:theorem} Optimality conditions - equality-constrained problems
+:label: thm-eq_const
+
+Let $P$ be $\mini \braces{f(x) : h(x) = 0}$ with differentiable $f: \reals^n \rightarrow \reals$ and $h:\reals^n \rightarrow \reals^l$. If $\overline{x}$ is optimal for $P$, then $(\overline{x}, \overline{\mu})$ satisfies 
+
+```{math}
+\begin{align}
+& \frac{\partial L(x, \mu)}{\partial x} = 0 \Rightarrow \nabla f(x) + \sum_{i=1}^l \mu_i \nabla h_i(x) = 0 \\
+& \frac{\partial L(x, \mu)}{\partial \mu} = 0 \Rightarrow h(x) = 0.
+\end{align}
+```
+
+Moreover, if $f$ is convex and $h$ is affine, then these conditions are not only necessary, but also sufficient for optimality of $\overline{x}$.
+````
+
+One important thing to notice from {prf:ref}`thm-eq_const` is that, just as it is the case with unconstrained optimisation, convexity can be used to infer global optimality. Otherwise, the conditions stated in {prf:ref}`thm-eq_const` are only necessary: a solution may satisfy these conditions but not be optimal, as they are only necessary but not sufficient otherwise.
+
+Let's see how these can be used in an example. Consider the problem $\maxi \braces{z= -2x_1^2 - x_2^2 + x_1x_2 + 8 x_1 + 3 x_2 : 3x_1 + x_2 = 10}$. The Lagrangian function is given by
+
+$$
+L(x_1,x_2,\mu) = -2x_1^2 - x_2^2 + x_1x_2 + 8 x_1 + 3 x_2 + \mu(3x_1 + x_2 - 10)
+$$
+
+The optimality conditions are given by the following set of equations:
+
+```{math}
+\begin{align*}
+&\partial \frac{L(x_1,x_2,\mu)}{\partial x_1} = -4x_1 + x_2 + 8 + 3\mu = 0 \\
+&\partial \frac{L(x_1,x_2,\mu)}{\partial x_2} = -2x_2 + x_1 + 3 + \mu = 0 \\
+&\partial \frac{L(x_1,x_2,\mu)}{\partial \mu} = 3x_1 + x_2 - 10 = 0
+\end{align*}
+```
+
+Solving this system of equations we obtain the solution $\overline{x} = (2.46, 2.60)$ and $\overline{\mu} = -0.25$. 
+
+%Add figure with problem and optimal point (ex1)
+
+```{warning} How do we know it is a maximum?
+These optimality conditions are a constrained equivalent to first-order conditions. As such, it is up to you to recognise that the objective function is concave and we are maximising, making the problem convex and the conditions from {prf:ref}`thm-eq_const` necessary and sufficient for optimality, in this case the maximum. Notice that if we were minimising instead, this point would satisfy the conditions but would not be optimal (there would be no optimal in fact as the objective function can decrease *ad infinitum*).  
+```
+
+### Inequality-constrained problems
+
+Let us now consider inequalities as constraints. That is, our problem now takes the form of 
+
+```{math}
+\begin{align*}
+(P) : \mini z = & \ f(x) \\
+\st & g_i(x) \leq 0, \ i = 1,\dots,m.
+\end{align*}
+```
+
+We proceed in the same manner as before, adding multipliers $\lambda_i$, $\forall i \in [m]$ to each of the constraints and form the Lagrangian function  
+
+$$L(x, \lambda) = f(x) + \sum_{i=1}^m \lambda_i g_i(x).$$
+
+The difference now is that we require **additional conditions** on how those multipliers behave. Essentially, differently from the equality constraint case, it may be that the constraint is such that $g_i(x) < 0$, meaning that it is not binding and, as such, does not play any role in the optimality conditions of the point $x$. As such, we must make sure that only when $g_i(x) = 0$ (i.e., they are binding) they play are role in the optimality conditions. For these to work as intended, we must impose that $\lambda_i \ge 0$ (as the inequality are satisfied by one of its sides) and that $\lambda_i g_i(x) = 0$, $\forall i \in [m]$. The second condition enforces that in the cases where $g_i(x) < 0$, the constraint plays no role in the optimality conditions.
+
+Putting these all together, we arrive at the following optimality conditions.
+
+```{prf:theorem} Optimality conditions - inequality constrained problems
+Let $P$ be $\mini \braces{f(x) : g(x) \leq 0}$ with differentiable $f: \reals^n \rightarrow \reals$ and $g:\reals^n \rightarrow \reals^m$. If $\overline{x}$ is optimal for $P$, then $(\overline{x}, \overline{\lambda})$ satisfies 
+\begin{align*}
+& \nabla f(\overline{x}) + \sum_{i=1}^m \overline{\lambda}_i \nabla g_i(\overline{x}) = 0 \\
+& g(\overline{x}) \leq 0  \\
+& \overline{\lambda}_i g_i(\overline{x}) = 0 , \ i = 1,\dots,m \\
+& \overline{\lambda}_i \geq 0, \ i = 1,\dots,m.
+\end{align*}
+```
+
+Once again. Notice that these conditions are only necessary for optimality, but not sufficient. The most general form of these conditions are known as Karush-Kuhn-Tucker (or KKT) conditions, which represent the general optimality conditions for constrained optimisation problems. For completeness, they are stated in {prf:ref}`kkt_conditions`.
+
+```{prf:theorem} Karush-Kuhn-Tucker (KKT) conditions
+:label: kkt_conditions
+
+Let $P$ be $\mini \braces{f(x) : g(x) \leq 0, h(x) = 0}$ with differentiable $f: \reals^n \rightarrow \reals$, $g:\reals^n \rightarrow \reals^m$ and $h:\reals^n \rightarrow \reals^l$. If $\overline{x}$ is optimal for $P$, then $(\overline{x}, \overline{\lambda}, \overline{\mu})$ satisfies 
+\begin{align*}
+& \nabla f(\overline{x}) + \sum_{i=1}^m \overline{\lambda}_i \nabla g_i(\overline{x}) + \sum_{i=1}^l \overline{\mu}_i \nabla h_i(\overline{x})= 0 \\
+& g_i(\overline{x}) \leq 0, \ i = 1,\dots,m  \\
+& h_i(\overline{x}) = 0, \ i = 1,\dots,l \\
+& \overline{\lambda}_i g_i(\overline{x}) = 0, \ i = 1,\dots,m \\
+& \overline{\lambda}_i \geq 0, \ i = 1,\dots,m.
+\end{align*}
+```
+
+For the KKT conditions to be necessary and sufficient, we require that $f$ is convex, $g_i$ is convex, $\forall i \in [m]$ and that there exists at least one $x$ such that $g_i(x) < 0$, $\forall i \in [m]$. This last condition is additional to our previosuly seen convexity requirements. These **constraint qualification** conditions loosely implies that the gradients associated with $g_i(x)$ do not "cancel each other out" and the first condition in {prf:ref}`kkt_conditions` reliably describes an equilibrium point where the optimal point resides.
+
+```{note}
+The constraint qualification condition we used is known as **Slater's constraint qualification**. There exists other more general conditions that can be considered instead, for example linear independence constraint qualification (LICQ) and Mangasarian-Fromovitz constraint qualification (MFCQ), which also render the KKT conditions necessary and sufficient for optimality.
+```
+
+Let us consider another example: consider the problem $\mini_x\braces{(x_1 - 3)^2 + (x_2 - 3)^2 : -x_1 + x_2 \leq 4; \ 2x_1 + 3x_2 \leq 11}$. The Lagrangian function is given by
+
+$$
+L(x_1,x_2,\lambda_1,\lambda_2) = (x_1 - 3)^2 + (x_2 - 3)^2 + \lambda_1(-x_1 + x_2 - 4) + \lambda_2(2x_1 + 3x_2 - 11).
+$$
+
+As such, the KKT conditions are:
+```{math}
+\begin{align*}
+&\begin{bmatrix}2x_1 -6 \\ 2x_2 -6
+\end{bmatrix} + \lambda_1 \begin{bmatrix} -1 \\ 1
+\end{bmatrix} + \lambda_2\begin{bmatrix} 2 \\ 3\end{bmatrix}
+= 0 \\ 
+&x_1 + x_2 - 2 \leq 0 \\
+&2x_1 + 3x_2 - 11 \leq 0 \\
+&\lambda_1(x_1 + x_2 - 2) = 0 \\
+&\lambda_2(2x_1 + 3x_2 - 11) = 0 \\
+&\lambda_1, \lambda_2 \geq 0
+\end{align*}
+```
+
+Notice that in this case,to solve the KKT conditions, we need to make an assumption on how the complementarity conditions $\lambda_i g_i(x) = 0$, $i \in [m]$, are satisfied. In this case, they imply that one of the following cases must hold:
+
+1. both $\lambda_1 = 0$ and $\lambda_2 = 0$; thus $g_1(x) < 0$ and $g_2(x) < 0$;
+2. $\lambda_1 > 0$ and $\lambda_2 = 0$; thus $g_1(x) = 0$  and $g_2(x) < 0$;
+3. $\lambda_1 = 0$ and $\lambda_2 > 0$; thus $g_1(x) < 0$  and $g_2(x) = 0$;
+4. both $\lambda_1 > 0$ and $\lambda_2 > 0$; thus $g_1(x) = 0$ and $g_2(x) = 0$.
+
+One might need to test all cases to find solutions satisfying the KKT conditions. In this example, $\lambda_1= 0, \lambda_2 > 0$ leads to a (unique optimal) solution satisfying KKT conditions: $(\overline{x}_1,\overline{x}_2,\overline{\lambda}_1,\overline{\lambda}_2) = (2.38, 2.07, 0, 0.61)$.
+
+% Add figure and make once again a comment on the equilibrium part (ex2).
