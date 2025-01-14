@@ -94,7 +94,21 @@ Second-order information can provide answer for that. Recall that the second-ord
 
 There is however one inconclusive case: when both $f'(a) = 0$ and $f''(a) = 0$. This means that at $a$ the curvature of $f$ changes, meaning that we have an **inflexion point**, which is neither a minimum not a maximum.
 
-%TODO: plot a function with a maximum a minimum and a inflection point
+```{code-cell}
+---
+mystnb:
+  figure:
+    name: fig:sine
+    caption: |
+      Sine function illustrating a minimum, an inflection point and a maximum.
+tags: [remove-input]
+---
+using CairoMakie
+
+fig, ax, plot = lines(-pi:0.1:pi, sin)
+scatter!(Point2f[(-pi/2,-1),(0,0),(pi/2,1)], color=Makie.wong_colors()[2])
+fig
+```
 
 ## Taylor approximation
 
@@ -121,6 +135,7 @@ Adapted from [Michael Schlottke-Lakemper's code](https://gist.github.com/sloede/
 
 ```{code-cell}
 using WGLMakie, Bonito
+WGLMakie.activate!()
 
 function base_graph(fun)
     fig = Figure(size=(800, 600), fontsize=30)
@@ -196,11 +211,11 @@ App() do session::Session
         end
     end
 
-    slider_x0 = Slider(-7:0.1:7)
+    slider_x0 = Bonito.Slider(-7:0.1:7)
     slider_x0[] = 0  # set starting value
     y = @lift($fun($slider_x0))
 
-    slider_deg = Slider(1:5)
+    slider_deg = Bonito.Slider(1:5)
     xvals = range(-7, 7, 100)
     yvals = @lift($taylor.(xvals, $slider_deg, $slider_x0))
     
@@ -351,7 +366,15 @@ Moreover, if $f$ is convex and $h$ is affine, then these conditions are not only
 
 One important thing to notice from {prf:ref}`thm-eq_const` is that, just as it is the case with unconstrained optimisation, convexity can be used to infer global optimality. Otherwise, the conditions stated in {prf:ref}`thm-eq_const` are only necessary: a solution may satisfy these conditions but not be optimal, as they are only necessary but not sufficient otherwise.
 
-Let's see how these can be used in an example. Consider the problem $\maxi \braces{z= -2x_1^2 - x_2^2 + x_1x_2 + 8 x_1 + 3 x_2 : 3x_1 + x_2 = 10}$. The Lagrangian function is given by
+Let's see how these can be used in an example. 
+Consider the problem 
+```{math}
+:label: constrained_problem1
+\maxi & -2x_1^2 - x_2^2 + x_1x_2 + 8 x_1 + 3 x_2 \\
+\st & 3x_1 + x_2 = 10.
+```
+
+The Lagrangian function is given by
 
 $$
 L(x_1,x_2,\mu) = -2x_1^2 - x_2^2 + x_1x_2 + 8 x_1 + 3 x_2 + \mu(3x_1 + x_2 - 10)
@@ -369,7 +392,37 @@ The optimality conditions are given by the following set of equations:
 
 Solving this system of equations we obtain the solution $\overline{x} = (2.46, 2.60)$ and $\overline{\mu} = -0.25$. 
 
-%Add figure with problem and optimal point (ex1)
+```{code-cell}
+---
+mystnb:
+  figure:
+    name: fig:constrained_optimum
+    caption: |
+      Contour and optimum of {eq}`constrained_problem1`.
+tags: [remove-input]
+---
+using LaTeXStrings
+CairoMakie.activate!()
+
+f(x) = -2*x[1]^2 - x[2]^2 + x[1]*x[2] + 8x[1] + 3x[2]
+
+# Plotting the contours of the function to be optimised
+n = 1000
+x = range(-7,stop=14,length=n)
+y = range(-10,stop=10,length=n)
+z = [f([x[i],y[j]]) for i = 1:n, j = 1:n]
+
+levels = [-150 + 15i for i =2:2:10]
+mylevels = [levels; 12; 15; 25]
+
+fig = Figure()
+ax = Axis(fig[1,1], limits=(-10,20,-10,10), xlabel=L"x_1", ylabel=L"x_2")
+contour!(ax, x,y,z, levels=mylevels, labels=true, colorrange=(-120,20))
+ablines!(ax, [10], [-3], label=L"3x_1+x_2=10")
+scatter!(ax, Point2f[(69/28,73/28)], label=L"\bar{x}", color=Makie.wong_colors()[2])
+axislegend()
+fig
+```
 
 ```{warning} How do we know it is a maximum?
 These optimality conditions are a constrained equivalent to first-order conditions. As such, it is up to you to recognise that the objective function is concave and we are maximising, making the problem convex and the conditions from {prf:ref}`thm-eq_const` necessary and sufficient for optimality, in this case the maximum. Notice that if we were minimising instead, this point would satisfy the conditions but would not be optimal (there would be no optimal in fact as the objective function can decrease *ad infinitum*).  
@@ -425,7 +478,15 @@ For the KKT conditions to be necessary and sufficient, we require that $f$ is co
 The constraint qualification condition we used is known as **Slater's constraint qualification**. There exists other more general conditions that can be considered instead, for example linear independence constraint qualification (LICQ) and Mangasarian-Fromovitz constraint qualification (MFCQ), which also render the KKT conditions necessary and sufficient for optimality.
 ```
 
-Let us consider another example: consider the problem $\mini_x\braces{(x_1 - 3)^2 + (x_2 - 3)^2 : -x_1 + x_2 \leq 4; \ 2x_1 + 3x_2 \leq 11}$. The Lagrangian function is given by
+Let us consider another example: consider the problem
+```{math}
+:label: constrained_problem2
+\mini & (x_1 - 3)^2 + (x_2 - 3)^2 \\
+\st & -x_1 + x_2 \leq 4 \\
+& 2x_1 + 3x_2 \leq 11
+```
+
+The Lagrangian function is given by
 
 $$
 L(x_1,x_2,\lambda_1,\lambda_2) = (x_1 - 3)^2 + (x_2 - 3)^2 + \lambda_1(-x_1 + x_2 - 4) + \lambda_2(2x_1 + 3x_2 - 11).
@@ -456,3 +517,30 @@ Notice that in this case,to solve the KKT conditions, we need to make an assumpt
 One might need to test all cases to find solutions satisfying the KKT conditions. In this example, $\lambda_1= 0, \lambda_2 > 0$ leads to a (unique optimal) solution satisfying KKT conditions: $(\overline{x}_1,\overline{x}_2,\overline{\lambda}_1,\overline{\lambda}_2) = (2.38, 2.07, 0, 0.61)$.
 
 % Add figure and make once again a comment on the equilibrium part (ex2).
+```{code-cell}
+---
+mystnb:
+  figure:
+    name: fig:constrained_optimum2
+    caption: |
+      Contour and optimum of {eq}`constrained_problem2`.
+tags: [remove-input]
+---
+
+f(x) = (x[1] - 3)^2 + (x[2] - 3)^2 
+
+n = 500
+x1 = range(-5,stop=10,length=n)
+x2 = range(-5,stop=10,length=n)
+z = [f([x1[i],x2[j]]) for j = 1:n, i = 1:n]
+
+fig = Figure()
+ax = Axis(fig[1,1], limits=(0,10,0,10), xlabel=L"x_1", ylabel=L"x_2")
+
+contour!(ax, x1,x2,z, levels=[0.1, 1.2307, 6, 15, 28], labels=true, colorrange=(0,35))
+ablines!(ax, [2], [1], label=L"-x_1+x_2\leq 2")
+ablines!(ax, [11/3], [-2/3], label=L"2x_1+3x_2\leq 11")
+scatter!(ax, Point2f[(2.38462,2.07692)], label=L"\bar{x}", color=Makie.wong_colors()[2])
+axislegend()
+fig
+```
