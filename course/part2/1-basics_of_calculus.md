@@ -79,9 +79,11 @@ Points that are candidates to optimal points share one thing in common: at them,
 
 ````{note}
 One way of seeing this is thinking about the first-order Taylor approximation of $f$ at a candidate point $a$. The first-order approximation would be given as
+
 ```{math}
 J(x) = f(a) + f'(a)(x - a)
 ```
+
 which is the expression of the tangent line of $f$ at $a$. If $f'(a) =0$, this means that at $a$, $J(x) = f(a)$ for all $x$. In other words, the tangent line is a horizontal line that crosses the y-axis at $f(a)$.
 ````
 
@@ -129,11 +131,19 @@ Let $f$ be $n$-times differentiable on an open interval containing $x$ and $a$. 
 where $R_{n+1}(x)$ represents the residual associated with the $n+1$-order and subsequent terms.
 ````
 
-The Taylor expansion is exact, once an infinite number of terms are considered. Its practical use however is as an $n^\text{th}$-order  **approximation**, which corresponds to the Taylor expansion to the $n^\text{th}$ order, without the residual term. The figure below illustrates how the Taylor approximation can be used to approximate the function. Notice how well it approximates the function in the vicinity of the point of interest (our $a$) and how it becomes a better approximation as higher orders are considered.
+The Taylor expansion is exact, once an infinite number of terms are considered. Its practical use however is as an $n^\text{th}$-order  **approximation**, which corresponds to the Taylor expansion to the $n^\text{th}$ order, without the residual term. {numref}`fig:taylor_approx` illustrates how the Taylor approximation can be used to approximate the function. Notice how well it approximates the function in the vicinity of the point of interest (our $a$) and how it becomes a better approximation as higher orders are considered.
 
 Adapted from [Michael Schlottke-Lakemper's code](https://gist.github.com/sloede/a680cf36245e1794801a6bcd4530487a).
 
 ```{code-cell}
+---
+mystnb:
+  figure:
+    name: fig:taylor_approx
+    caption: |
+      Taylor approximations for sine and cosine
+tags: [remove-input]
+---
 using WGLMakie, Bonito
 WGLMakie.activate!()
 
@@ -368,6 +378,7 @@ One important thing to notice from {prf:ref}`thm-eq_const` is that, just as it i
 
 Let's see how these can be used in an example. 
 Consider the problem 
+
 ```{math}
 :label: constrained_problem1
 \maxi & -2x_1^2 - x_2^2 + x_1x_2 + 8 x_1 + 3 x_2 \\
@@ -507,7 +518,7 @@ As such, the KKT conditions are:
 \end{align*}
 ```
 
-Notice that in this case,to solve the KKT conditions, we need to make an assumption on how the complementarity conditions $\lambda_i g_i(x) = 0$, $i \in [m]$, are satisfied. In this case, they imply that one of the following cases must hold:
+Notice that in this case, to solve the KKT conditions, we need to make an assumption on how the complementarity conditions $\lambda_i g_i(x) = 0$, $i \in [m]$, are satisfied. In this case, they imply that one of the following cases must hold:
 
 1. both $\lambda_1 = 0$ and $\lambda_2 = 0$; thus $g_1(x) < 0$ and $g_2(x) < 0$;
 2. $\lambda_1 > 0$ and $\lambda_2 = 0$; thus $g_1(x) = 0$  and $g_2(x) < 0$;
