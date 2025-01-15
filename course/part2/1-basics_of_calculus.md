@@ -549,9 +549,11 @@ z = [f([x1[i],x2[j]]) for j = 1:n, i = 1:n]
 fig = Figure()
 ax = Axis(fig[1,1], limits=(-5,10,0,10), xlabel=L"x_1", ylabel=L"x_2")
 
+poly!(ax, Point2f[(-2,0), (5.5,0), (1,3)])
+
 contour!(ax, x1,x2,z, levels=[0.1, 1.2307, 6, 15, 28], labels=true, colorrange=(0,35))
-ablines!(ax, [2], [1], label=L"-x_1+x_2\leq 2")
-ablines!(ax, [11/3], [-2/3], label=L"2x_1+3x_2\leq 11", color=Makie.wong_colors()[3])
+ablines!(ax, [2], [1], label=L"-x_1+x_2\leq 2", color=Makie.wong_colors()[3])
+ablines!(ax, [11/3], [-2/3], label=L"2x_1+3x_2\leq 11", color=Makie.wong_colors()[4])
 scatter!(ax, Point2f[(2.38462,2.07692)], label=L"\bar{x}", color=Makie.wong_colors()[2])
 axislegend()
 
@@ -574,7 +576,7 @@ x_nopt = [1, 3]
 ∇g1_nopt = ∇(g1,x_nopt)
 ∇g2_nopt = ∇(g2,x_nopt)
 
-arrows!(ax, Point2f[x_nopt, x_nopt, x_nopt], Point2f[∇f_nopt, ∇g1_nopt, ∇g2_nopt], color=Makie.wong_colors()[[2,4,5]])
+arrows!(ax, Point2f[x_nopt, x_nopt, x_nopt], Point2f[∇f_nopt, ∇g1_nopt, ∇g2_nopt], color=Makie.wong_colors()[[2,3,4]])
 text!(ax, Point2f[x_nopt, x_nopt, x_nopt] + Point2f[∇f_nopt, ∇g1_nopt, ∇g2_nopt], text=[L"$\nabla f(x^0)$", L"$\nabla g_1(x^0)$", L"$\nabla g_2(x^0)$"], offset=(-10,5))
 
 
