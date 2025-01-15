@@ -35,7 +35,6 @@ If {math}`\lim_{x \to a}f(x) = f(a)` for all $a \in \reals$, we say that the fun
 
 If a function is continuos, we can hope for it to be differentiable as well. Let's us restate a slightly different definition of  differentiability than that presented in [Lecture 2](../part1/2-functions_and_optimisation.md).
 
-
 ````{prf:definition}
 :label: differentiability_def_delta
 
@@ -277,7 +276,7 @@ One last point worth mentioning relates to second-order Taylor approximations fo
 f(x) = f(a) + \nabla f(a)^\top (x - a) + \frac{1}{2}(x - a)^\top H(a)(x - a).
 ```
 
-```{admonition} Note: Second-order expansion of $f$
+```{admonition} Second-order expansion of $f$
 :class: note
 
 Analogously to the univariate case, the second-order Taylor expansion of $f$ at $a$ is given by
@@ -325,7 +324,7 @@ Constrained problems are, in general, more challenging to solve. In the presence
 
 % Add figure from introopt showing the optimal point for a nonlinear problem (2nd slide)
 
-We must thus consider an alternative framework for optimality conditions. In that, we must consider both objective function optimality and constraint satisfaction simultaneously. The theoretical framework that allows for analysing constrained optimisation problems from that perspective is know and Lagrangian duality. 
+We must thus consider an alternative framework for optimality conditions. In that, we must consider both objective function optimality and constraint satisfaction simultaneously. The theoretical framework that allows for analysing constrained optimisation problems from that perspective is know and Lagrangian duality.
 
 ### Equality-constrained problems
 
