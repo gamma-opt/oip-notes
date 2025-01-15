@@ -93,7 +93,7 @@ Converting {eq}`lp_example` into canonical form yields
 In this form, the variables remaining on the left side of the linear constraints are called _basic variables_ and the remaining ones are called _non-basic variables_.
 Note that right now all basic variables are the slack variables we defined as a part of our modification, but this will not be the case after one iteration of the algorithm.
 
-The Simplex algorithm proceeds by exchanging a basic variable with a non-basic variable.
+The simplex algorithm proceeds by exchanging a basic variable with a non-basic variable.
 More specifically, at every iteration, a basic and a non-basic variable are chosen, then the constraint associated with the basic variable is solved for the non-basic variable.
 The constraint written this way allows us to substitute the non-basic variable with a new equation, which will ideally get us closer to the goal of rewriting the objective in the easy form of {eq}`lp_obj_form`.
 
@@ -159,6 +159,8 @@ fig
 ```
 
 This process of solving and substitution is repeated until the objective function contains variables with only negative coefficients, at which point the optimum has been found.
+An interesting fact is that this iteration corresponds to moving through the vertices of the feasible region, as illustrated in {ref}`fig:lp_it1`.
+It can be proved that if a linear problem has an optimum in the feasible region, then at least one vertex will be an optimum.
 
 The only question remaining is how the basic and non-basic variables to be exchanged are selected.
 After all, we gave no reason above to picking $s_1$ and $x_1$ above and one may wonder if any selection is appropriate.
