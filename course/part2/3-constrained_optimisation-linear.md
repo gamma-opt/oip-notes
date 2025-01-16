@@ -185,4 +185,46 @@ Consequently, since the first constraint gives the only feasible value, $s_1$ is
 
 If there are multiple constraints prescribing the same value for the non-basic variable to be switched, then ties can be broken with a heuristic or random selection.
 
-## Branch-and-bound
+## Branch-and-cut
+
+As great and effective the simplex method is, it cannot directly be used on (mixed-)integer problems. 
+Consider the problem
+```{math}
+:label: bnc_ip
+\maxi & 4x_1-x_2 \\
+\st & 7x_1-2x_2\leq 14 \\
+& x_2 \leq 3 \\
+& 2x_1-2x_2 \leq 3 \\
+& x_1,x_2\in \integers_+.
+```
+
+If we ignore the integrality constraint and apply the simplex method, we obtain an optimum $(x_1,x_2)=(\frac{20}{7},3)$ for an objective value of $\frac{59}{7}$.
+This is clearly not a feasible solution to our original problem, $x_1$ is not an integer.
+Even so, this result provides an upper-bound for the solution we are looking for, as restoring the integrality will make this problem more constrained, and thus the optimal value can only go down (when maximizing).
+
+Making a problem more general by ignoring or relaxing constraints is called a _relaxation_. 
+In this example, the relaxation did not give us a feasible solution with respect to integrality, but we can use it to guide further searches.
+The branch-and-cut algorithm does exactly this.
+
+Since $x_1$ is not an integer, we can add a constraint to disallow this solution and rerun the simplex algorithm.
+Simply adding $x_1\neq \frac{20}{7}$ however is not ideal, since it is easily imaginable this may give rise to a practically identical optimum $(\frac{20}{7}+\delta, 3)$ where $\delta$ is very small.
+Instead, we can eliminate the entire neighborhood of non-integer solutions, and end up with two _subproblems_: one with the constraint $x_1\leq 2$ and another with $x_1\geq 3$.
+More generally, upon encountering a non-integer solution, we devise cuts, which allows branching into subproblems that can repeat the same process until an integer solution is found.
+
+```{figure} ../figures/bnc.drawio.svg
+:name: bnc_tree
+
+Illustration of the branch-and-cut algorithm on {eq}`bnc_ip`, represented by $P_0$. $P_1$ does not need to be solved because the relaxation has an infeasible set of constraints and $P_4$ is pruned as its objective value is smaller than a known feasible solution in $P_3$.
+```
+
+A nice feature of this algorithm is that not every subproblem needs to be solved.
+For example, as illustrated in {numref}`bnc_tree`, subproblem $P_1$ can be detected to be infeasible before the optimisation process by inspecting the constraints.
+Alternatively, it can be inferred that we don't need to inspect subproblems of $P_4$, since its objective value is smaller than that of $P_3$, which already provides a feasible solution to the integer problem.
+
+```{warning}
+While in this example, an integer solution was found quickly, real-world problems can quickly get very complicated.
+For example, in a problem with a much larger number of variables, the relaxation may have an optimum with a large number of non-integer variables.
+In this scenario, there may be no more efficient way of continuing the search than adding constraints for one variable at a time.
+Consequently, the _search tree_ for the problem, as exemplified in {numref}`bnc_tree` will be both very wide and deep.
+This is exactly why solving (mixed)-integer problems are often more difficult than linear problems.
+```
