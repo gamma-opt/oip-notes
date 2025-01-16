@@ -527,6 +527,7 @@ Notice that in this case, to solve the KKT conditions, we need to make an assump
 One might need to test all cases to find solutions satisfying the KKT conditions. In this example, $\lambda_1= 0, \lambda_2 > 0$ leads to a (unique optimal) solution satisfying KKT conditions: $(\overline{x}_1,\overline{x}_2,\overline{\lambda}_1,\overline{\lambda}_2) = (2.38, 2.07, 0, 0.61)$.
 
 % Add figure and make once again a comment on the equilibrium part (ex2).
+
 ```{code-cell}
 ---
 mystnb:
@@ -568,7 +569,6 @@ x_opt = [2.38462, 2.07692]
 
 arrows!(ax, Point2f[x_opt, x_opt], Point2f[∇f_opt, ∇g2_opt], color=Makie.wong_colors()[[2, 4]])
 text!(ax, Point2f[x_opt, x_opt]+Point2f[∇f_opt, ∇g2_opt], text=[L"$\nabla f(\overline{x})$", L"$\lambda_2\nabla g_2(\overline{x})$"], offset=(10,0))
-
 
 x_nopt = [1, 3]
 
