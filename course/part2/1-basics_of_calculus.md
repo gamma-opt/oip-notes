@@ -220,7 +220,7 @@ App() do session::Session
         end
     end
 
-    slider_x0 = Bonito.Slider(-7:0.1:7)
+    slider_x0 = Bonito.Slider(-6:0.1:6)
     slider_x0[] = 0  # set starting value
     y = @lift($fun($slider_x0))
 
