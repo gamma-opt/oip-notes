@@ -165,19 +165,23 @@ The use of the second-order approximation of $f$ is so that the Hessian is const
 Let us once again consider a numerical example. We want to solve $\mini \braces{x_1^ 2 - 2x_1x_2 + 4x_2^ 2 : 0.1x_1 - x_2 = 1}$. Assume we start from $x^0 = (11, 0.1)$.  The Jacobian is given by
 
 $$
-\nabla f(x) = \begin{bmatrix} 2x_1 - 2x_2 \\ -2x_1 + 8x_2 \end{bmatrix}$; $H(x) = \begin{bmatrix} 2 & -2 \\ -2 & 8 \end{bmatrix}$; $A = [0.1, -1].
+\nabla f(x) = \begin{bmatrix} 2x_1 - 2x_2 \\ -2x_1 + 8x_2 \end{bmatrix}; H(x) = \begin{bmatrix} 2 & -2 \\ -2 & 8 \end{bmatrix}; A = [0.1, -1].
 $$
 
 and the Newton system is
 
 $$
 \begin{bmatrix} H(x^k) & A^\top \\ A & 0 \end{bmatrix} \begin{bmatrix} \Delta x \\ \mu \end{bmatrix} =  \begin{bmatrix} -\nabla f(x^k) \\ 0 \end{bmatrix} = 
-\begin{bmatrix} 2 & -2 & 0.1 \\ -2 & 8 & -1 \\ 0.1 & -1 & 0 \end{bmatrix} \begin{bmatrix} \Delta x_1 \\ \Delta x_2 \\ \mu \end{bmatrix} = \begin{bmatrix} -2x_1 + 2x_2 \\ 2x_1 - 8x_2 \\ 0\end{bmatrix}$.
+\begin{bmatrix} 2 & -2 & 0.1 \\ -2 & 8 & -1 \\ 0.1 & -1 & 0 \end{bmatrix} \begin{bmatrix} \Delta x_1 \\ \Delta x_2 \\ \mu \end{bmatrix} = \begin{bmatrix} -2x_1 + 2x_2 \\ 2x_1 - 8x_2 \\ 0\end{bmatrix}.
 $$
 
 For $x^0$, we obtain $d^1 = [\Delta x^1, \mu^1]^\top = [-11.714, -1.171, -7.142]^\top$, making $x^1 = x^0 + [-11.714, -1.171]^\top = [-0.714, -1.071]^\top$.
 
 To test whether $x^1$ is optimal, we can check whether $x_1, \mu^1$ satisfy the KKT conditions in {eqref}`eq:Newton-system`. In this case, they do, and thus $x^1$ is the optimal solution.
+
+```{warning}
+When making calculations with matrices and vectors, it is important to pay attention to the vectors dimensions and make sure they agree. That is why we are making the point of reminding you that $[...]^\top$ is originally a column vector that we are writing in row format for convenience.
+```
 
 
 ## Barriers
