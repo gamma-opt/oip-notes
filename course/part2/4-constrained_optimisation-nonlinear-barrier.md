@@ -92,11 +92,92 @@ Thus $x^1 = x^0 + d^0 = \begin{bmatrix} 3/2 & 1/2 & 1\end{bmatrix}$. As $||x^1 -
 
 %TODO: could we do the above via code, somehow?
 
+````{admonition} Types of problems best suited for Newton-Raphson
+:class: note 
+The bulk of the computational effort in the method is associated with calculating the inverse of the Jacobian in $d = -\nabla f(x^k)^{-1}f(x^k)$. 
+
+If the resulting system of equations is **linear**, it is more efficient to use a suitable linear algebra method which can avoid the need for calculating inverse matrices. These are often encoded in the so-called backslash operator. In `Julia`, this would be done using 
+
+% TODO: This needs fixing. Maybe connect with the example
+```{code} julia
+d = -\nabla f(x^k) \ f(x^k)
+```
+
+````
+
+
 ## Using Newton's method with equality constraints
 
+One interesting insight is that we can employ {prf:ref}`alg:NR` to find solutions to the systems of equations representing the KKT conditions of (equality) constrained optimisation problems. Assume our problem to be stated in the following form
 
+```{math}
+\begin{align*}
+\mini \ &f(x) \\
+\st   &Ax = b.
+\end{align*}
+```
 
+```{note}
+To make our notation a little easier to follow, we are explicitly assuming that $h(x) = Ax - b$. The method can be adapted for nonlinear constraint functions $h(x)$ using first-order approximations of $h$. Notice that these would yield nonconvex problems. 
+```
 
+First, we must consider the second-order approximation of $f$ at $x^k$, with $Ax^k = b$.
+
+$$
+f(x^k + \Delta x) = f(x^k) + \nabla f(x^k)^\top \Delta x + \frac{1}{2}\Delta x H(x^k) \Delta x,
+$$
+
+where $H(x^k)$ is the Hessian of $f$ at $x^k$ and $\Delta x = x - x^k$.  
+
+The KKT conditions for the second-order approximation problem state that $x^k + \Delta x$ is optimal if exists $\mu$ such that
+
+```{math}
+:label: eq:Newton-system
+\begin{align}
+&\nabla f(x^k) + H(x^k)\Delta x + A^\top\mu = 0 \\
+&A(x^k + \Delta x) = b \Rightarrow A\Delta x = 0.
+\end{align}
+```
+
+For convenience, {eqref}`eq:Newton-system` are typically stated in a matrix form known as the Newton system, given by
+
+```{math}
+\begin{bmatrix}
+H(x^k) & A^\top \\
+A & 0
+\end{bmatrix}
+%
+\begin{bmatrix}
+\Delta x \\
+\mu
+\end{bmatrix} = 
+%
+\begin{bmatrix}
+-\nabla f(x^k) \\
+0
+\end{bmatrix}
+```
+
+```{note}
+The use of the second-order approximation of $f$ is so that the Hessian is constant and the resulting system is a linear system of equations, which allows us to benefit from known efficient and robust computational linear algebra techniques.
+```
+
+Let us once again consider a numerical example. We want to solve $\mini \braces{x_1^ 2 - 2x_1x_2 + 4x_2^ 2 : 0.1x_1 - x_2 = 1}$. Assume we start from $x^0 = (11, 0.1)$.  The Jacobian is given by
+
+$$
+\nabla f(x) = \begin{bmatrix} 2x_1 - 2x_2 \\ -2x_1 + 8x_2 \end{bmatrix}$; $H(x) = \begin{bmatrix} 2 & -2 \\ -2 & 8 \end{bmatrix}$; $A = [0.1, -1].
+$$
+
+and the Newton system is
+
+$$
+\begin{bmatrix} H(x^k) & A^\top \\ A & 0 \end{bmatrix} \begin{bmatrix} \Delta x \\ \mu \end{bmatrix} =  \begin{bmatrix} -\nabla f(x^k) \\ 0 \end{bmatrix} = 
+\begin{bmatrix} 2 & -2 & 0.1 \\ -2 & 8 & -1 \\ 0.1 & -1 & 0 \end{bmatrix} \begin{bmatrix} \Delta x_1 \\ \Delta x_2 \\ \mu \end{bmatrix} = \begin{bmatrix} -2x_1 + 2x_2 \\ 2x_1 - 8x_2 \\ 0\end{bmatrix}$.
+$$
+
+For $x^0$, we obtain $d^1 = [\Delta x^1, \mu^1]^\top = [-11.714, -1.171, -7.142]^\top$, making $x^1 = x^0 + [-11.714, -1.171]^\top = [-0.714, -1.071]^\top$.
+
+To test whether $x^1$ is optimal, we can check whether $x_1, \mu^1$ satisfy the KKT conditions in {eqref}`eq:Newton-system`. In this case, they do, and thus $x^1$ is the optimal solution.
 
 
 ## Barriers
