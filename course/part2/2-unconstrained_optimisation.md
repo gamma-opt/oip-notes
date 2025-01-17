@@ -157,10 +157,10 @@ Adapted from [Emilien Dupont's code](https://emiliendupont.github.io/2018/01/24/
 % TODO: Add marker to final point to show where it converged
 % TODO: Add multiple functions to choose from?
 ```{raw} html
-<body>
+
 <div id="d3-gd"></div>
 <select name="gd-func"></select>
-</body>
+
 <style>
 .sgd {
     stroke: black;
@@ -198,7 +198,7 @@ circle:hover {
   fill-opacity: .3;
 }
 </style>
-<body>
+
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script src="https://d3js.org/d3-contour.v1.min.js"></script>
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
@@ -212,35 +212,35 @@ const width = 800,
     nx = parseInt(width / 5), // grid sizes
     ny = parseInt(height / 5),
     h = 1e-7, // step used when approximating gradients
-    drawing_time = 30; // max time to run optimization
-
-// Parameters describing where function is defined
-const domain_x = [-2, 2],
-    domain_y = [-2, 2],
-    domain_f = [-2, 8],
+    drawing_time = 30, // max time to run optimization
     contour_step = 0.5; // Step size of contour plot
 
-const scale_x = d3.scaleLinear()
-                .domain([0, width])
-                .range(domain_x);
-
-const scale_y = d3.scaleLinear()
-                .domain([0, height])
-                .range(domain_y);
-
-const thresholds = d3.range(domain_f[0], domain_f[1], contour_step);
-
-const contours = d3.contours()
-    .size([nx, ny])
-    .thresholds(thresholds);
-
-const color_scale = d3.scaleLinear()
-    .domain(d3.extent(thresholds))
-    .interpolate(function() { return d3.interpolateYlGnBu; });
-
-/* Value of f at (x, y) */
-function f(x, y) {
-    return -2 * Math.exp(-((x - 1) * (x - 1) + y * y) / .2) + -3 * Math.exp(-((x + 1) * (x + 1) + y * y) / .2) + x * x + y * y;
+// Function, scale_x, scale_y, contour_thresholds
+const funcs = {
+    "Two Gaussians": [
+        function f(x,y) {
+            return -2 * Math.exp(-((x - 1) * (x - 1) + y * y) / .2) + -3 * Math.exp(-((x + 1) * (x + 1) + y * y) / .2) + x * x + y * y;
+        },
+        d3.scaleLinear().domain([0, width]).range([-2,2]),
+        d3.scaleLinear().domain([0, height]).range([-2,2]),
+        d3.range(-2, 8, contour_step)
+    ],
+    "Rosenbrock": [
+        function f(x,y) {
+            return (1-x)*(1-x) + 2*(y-x*x)*(y-x*x);
+        },
+        d3.scaleLinear().domain([0, width]).range([-1.5,1.5]),
+        d3.scaleLinear().domain([0, height]).range([-1,3]),
+        d3.range(0, 15, contour_step)
+    ],
+    "Himmelblau": [
+        function f(x,y) {
+            return (x*x+y-11)*(x*x+y-11) + (x+y*y-7)*(x+y*y-7);
+        },
+        d3.scaleLinear().domain([0, width]).range([-6,6]),
+        d3.scaleLinear().domain([0, height]).range([-4,4]),
+        d3.range(0, 100, 5)
+    ]
 }
 
 /* Returns gradient of f at (x, y) */
@@ -258,30 +258,14 @@ function hess_f(f,x,y) {
 }
 
 
-const func_names = ["Two Gaussians", "Rosenbrock", "Himmelblau"];
-const funcs = {
-    "Two Gaussians": [
-        function f(x,y) {
-            return -2 * Math.exp(-((x - 1) * (x - 1) + y * y) / .2) + -3 * Math.exp(-((x + 1) * (x + 1) + y * y) / .2) + x * x + y * y;
-        }, get_values
-    ],
-    "Rosenbrock":
-        function f(x,y) {
-            return (1-x)*(1-x) + 100*(y-x*x)*(y-x*x);
-        },
-    "Himmelblau":
-        function f(x,y) {
-            return (6.25*x*x+2*y-11)*(6.25*x*x+2*y-11) + (2.5*x+4*y*y-7)*(2.5*x+4*y*y-7);
-        }
-}
-
 d3.select('select[name="gd-func"]')
     .on('change', function() {
         const func = d3.select(this).property('value');
-        create_interactive_plot("#d3-gd", gradient_container, funcs[func]);
+        d3.select("#d3-gd").selectChild().remove();  // remove previous plot
+        create_interactive_plot("#d3-gd", gradient_container, func);
         })
     .selectAll('option')
-    .data(func_names)
+    .data(Object.keys(funcs))
     .enter()
     .append('option')
     .attr('value', d=>d)
@@ -289,23 +273,7 @@ d3.select('select[name="gd-func"]')
 
 
 
-
-/* Returns values of f(x,y) at each point on grid as 1 dim array. */
-function get_values(fun, nx, ny) {
-    let grid = new Array(nx * ny);
-    for (i = 0; i < nx; i++) {
-        for (j = 0; j < ny; j++) {
-            let x = scale_x( parseFloat(i) / nx * width ),
-                y = scale_y( parseFloat(j) / ny * height );
-            // Set value at ordering expected by d3.contour
-            grid[i + j * nx] = fun(x, y);
-        }
-    }
-    return grid;
-}
-
-
-function draw_contour(selector, mousedown_fn, obj_f) {
+function draw_contour(selector, mousedown_fn, func) {
     const svg = d3.select(selector)
                   .append("svg")
                   .attr("width", width)
@@ -313,7 +281,28 @@ function draw_contour(selector, mousedown_fn, obj_f) {
 
     const function_g = svg.append("g").on("mousedown", mousedown_fn);
 
-    let f_values = get_values(obj_f, nx, ny);
+    const [obj_f, scale_x, scale_y, thresholds] = funcs[func]
+
+
+
+    //let f_values = get_values(obj_f, nx, ny);
+    let f_values = new Array(nx * ny);
+    for (i = 0; i < nx; i++) {
+        for (j = 0; j < ny; j++) {
+            let x = scale_x( parseFloat(i) / nx * width ),
+                y = scale_y( parseFloat(j) / ny * height );
+            // Set value at ordering expected by d3.contour
+            f_values[i + j * nx] = obj_f(x, y);
+        }
+    }
+
+    const contours = d3.contours()
+        .size([nx, ny])
+        .thresholds(thresholds);
+
+    const color_scale = d3.scaleLinear()
+        .domain(d3.extent(thresholds))
+        .interpolate(function() { return d3.interpolateYlGnBu; });
 
     function_g.selectAll("path")
             .data(contours(f_values))
@@ -387,8 +376,9 @@ const gradient_container = {
     "Adam": [get_adam_path, 1e-2, 100, 0.7, 0.999, 1e-6]
 }
 
-function create_interactive_plot(selector, method_container, obj_f) {
-    const svg = draw_contour(selector, mouse_fn, obj_f);
+function create_interactive_plot(selector, method_container, func) {
+    const [obj_f, scale_x, scale_y, thresholds] = funcs[func]
+    const svg = draw_contour(selector, mouse_fn, func);
     let draw_state = create_menu(svg, Object.keys(method_container));
     const path_g = svg.append("g");
 
@@ -401,14 +391,14 @@ function create_interactive_plot(selector, method_container, obj_f) {
         path_g.selectAll("path").remove();
         for (const [name, [f, ...rest]] of Object.entries(method_container)){
             if (draw_state[name]) {
-                let data = f(obj_f, x0, y0, ...rest);
+                let data = f(obj_f, x0, y0, scale_x, scale_y, ...rest);
                 draw_path(data, name.toLowerCase(), path_g)
             }
         }
     }
 }
 
-create_interactive_plot("#d3-gd", gradient_container, f);
+create_interactive_plot("#d3-gd", gradient_container, "Two Gaussians");
 
 
 /*
@@ -416,7 +406,7 @@ create_interactive_plot("#d3-gd", gradient_container, f);
  * SGD, Momentum, RMSProp, Adam.
  */
 
-function get_sgd_path(f, x0, y0, learning_rate, num_steps) {
+function get_sgd_path(f, x0, y0, scale_x, scale_y, learning_rate, num_steps) {
     let sgd_history = [{"x": scale_x.invert(x0), "y": scale_y.invert(y0)}];
     let x1, y1, gradient;
     for (i = 0; i < num_steps; i++) {
@@ -430,7 +420,7 @@ function get_sgd_path(f, x0, y0, learning_rate, num_steps) {
     return sgd_history;
 }
 
-function get_momentum_path(f, x0, y0, learning_rate, num_steps, momentum) {
+function get_momentum_path(f, x0, y0, scale_x, scale_y, learning_rate, num_steps, momentum) {
     let v_x = 0,
         v_y = 0;
     let momentum_history = [{"x": scale_x.invert(x0), "y": scale_y.invert(y0)}];
@@ -448,7 +438,7 @@ function get_momentum_path(f, x0, y0, learning_rate, num_steps, momentum) {
     return momentum_history
 }
 
-function get_rmsprop_path(f, x0, y0, learning_rate, num_steps, decay_rate, eps) {
+function get_rmsprop_path(f, x0, y0, scale_x, scale_y, learning_rate, num_steps, decay_rate, eps) {
     let cache_x = 0,
         cache_y = 0;
     let rmsprop_history = [{"x": scale_x.invert(x0), "y": scale_y.invert(y0)}];
@@ -466,7 +456,7 @@ function get_rmsprop_path(f, x0, y0, learning_rate, num_steps, decay_rate, eps) 
     return rmsprop_history;
 }
 
-function get_adam_path(f, x0, y0, learning_rate, num_steps, beta_1, beta_2, eps) {
+function get_adam_path(f, x0, y0, scale_x, scale_y, learning_rate, num_steps, beta_1, beta_2, eps) {
     let m_x = 0,
         m_y = 0,
         v_x = 0,
@@ -593,9 +583,8 @@ BFGS approximates $H^{-1}(x_k)$ with $B_k$ complemented with an update rule.
 ```
 
 ```{raw} html
-<body>
 <div id="d3-newton"></div>
-</body>
+<select name="newton-func"></select>
 <style>
 .newton {
     stroke: black;
@@ -616,7 +605,21 @@ const newton_container = {
     "Newton": [get_newton_path, 300, 1e-4],
     "BFGS": [get_bfgs_path, 100, 1e-4]
 }
-create_interactive_plot("#d3-newton", newton_container, f);
+d3.select('select[name="newton-func"]')
+    .on('change', function() {
+        const func = d3.select(this).property('value');
+        d3.select("#d3-newton").selectChild().remove();  // remove previous plot
+        create_interactive_plot("#d3-newton", newton_container, func);
+        })
+    .selectAll('option')
+    .data(Object.keys(funcs))
+    .enter()
+    .append('option')
+    .attr('value', d=>d)
+    .text(d => d);
+
+
+create_interactive_plot("#d3-newton", newton_container, "Two Gaussians");
 
 function golden_ls(f, a, b, l) {
     const alpha = 0.618 // 1/golden_ratio
@@ -644,7 +647,7 @@ function golden_ls(f, a, b, l) {
     return (a+b)/2
 }
 
-function get_newton_path(f, x0, y0, num_steps, tol) {
+function get_newton_path(f, x0, y0, scale_x, scale_y, num_steps, tol) {
     let newton_history = [{"x": scale_x.invert(x0), "y": scale_y.invert(y0)}];
     let x1, y1, gradient, hessian, lr;
     for (i = 0; i < num_steps; i++) {
@@ -663,7 +666,7 @@ function get_newton_path(f, x0, y0, num_steps, tol) {
     return newton_history;
 }
 
-function get_bfgs_path(f, x0, y0, num_steps, tol) {
+function get_bfgs_path(f, x0, y0, scale_x, scale_y, num_steps, tol) {
     let bfgs_history = [{"x": scale_x.invert(x0), "y": scale_y.invert(y0)}];
     let x1, y1, gradient, s, g, rho;
     const id_matrix = math.matrix([[1.,0.],[0.,1.]]);
