@@ -9,7 +9,7 @@ We now focus on nonlinear optimisation problems, i.e., problems in which the obj
 
 The range of existing methods for solving constrained nonlinear problems is quite broad. In general, the main difference between them is what theoretical framework they are based on and how they iterate to satisfy KKT optimality conditions. Often, a progressively improving approximation of the problem is considered instead, and how this is set also differentiate the existing methods.
 
-Local methods are typically more efficient from a computational perspective. This is why convexity is such an important and desired feature. As you may recall from our previous lectures, in the case of convex problems (see [Part 1, Lecture 2](2-functions_and_optimisation.md) for a definition of a convex problem), these methods that are expected to converge to global optimal solutions.
+Local methods are typically more efficient from a computational perspective. This is why convexity is such an important and desired feature. As you may recall from our previous lectures, in the case of convex problems (see [Part 1, Lecture 2](../part1/2-functions_and_optimisation.md) for a definition of a convex problem), these methods that are expected to converge to global optimal solutions.
 
 Global methods, on the other hand, are computationally intensive and require a great deal of techniques to be combined such that the optimality of a given solution can be proven. Although remarkable progress has been made in the recent decades, they are still considerably less reliable in terms of computational performance.
 
@@ -139,7 +139,7 @@ The KKT conditions for the second-order approximation problem state that $x^k + 
 \end{align}
 ```
 
-For convenience, {eqref}`eq:Newton-system` are typically stated in a matrix form known as the Newton system, given by
+For convenience, {eq}`eq:Newton-system` are typically stated in a matrix form known as the Newton system, given by
 
 ```{math}
 \begin{bmatrix}
@@ -177,7 +177,7 @@ $$
 
 For $x^0$, we obtain $d^1 = [\Delta x^1, \mu^1]^\top = [-11.714, -1.171, -7.142]^\top$, making $x^1 = x^0 + [-11.714, -1.171]^\top = [-0.714, -1.071]^\top$.
 
-To test whether $x^1$ is optimal, we can check whether $x_1, \mu^1$ satisfy the KKT conditions in {eqref}`eq:Newton-system`. In this case, they do, and thus $x^1$ is the optimal solution.
+To test whether $x^1$ is optimal, we can check whether $x_1, \mu^1$ satisfy the KKT conditions in {eq}`eq:Newton-system`. In this case, they do, and thus $x^1$ is the optimal solution.
 
 ```{warning}
 When making calculations with matrices and vectors, it is important to pay attention to the vectors dimensions and make sure they agree. That is why we are making the point of reminding you that $[...]^\top$ is originally a column vector that we are writing in row format for convenience.
