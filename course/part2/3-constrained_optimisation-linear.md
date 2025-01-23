@@ -185,6 +185,10 @@ Consequently, since the first constraint gives the only feasible value, $s_1$ is
 
 If there are multiple constraints prescribing the same value for the non-basic variable to be switched, then ties can be broken with a heuristic or random selection.
 
+<video width="800" controls muted>
+    <source src="../_static/SimplexGiapetto.mp4" type="video/mp4">
+</video>
+
 ## Branch-and-cut
 
 As great and effective the simplex method is, it cannot directly be used on (mixed-)integer problems. 
@@ -257,3 +261,7 @@ In this scenario, there may be no more efficient way of continuing the search th
 Consequently, the _search tree_ for the problem, as exemplified in {numref}`bnc_tree` will be both very wide and deep.
 This is exactly why solving (mixed)-integer problems are often more difficult than linear problems.
 ```
+
+<video width="800" controls muted>
+    <source src="../_static/BNC.mp4" type="video/mp4">
+</video>
