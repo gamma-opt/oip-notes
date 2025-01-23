@@ -2,31 +2,31 @@ format: jb-book
 root: intro
 parts:
 - caption: The Fundamentals of Mathematical Optimisation Modelling
-  numbered: true
+  numbered: 3
   chapters:
-  - file: part1/lecture01
-  - file: part1/lecture02
-  - file: part1/lecture03
-  - file: part1/lecture04
-  - file: part1/lecture05
-  - file: part1/lecture06
-  - file: part1/lecture07
-  - file: part1/lecture08
-  - file: part1/lecture09
-  - file: part1/lecture10
+  - file: part1/1-intro
+  - file: part1/2-functions_and_optimisation
+  - file: part1/3-mathematical_programming
+  - file: part1/4-examples_LP-1
+  - file: part1/5-symbolic_formulations
+  - file: part1/6-examples_LP-2
+  - file: part1/7-MIP
+  - file: part1/8-examples-MIP
+  - file: part1/9-multiobjective
+  - file: part1/10-nonlinear
 - caption: Advanced Mathematical Optimisation Modelling
-  numbered: true
+  numbered: 3
   chapters:
-  - file: part2/lecture01
-  - file: part2/lecture02
-  - file: part2/lecture03
-  - file: part2/lecture04
-  - file: part2/lecture05
-  - file: part2/lecture06
-  - file: part2/lecture07
-  - file: part2/lecture08
-  - file: part2/lecture09
-  - file: part2/lecture10
+  - file: part2/1-basics_of_calculus
+  - file: part2/2-unconstrained_optimisation
+  - file: part2/3-constrained_optimisation-linear
+  - file: part2/4-constrained_optimisation-nonlinear-barrier
+  - file: part2/5-combinatorial_optimisation
+  - file: part2/6-heuristics-1
+  - file: part2/7-heuristics-2
+  - file: part2/8-deployment-model_governance
+  - file: part2/9-using_optimisation_models
+  - file: part2/10-optimisation_solvers
 - caption: "━━━━━━━━"
   numbered: false
   chapters:

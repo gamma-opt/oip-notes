@@ -1,6 +1,6 @@
 title: Optimisation in Practice
 author: Fabricio Oliveira & Tunç Başar Köse
-logo: _static/sidebar_logo.png
+#logo: _static/sidebar_logo.png
 only_build_toc_files: true
 
 # Code execution settings
@@ -29,20 +29,31 @@ repository:
   url: https://github.com/gamma-opt/oip-notes  # Online location of your book
   branch: main                                          # Which branch of the repository should be used when creating links (optional)
 
+execute:
+  execute_notebooks: cache
+
 sphinx:
   extra_extensions:
     - sphinx_proof
+    - sphinxcontrib.jquery
   config:
     html_theme: quantecon_book_theme
+    html_favicon: _static/icon.png
     numfig_secnum_depth: 1  # https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-numfig_secnum_depth
     latex_domain_indices: false  # don't make proof index in PDF when using sphinx-proof
     mathjax_path: https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js  # Enable MathJax 3
     mathjax3_config:
       loader:
-        load: ["[tex]/textmacros"]  # For ~ to work as non-breaking space
+        load: 
+          - "[tex]/textmacros"  # For ~ to work as non-breaking space
+          - "[tex]/mathtools"   # For rcases
+          - "output/svg"        # Change mathjax renderer to prevent clipping on the top in some equations
       tex:
         packages:
-          "[+]": ["textmacros"]     # For ~ to work as non-breaking space
+          "[+]": 
+            - "textmacros"    # For ~ to work as non-breaking space
+            - "mathtools"
+        maxBuffer: 6*1024  # in order to render large model equations in p1l5
         # If you add something, you should probably add to latex_elements below as well
         macros:
           "reals": "\\mathbb{R}"
@@ -75,6 +86,8 @@ sphinx:
           "brackets": ["\\left[ #1 \\right]", 1]
           "floor": ["\\lfloor #1 \\rfloor", 1]
           "ceil": ["\\lceil #1 \\rceil", 1]
+          "dx": ["\\frac{d#1}{#1}", 1]
+          "lx": ["\\frac{#1_{#2}-\\bar{#1}_{#2}}{\\bar{#1}_{#2}}", 2]
     latex_elements:
       pointsize: '11pt'
       
@@ -142,6 +155,8 @@ sphinx:
         {} % code to run before title
         [\rule{\textwidth}{1pt}] % code to run after title
 
+        \usepackage{mathtools}
+        \allowdisplaybreaks  % break equations between pages
         % Math commands
         \newcommand{\reals}{\mathbb{R}}
         \newcommand{\integers}{\mathbb{Z}}
@@ -173,3 +188,5 @@ sphinx:
         \newcommand{\brackets}[1]{\left[ #1 \right]}
         \newcommand{\floor}[1]{\lfloor #1 \rfloor}
         \newcommand{\ceil}[1]{\lceil #1 \rceil}
+        \newcommand{\dx}[1]{\frac{d#1}{#1}}
+        \newcommand{\lx}[2]{\frac{#1_{#2}-\bar{#1}_{#2}}{\bar{#1}_{#2}}}

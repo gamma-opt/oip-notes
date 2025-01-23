@@ -3,7 +3,37 @@
               overflow: hidden;
               height: 30px;
               width: 105px;
-              background: url("toolbar_logo.png")
+              background: url("toolbar_logo.svg")
                 no-repeat left top !important;
               background-size: 105px 30px !important;
+}
+
+/* 
+  Add some space for visual effect
+*/
+.qe-toolbar__inner>ul>li.btn__minus {
+  margin-right: 2rem;
+}
+
+/* 
+  quantecon theme aligns table headers to left
+  this restores (part of) default behavior
+*/
+table thead tr th.text-center {
+  text-align: center!important;
+}
+
+#critical_points {
+  transform: scale(1.5) translate(-20px, -60px);
+  clip-path: rect(30% auto auto auto);
+}
+
+#critical_points_caption {
+  position: relative;
+  color: rgb(68,68,68);
+  font-family: Source Sans Pro, sans-serif
+}
+
+div.algorithm {
+  --pst-icon-admonition-default: "\f121"
 }
