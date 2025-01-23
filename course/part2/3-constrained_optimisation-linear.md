@@ -198,6 +198,8 @@ Consider the problem
 & x_1,x_2\in \integers_+.
 ```
 
+%TODO: add a plot of this problem, showing the "dotted" feasible region. We ccould also show where the LP relaxation solution is and show how it differs from rounding.
+
 If we ignore the integrality constraint and apply the simplex method, we obtain an optimum $(x_1,x_2)=(\frac{20}{7},3)$ for an objective value of $\frac{59}{7}$.
 This is clearly not a feasible solution to our original problem, $x_1$ is not an integer.
 Even so, this result provides an upper-bound for the solution we are looking for, as restoring the integrality will make this problem more constrained, and thus the optimal value can only go down (when maximizing).
