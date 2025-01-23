@@ -198,11 +198,38 @@ Consider the problem
 & x_1,x_2\in \integers_+.
 ```
 
-%TODO: add a plot of this problem, showing the "dotted" feasible region. We ccould also show where the LP relaxation solution is and show how it differs from rounding.
-
 If we ignore the integrality constraint and apply the simplex method, we obtain an optimum $(x_1,x_2)=(\frac{20}{7},3)$ for an objective value of $\frac{59}{7}$.
 This is clearly not a feasible solution to our original problem, $x_1$ is not an integer.
 Even so, this result provides an upper-bound for the solution we are looking for, as restoring the integrality will make this problem more constrained, and thus the optimal value can only go down (when maximizing).
+
+```{code-cell}
+---
+mystnb:
+  figure:
+    name: fig:ip
+    caption: |
+      The integer problem {eq}`bnc_ip`. The blue points represent the integer solutions, the dashed lines are constraints added during the branch-and-cut algorithm. The orange star is the optimal solution to the linear relaxation.
+tags: [remove-input]
+---
+
+fig = Figure()
+ax = Axis(fig[1,1], limits=(-0.1,3.1,-0.1,3.1))
+hidespines!(ax)
+vlines!(ax, 0, ymax=4, color=:black)
+hlines!(ax, 0, xmax=4, color=:black)
+
+lines!(ax, Point2f[(10/3.5, 3), (2,0)], linewidth=2, label=L"7x_1-2x_2\leq 14", color=Makie.wong_colors()[4])
+hlines!(ax, 3, xmax=4, linewidth=2, label=L"x_2\leq 3", color=Makie.wong_colors()[3])
+lines!(ax, Point2f[(4.5, 3), (1.5, 0)], linewidth=2, label=L"2x_1-2x_2\leq 3", color=Makie.wong_colors()[2])
+
+vlines!(ax, 2, ymax=4, linewidth=2, label=L"x_1\leq 2", color=Makie.wong_colors()[6], linestyle=:dash)
+hlines!(ax, 1, xmax=4, linewidth=2, label=L"x_2\geq 1", color=Makie.wong_colors()[5], linestyle=:dash)
+
+scatter!(ax, [0,0,0,0,1,1,1,1,2,2,2], [0,1,2,3,0,1,2,3,1,2,3])
+scatter!(ax, Point2f[(20/7, 3)], color=Makie.wong_colors()[2], marker=:star5, markersize=20)
+fig[1,2] = Legend(fig, ax)
+fig
+```
 
 Making a problem more general by ignoring or relaxing constraints is called a _relaxation_. 
 In this example, the relaxation did not give us a feasible solution with respect to integrality, but we can use it to guide further searches.
