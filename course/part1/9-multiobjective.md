@@ -218,10 +218,7 @@ function weighted_method_knapsack(lambda)
     @assert is_solved_and_feasible(m)
     return [i for i in 1:N if value(x[i]) > 0.9]
 end
-```
 
-```{code-cell}
-:tags: [remove-input]
 using LaTeXStrings
 
 sol1 = weighted_method_knapsack(1)
