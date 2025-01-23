@@ -211,9 +211,11 @@ const width = 800,
     height = 500,
     nx = parseInt(width / 5), // grid sizes
     ny = parseInt(height / 5),
-    h = 1e-7, // step used when approximating gradients
+    h = 1e-2, // step used when approximating gradients
     drawing_time = 30, // max time to run optimization
-    contour_step = 0.5; // Step size of contour plot
+    contour_step = 0.5, // Step size of contour plot
+    convergence_tol = 1e-4,
+    max_iters = 500;
 
 // Function, scale_x, scale_y, contour_thresholds
 const funcs = {
@@ -251,9 +253,9 @@ function grad_f(f,x,y) {
 }
 
 function hess_f(f,x,y) {
-    const xx = (f(x + h, y) - 2*f(x, y) + f(x - h, y)) / (h * h),
+    const xx = (f(x + 2*h, y) - 2*f(x + h, y) + f(x, y)) / (h * h),
           xy = (f(x + h, y + h) - f(x, y + h) - f(x + h, y) + f(x, y)) / (h * h),
-          yy = (f(x, y + h) - 2*f(x, y) + f(x, y - h)) / (h * h);
+          yy = (f(x, y + 2*h) - 2*f(x, y + h) + f(x, y)) / (h * h);
     return [[xx, xy], [xy, yy]];
 }
 
@@ -370,10 +372,10 @@ function create_menu(svg, labels) {
 
 // these functions should accept x0, y0, plus anything more specified here
 const gradient_container = {
-    "SGD": [get_sgd_path, 2e-2, 500],
-    "Momentum": [get_momentum_path, 1e-2, 200, 0.8],
-    "RMSProp": [get_rmsprop_path, 1e-2, 300, 0.99, 1e-6],
-    "Adam": [get_adam_path, 1e-2, 100, 0.7, 0.999, 1e-6]
+    "SGD": [get_sgd_path, 2e-2],
+    "Momentum": [get_momentum_path, 1e-2, 0.8],
+    "RMSProp": [get_rmsprop_path, 1e-2, 0.99, 1e-6],
+    "Adam": [get_adam_path, 1e-2, 0.7, 0.999, 1e-6]
 }
 
 function create_interactive_plot(selector, method_container, func) {
@@ -408,8 +410,8 @@ create_interactive_plot("#d3-gd", gradient_container, "Two Gaussians");
 
 function get_sgd_path(f, x0, y0, scale_x, scale_y, learning_rate, num_steps) {
     let sgd_history = [{"x": scale_x.invert(x0), "y": scale_y.invert(y0)}];
-    let x1, y1, gradient;
-    for (i = 0; i < num_steps; i++) {
+    let x1, y1, gradient = [1,1];  // dummy gradient
+    while (sgd_history.length <= max_iters && math.norm(gradient) > convergence_tol) {
         gradient = grad_f(f, x0, y0);
         x1 = x0 - learning_rate * gradient[0]
         y1 = y0 - learning_rate * gradient[1]
@@ -420,12 +422,12 @@ function get_sgd_path(f, x0, y0, scale_x, scale_y, learning_rate, num_steps) {
     return sgd_history;
 }
 
-function get_momentum_path(f, x0, y0, scale_x, scale_y, learning_rate, num_steps, momentum) {
+function get_momentum_path(f, x0, y0, scale_x, scale_y, learning_rate, momentum) {
     let v_x = 0,
         v_y = 0;
     let momentum_history = [{"x": scale_x.invert(x0), "y": scale_y.invert(y0)}];
-    let x1, y1, gradient;
-    for (i=0; i < num_steps; i++) {
+    let x1, y1, gradient = [1,1];  // dummy gradient
+    while (momentum_history.length <= max_iters && math.norm(gradient) > convergence_tol) {
         gradient = grad_f(f, x0, y0)
         v_x = momentum * v_x - learning_rate * gradient[0]
         v_y = momentum * v_y - learning_rate * gradient[1]
@@ -438,12 +440,12 @@ function get_momentum_path(f, x0, y0, scale_x, scale_y, learning_rate, num_steps
     return momentum_history
 }
 
-function get_rmsprop_path(f, x0, y0, scale_x, scale_y, learning_rate, num_steps, decay_rate, eps) {
+function get_rmsprop_path(f, x0, y0, scale_x, scale_y, learning_rate, decay_rate, eps) {
     let cache_x = 0,
         cache_y = 0;
     let rmsprop_history = [{"x": scale_x.invert(x0), "y": scale_y.invert(y0)}];
-    let x1, y1, gradient;
-    for (i = 0; i < num_steps; i++) {
+    let x1, y1, gradient = [1,1];  // dummy gradient
+    while (rmsprop_history.length <= max_iters && math.norm(gradient) > convergence_tol) {
         gradient = grad_f(f, x0, y0)
         cache_x = decay_rate * cache_x + (1 - decay_rate) * gradient[0] * gradient[0]
         cache_y = decay_rate * cache_y + (1 - decay_rate) * gradient[1] * gradient[1]
@@ -456,14 +458,14 @@ function get_rmsprop_path(f, x0, y0, scale_x, scale_y, learning_rate, num_steps,
     return rmsprop_history;
 }
 
-function get_adam_path(f, x0, y0, scale_x, scale_y, learning_rate, num_steps, beta_1, beta_2, eps) {
+function get_adam_path(f, x0, y0, scale_x, scale_y, learning_rate, beta_1, beta_2, eps) {
     let m_x = 0,
         m_y = 0,
         v_x = 0,
         v_y = 0;
     let adam_history = [{"x": scale_x.invert(x0), "y": scale_y.invert(y0)}];
-    let x1, y1, gradient;
-    for (i = 0; i < num_steps; i++) {
+    let x1, y1, gradient = [1,1];  // dummy gradient
+    while (adam_history.length <= max_iters && math.norm(gradient) > convergence_tol) {
         gradient = grad_f(f, x0, y0)
         m_x = beta_1 * m_x + (1 - beta_1) * gradient[0]
         m_y = beta_1 * m_y + (1 - beta_1) * gradient[1]
@@ -602,8 +604,8 @@ BFGS approximates $H^{-1}(x_k)$ with $B_k$ complemented with an update rule.
 <script>
 
 const newton_container = {
-    "Newton": [get_newton_path, 300, 1e-4],
-    "BFGS": [get_bfgs_path, 100, 1e-4]
+    "Newton": [get_newton_path],
+    "BFGS": [get_bfgs_path]
 }
 d3.select('select[name="newton-func"]')
     .on('change', function() {
@@ -647,12 +649,11 @@ function golden_ls(f, a, b, l) {
     return (a+b)/2
 }
 
-function get_newton_path(f, x0, y0, scale_x, scale_y, num_steps, tol) {
+function get_newton_path(f, x0, y0, scale_x, scale_y) {
     let newton_history = [{"x": scale_x.invert(x0), "y": scale_y.invert(y0)}];
-    let x1, y1, gradient, hessian, lr;
-    for (i = 0; i < num_steps; i++) {
+    let x1, y1, hessian, lr, gradient = [1,1];  // dummy gradient
+    while (newton_history.length <= max_iters && math.norm(gradient) > convergence_tol) {
         gradient = grad_f(f, x0, y0);
-        if (math.norm(gradient) < tol) return newton_history;
         hessian = hess_f(f, x0, y0);
         dir = math.chain(hessian).inv().multiply(gradient, -1).done()
         const foo = (l) => f(x0 + l*dir[0], y0 + l*dir[1])
@@ -666,15 +667,14 @@ function get_newton_path(f, x0, y0, scale_x, scale_y, num_steps, tol) {
     return newton_history;
 }
 
-function get_bfgs_path(f, x0, y0, scale_x, scale_y, num_steps, tol) {
+function get_bfgs_path(f, x0, y0, scale_x, scale_y) {
     let bfgs_history = [{"x": scale_x.invert(x0), "y": scale_y.invert(y0)}];
-    let x1, y1, gradient, s, g, rho;
+    let x1, y1, s, g, rho, gradient = [1,1];  // dummy gradient
     const id_matrix = math.matrix([[1.,0.],[0.,1.]]);
     let H = id_matrix;
     let next_grad = grad_f(f, x0, y0);
-    for (i = 0; i < num_steps; i++) {
+    while (bfgs_history.length <= max_iters && math.norm(gradient) > convergence_tol) {
         gradient = next_grad;
-        if (math.norm(gradient) < tol) return bfgs_history;
         dir = math.chain(H).multiply(gradient, -1).done();
         const foo = (l) => f(x0 + l*dir.get([0]), y0 + l*dir.get([1]));
         lr = golden_ls(foo, 0, 10, 1e-7);
