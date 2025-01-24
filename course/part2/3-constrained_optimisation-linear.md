@@ -41,10 +41,10 @@ To exemplify this process, consider the following LP
 :label: lp_example
 
 \begin{align*}
-\maxi &40x_1+60x_2 \\
-\stf &2x_1+x_2\leq 7 \\
-&x_1+x_2\leq 4 \\
-&x_1+3x_2\leq 9 \\
+\maxi &3x_1+2x_2 \\
+\stf &2x_1+x_2\leq 100 \\
+&x_1+x_2\leq 80 \\
+&x_1\leq 40 \\
 &x_1,x_2\geq 0.
 \end{align*}
 ```
@@ -63,16 +63,16 @@ tags: [remove-input]
 using CairoMakie, LaTeXStrings
 
 fig = Figure()
-ax = Axis(fig[1,1], limits=(-0.1,4,-0.1,4))
+ax = Axis(fig[1,1])
 hidespines!(ax)
-vlines!(ax, 0, ymax=4, color=:black)
-hlines!(ax, 0, xmax=4, color=:black)
+vlines!(ax, 0, ymax=100, color=:black)
+hlines!(ax, 0, xmax=100, color=:black)
 
-poly!(ax, Point2f[(0,0), (3.5,0), (3,1), (1.5, 2.5), (0, 3)])
+poly!(ax, Point2f[(0,0), (40,0), (40,20), (20, 60), (0, 80)])
 
-lines!(ax, Point2f[(3.5, 0), (1.5, 4)], linewidth=2, label=L"2x_1+x_2\leq 7", color=Makie.wong_colors()[4])
-lines!(ax, Point2f[(4, 0), (0, 4)], linewidth=2, label=L"x_1+x_2\leq 4", color=Makie.wong_colors()[2])
-lines!(ax, Point2f[(4, 5/3), (0, 3)], linewidth=2, label=L"x_1+3x_2\leq 9", color=Makie.wong_colors()[3])
+lines!(ax, Point2f[(50, 0), (0, 100)], linewidth=2, label=L"2x_1+x_2\leq 100", color=Makie.wong_colors()[4])
+lines!(ax, Point2f[(80, 0), (0, 80)], linewidth=2, label=L"x_1+x_2\leq 80", color=Makie.wong_colors()[2])
+vlines!(ax, 40, ymax=100, linewidth=2, label=L"x_1\leq 40", color=Makie.wong_colors()[3])
 axislegend()
 fig
 ```
@@ -82,10 +82,10 @@ Converting {eq}`lp_example` into canonical form yields
 ```{math}
 :label: lp_canonical
 \begin{align*}
-\maxi &40x_1+60x_2 \\
-\stf &s_1=7-2x_1-x_2 \\
-&s_2=4-x_1-x_2 \\
-&s_3=9-x_1-3x_2 \\
+\maxi &3x_1+2x_2 \\
+\stf &s_1=100-2x_1-x_2 \\
+&s_2=80-x_1-x_2 \\
+&s_3=40-x_1 \\
 &x_1,x_2,s_1,s_2,s_3\geq 0.
 \end{align*}
 ```
@@ -97,37 +97,37 @@ The simplex algorithm proceeds by exchanging a basic variable with a non-basic v
 More specifically, at every iteration, a basic and a non-basic variable are chosen, then the constraint associated with the basic variable is solved for the non-basic variable.
 The constraint written this way allows us to substitute the non-basic variable with a new equation, which will ideally get us closer to the goal of rewriting the objective in the easy form of {eq}`lp_obj_form`.
 
-To illustrate this with our example {eq}`lp_canonical`, suppose we pick $s_1$ and $x_1$ as our basic and non-basic variables.
-The constraint associated with the former for $x_1$ is $s_1=7-2x_1-x_2$ and solving it for $x_1$ gives us $x_1=3.5-0.5x_2-0.5s_1$.
+To illustrate this with our example {eq}`lp_canonical`, suppose we pick $s_3$ and $x_1$ as our basic and non-basic variables.
+The constraint associated with the former is $s_3=40-x_1$ and solving it for $x_1$ gives us $x_1=40-s_3$.
 We substitute this in all occurences of $x_1$ to obtain
 
 ```{math}
 \begin{align*}
-\maxi &40(3.5-0.5x_2-0.5s_1)+60x_2 \\
-\stf &x_1=3.5-0.5x_2-0.5s_1\\
-&s_2=4-(3.5-0.5x_2-0.5s_1)-x_2 \\
-&s_3=9-(3.5-0.5x_2-0.5s_1)-3x_2 \\
-&x_1,x_2,s_1,s_2,s_3\geq 0
+\maxi &3(40-s_3)+2x_2 \\
+\stf &s_1=100-2(40-s_3)-x_2 \\
+&s_2=80-(40-s_3)-x_2 \\
+&x_1=40-s_3 \\
+&x_1,x_2,s_1,s_2,s_3\geq 0.
 \end{align*}
 ```
 
 ```{math}
 :label: lp_it1
 \begin{align*}
-\maxi &140+40x_2-20s_1 \\
-\stf &x_1=3.5-0.5x_2-0.5s_1\\
-&s_2=0.5-0.5x_2 +0.5s_1\\
-&s_3=5.5-2.5x_2+0.5s_1 \\
+\maxi &120+2x_2-3s_3 \\
+\stf &s_1=20-x_2+2s_3 \\
+&s_2=40-x_2+s_3 \\
+&x_1=40-s_3 \\
 &x_1,x_2,s_1,s_2,s_3\geq 0.
 \end{align*}
 ```
 
-Now, $x_1, s_2$ and $s_3$ are the basic variables.
+Now, $x_1, s_1$ and $s_2$ are the basic variables.
 
 Both {eq}`lp_canonical` and {eq}`lp_it1` have a solution associated with them.
 We can obtain the solution by setting the non-basic variables to $0$ and solving for the remaining variables.
 For {eq}`lp_canonical`, this is easy, since the variables we care about are both non-basic and we immediately have the solution as $(x_1,x_2)=(0,0)$ with the objective value $0$.
-For {eq}`lp_it1`, doing the same thing gives the solution $(x_1,x_2)=(3.5,0)$ with the objective value $140$.
+For {eq}`lp_it1`, doing the same thing gives the solution $(x_1,x_2)=(40,0)$ with the objective value $120$.
 This means that we obtained a better solution in one iteration, though since there are still variables with positive coefficients in {eq}`lp_it1`, we don't know if this is the optimal solution.
 
 
@@ -141,25 +141,13 @@ mystnb:
 tags: [remove-input]
 ---
 
-fig = Figure()
-ax = Axis(fig[1,1], limits=(-0.1,4,-0.1,4))
-hidespines!(ax)
-vlines!(ax, 0, ymax=4, color=:black)
-hlines!(ax, 0, xmax=4, color=:black)
-
-poly!(ax, Point2f[(0,0), (3.5,0), (3,1), (1.5, 2.5), (0, 3)])
-
-lines!(ax, Point2f[(3.5, 0), (1.5, 4)], linewidth=2, label=L"2x_1+x_2\leq 7", color=Makie.wong_colors()[4])
-lines!(ax, Point2f[(4, 0), (0, 4)], linewidth=2, label=L"x_1+x_2\leq 4", color=Makie.wong_colors()[2])
-lines!(ax, Point2f[(4, 5/3), (0, 3)], linewidth=2, label=L"x_1+3x_2\leq 9", color=Makie.wong_colors()[3])
-axislegend()
-scatter!(ax, Point2f[(0,0), (3.5,0)], markersize=20, color=Makie.wong_colors()[6])
-text!(ax, Point2f[(0,0), (3.5,0)], text=["It 0", "It 1"], offset=(5,5), fontsize=15)
+scatter!(ax, Point2f[(0,0), (40,0)], markersize=20, color=Makie.wong_colors()[6])
+text!(ax, Point2f[(0,0), (40,0)], text=["It 0", "It 1"], offset=(5,5), fontsize=15)
 fig
 ```
 
 This process of solving and substitution is repeated until the objective function contains variables with only negative coefficients, at which point the optimum has been found.
-An interesting fact is that this iteration corresponds to moving through the vertices of the feasible region, as illustrated in {ref}`fig:lp_it1`.
+An interesting fact is that this iteration corresponds to moving through the vertices of the feasible region, as illustrated in {numref}`fig:lp_it1`.
 It can be proved that if a linear problem has an optimum in the feasible region, then at least one vertex will be an optimum.
 
 The only question remaining is how the basic and non-basic variables to be exchanged are selected.
@@ -171,17 +159,17 @@ If there are multiple such candidates, a heuristic or random selection may be em
 
 For the choosing of the basic variable, notice the state of the constraints (with letting $x_2=0$ since it remains a non-basic variable)
 ```{math}
-&s_1=7-2x_1 \\
-&s_2=4-x_1 \\
-&s_3=9-x_1 \\
+&s_1=100-2x_1 \\
+&s_2=80-x_1 \\
+&s_3=40-x_1 \\
 &x_1,x_2,s_1,s_2,s_3\geq 0.
 ```
 
-Each equality suggests a different value for $x_1$ when the basic variable is exchanged to be non-basic and thus getting value $0$: $3.5, 4$ and $9$ respectively.
+Each equality suggests a different value for $x_1$ when the basic variable is exchanged to be non-basic and thus getting value $0$: $50, 80$ and $40$ respectively.
 Note that the equalities giving different values is not inconsistent, since these are obtained from slack variables, which don't actually have fixed value.
 However, the slack variables are constrained to be non-negative as well, which means two of the three values above are infeasible.
-After all, if $x_1=9$ as suggested by the third constraint $s_3=9-x_1$, then the first constraint would become $s_1=7-9=-2$ which is not feasible with $s_1\geq 0$.
-Consequently, since the first constraint gives the only feasible value, $s_1$ is selected as the basic variable.
+After all, if $x_1=80$ as suggested by the second constraint $s_2=80-x_1$, then the first constraint would become $s_1=100-160=-60$ which is not feasible with $s_1\geq 0$.
+Consequently, since the third constraint gives the only feasible value, $s_3$ is selected as the basic variable.
 
 If there are multiple constraints prescribing the same value for the non-basic variable to be switched, then ties can be broken with a heuristic or random selection.
 
