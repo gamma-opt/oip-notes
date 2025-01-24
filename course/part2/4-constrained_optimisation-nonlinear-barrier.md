@@ -18,7 +18,8 @@ We will focus on a class of methods that has become the method of choice for sol
 - The employent of Newton's method to find solutions to KKT optimality conditions;
 - The use of barrier functions to eliminate inequalities.
 
-```{note} Interior point method v. barrier method
+```{admonition} Interior point method v. barrier method
+:class: note
 Classically, these methods were called interior point methods as a reference to the fact that the search for optimal solutions remains constrained within the feasible region. However, more recent (and efficient) variants employ features that allow the solution to leave the interior of the feasible region, making the denomination "Barrier methods" more accurate.
 ```
 
@@ -47,7 +48,7 @@ $$
 $$
 
 ```{note}
-The matrix $\nabla f(x^k)$ the known as the Jacobian of $f(x)$, and isthe first-order equivalent of the Hessian $\nabla^2 f(x^k)$.
+The matrix $\nabla f(x^k)$ the known as the Jacobian of $f(x)$, and is the first-order equivalent of the Hessian $\nabla^2 f(x^k)$.
 ```
 
 We want to obtain a vector $d$ such that $f(x^k + d) = 0$. Therefore, $d$ is
@@ -291,7 +292,7 @@ which remove the inequality constraints $x \ge 0$ and yields a form that is trac
 ```{admonition} Reformulation of linear constraints
 :class: note
 
-Inequalities can be trivially converted to equalities by adding nonnegative slack variables, with those slack variables then being added to the vector of decision variables $x$. As such, it turns out that {prf:ref}`barrier_problem` can be derived to a fairly general range of optimisation problems.
+Inequalities can be trivially converted to equalities by adding nonnegative slack variables, with those slack variables then being added to the vector of decision variables $x$. As such, it turns out that {eq}`barrier_problem` can be derived to a fairly general range of optimisation problems.
 ```
 
 Let us define some matrix notation, which will help make our overall notation more compact. Recall that $x \in \reals^n$. Let
@@ -333,7 +334,7 @@ We a little algebraic manipulation, we can restate the optimality conditions in 
 \end{equation}
 ```
 
-As before, we assume that we are given a point $x^k$ and we would like to move to a point $x^k + \\Delta x$ that satisfy the KKT conditions {eqref}`KKT_barrier`., which we can obtain by solving the Newton system
+As before, we assume that we are given a point $x^k$ and we would like to move to a point $x^k + \\Delta x$ that satisfy the KKT conditions {eq}`KKT_barrier`., which we can obtain by solving the Newton system
 
 ```{math}
 :label: infNS_barrier
@@ -359,7 +360,7 @@ X^kZ^ke - \rho e.
 \end{equation}
 ````
 
-Notice that from the optimality conditions {eqref}`KKT_barrier` we know that $A^\top\mu^k + z^k = c$ and $Ax^k = b$, which allows us to simplify the Newton system to
+Notice that from the optimality conditions {eq}`KKT_barrier` we know that $A^\top\mu^k + z^k = c$ and $Ax^k = b$, which allows us to simplify the Newton system to
 
 ```{math}
 :label: NS_barrier
@@ -437,7 +438,7 @@ z_1^k & 0 & 0 & 0 & 0 & 0 & x_1^k & 0 & 0 & 0 \\
 
 The format above represents a classic version of the method. Because feasibility conditions were assumed to be satisfied at all iterations, the method was first named as **interior point method**. 
 
-Later, it became known that considering the Newton system {eqref}`infNS_barrier` instead, while allowing for infeasible solutions, can lead to a convergent algorithm that has better computational behaviour. This makes the name **barrier method** more appropriate as the points are not anymore necessarily in the interior of the feasible region at all iterations.
+Later, it became known that considering the Newton system {eq}`infNS_barrier` instead, while allowing for infeasible solutions, can lead to a convergent algorithm that has better computational behaviour. This makes the name **barrier method** more appropriate as the points are not anymore necessarily in the interior of the feasible region at all iterations.
 ```
 
 The final element in the algorithm relates to the coefficient of the barrier term $\rho$. In practice, barrier methods typically start with a larger value of $\rho$ and then at each Newton step, decreases it to guide the solution towards the optimal of the original problem. This is motivated by avoiding numerical issues related to have a steeper barrier function when the method is still far away from points closer to the inflexion of the barrier. Putting this all together, we can stat the pseudocode of the barrier method as follows.
@@ -447,7 +448,7 @@ The final element in the algorithm relates to the coefficient of the barrier ter
 **Inputs** feasible solution $(x^k,\mu^k,z^k)$, initial $\rho^k$, $\beta \in (0,1)$, convergence criterion `converged`.
 1. {math}`k=0`
 2. **while** not `converged()`:
-    1. compute $\Delta w^{k+1} = (\Delta x^{k+1}, \Delta \mu^{k+1}, \Delta z^{k+1})$ using {eqref}`NS_barrier`
+    1. compute $\Delta w^{k+1} = (\Delta x^{k+1}, \Delta \mu^{k+1}, \Delta z^{k+1})$ using {eq}`NS_barrier`
     2. {math}`w_{k+1}=w_k + \Delta w^{k+1}`
     3. {math}`\rho^{k+1} = \beta\rho^k`
     4. {math}`k=k+1`
