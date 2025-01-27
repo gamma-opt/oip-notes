@@ -1,3 +1,18 @@
+---
+jupytext:
+  cell_metadata_filter: -all
+  formats: md:myst
+  text_representation:
+    extension: .md
+    format_name: myst
+    format_version: 0.13
+    jupytext_version: 1.16.2
+kernelspec:
+  display_name: Julia 1.10.3
+  language: julia
+  name: julia-1.10
+---
+
 # Constrained optimisation: the nonlinear case
 
 We now focus on nonlinear optimisation problems, i.e., problems in which the objective function and or some (or all) the constraints are not linear expressions. 
@@ -91,7 +106,49 @@ d^0 = -[\nabla f(x^0)]^{-1}f(x^0) = - \begin{bmatrix} 2 & 0 & 2 \\ 2 & 0 & -1 \\
 
 Thus $x^1 = x^0 + d^0 = \begin{bmatrix} 3/2 & 1/2 & 1\end{bmatrix}$. As $||x^1 - x^0|| = || d^0 || \approx 0.7$, the method carries on until $|| d^k|| < \epsilon$ $x^* = (1, 1, 1)$ is reached after approx. 20 iterations.
 
-%TODO: could we do the above via code, somehow?
+```{code-cell}
+---
+mystnb:
+  figure:
+    name: fig:newton_residuals
+    caption: |
+      The convergence of the above Newton-Raphson example, illustrated by the norm of residuals at every iteration.
+tags: [remove-input]
+---
+using CairoMakie, LinearAlgebra, LaTeXStrings
+
+f(x) = [
+    sum(x.^2)-3, 
+    x[1]^2+x[2]^2-x[3]-1,
+    sum(x)-3
+]
+
+df(x) = [
+    2x[1] 2x[2] 2x[3];
+    2x[1] 2x[2] -1;
+     1     1     1
+]
+
+x = [1,0,1]
+eps = 0.01
+
+fig = Figure()
+ax = Axis(fig[1,1], xticks=1:8, xlabel="Iteration", ylabel=L"|| x_i-x_{i-1} ||", ylabelsize=22)
+
+norms = []
+while true
+    d = - df(x) \ f(x)
+    x += d
+    push!(norms, LinearAlgebra.norm(d))
+    if LinearAlgebra.norm(d) < eps
+        break
+    end
+end
+
+scatter!(ax, 1:8, norms)
+
+fig
+```
 
 ````{admonition} Types of problems best suited for Newton-Raphson
 :class: note 
@@ -217,7 +274,7 @@ I(u) = \begin{cases} 0, &\text{if } u \leq 0 \\
 
 
 
-From a numerical standpoint, the indicator function creates problem since it is nondiferentiable. As such, many proposals for functions that can act as surrogates have been considered in this setting. The most widely accepted as providing a great trade-off betwee computational suitability while imposing the "barring" effect we seek are **logarithmic barriers**, defined as
+From a numerical standpoint, the indicator function creates problem since it is non-differentiable. As such, many proposals for functions that can act as surrogates have been considered in this setting. The most widely accepted as providing a great trade-off betwee computational suitability while imposing the "barring" effect we seek are **logarithmic barriers**, defined as
 
 $$
 \begin{equation*}
@@ -225,41 +282,31 @@ $$
 \end{equation*}
 $$
 
-where $\rho > 0$ sets the accuracy (as referenced against the original indicator function) of the barrier term $\Phi_\rho(u)$. Figure X illustrates the logarithmic barrier applied to a constraint $u \le 0$. Notice how, as one increases the value of the parameter $\rho$, the more closely the logarithmic barrier resembles the indicator function.
+where $\rho > 0$ sets the accuracy (as referenced against the original indicator function) of the barrier term $\Phi_\rho(u)$. {numref}`fig:log_barrier` illustrates the logarithmic barrier applied to a constraint $u \le 0$. Notice how, as one decreases the value of the parameter $\rho$ from 1, the more closely the logarithmic barrier resembles the indicator function.
 
-%TODO: Adapt this for Makie
-<!-- 
-using Plots, LaTeXStrings
-pyplot()
+```{code-cell}
+---
+mystnb:
+  figure:
+    name: fig:log_barrier
+    caption: |
+      Logarithmic barriers with varying $\rho$.
+tags: [remove-input]
+---
+n = 1000
+f(x) = -log(-x)
+x = range(-3, stop=-1e-10, length=n)
 
-n=1000
+fig = Figure()
+ax = Axis(fig[1,1], limits=(-3, 0.5, -1.5, 2))
+lines!(ax, x, f, label = L"\rho = 1")
+lines!(ax, x, 0.5*f.(x), label = L"\rho = 0.5")
+lines!(ax, x, 0.1*f.(x), label = L"\rho = 0.1")
+lines!(ax, [x;0], vcat(zero(x),2), linestyle=:dash, label=L"I(u)")
 
-
-f(x) = -log.(-x) 
-x = range(-3,stop=-1e-10,length=n);
-
-plot(x, f(x),
-    #xaxis = (L"$x_1$", (0,2)),
-    #yaxis = (L"$-ln(x)$", (-4,4)),
-    #aspect_ratio = :equal
-    label = L"$\rho = 1$"
-    )        
- 
-plot!(x, 0.5*f(x), 
-    #xaxis = (L"$x_1$", (0,2)),
-    #yaxis = (L"$-ln(x)$", (-1,2)),
-    label = L"$\rho = 0.5$"
-    )
-
-plot!(x, 0.1*f(x), 
-    xaxis = (L"$u$",(-3,1)),
-    yaxis = (L"$\phi_\rho(u) = -\rho (ln(-u))$", (-2,2)),
-    #aspect_ratio = :equal
-    label = L"$\rho = 0.1$"
-)
-
-plot!([x;0], [zeros(length(x));4], line = :dash, label = L"$I(u)$") 
--->
+axislegend(position=:lt)
+fig
+```
 
 
 ### The barrier problem
@@ -270,7 +317,7 @@ The barrier function can be used to recast an optimisation problem in a format t
 \begin{align*}
 \mini \ &f(x) \\
 \st   &Ax = b \\
-x \ge 0.
+&x \ge 0.
 \end{align*}
 ```
 
@@ -298,9 +345,10 @@ Inequalities can be trivially converted to equalities by adding nonnegative slac
 Let us define some matrix notation, which will help make our overall notation more compact. Recall that $x \in \reals^n$. Let
 
 $$
-X = \diag(x) = \begin{bmatrix} x_1 & 0 & \dots & 0 \\ 0 x_2 & \dots& 0 \\
+X = \diag(x) = \begin{bmatrix} x_1 & 0 & \dots & 0 \\ 
+0 & x_2 & \dots& 0 \\
 & & \ddots & \\
-0 & 0 & 0 & x_n \end{bmatrix}
+0 & 0 & \dots & x_n \end{bmatrix}
 $$
 
 and $e$ be a vector of one's of adequate size. Thus $X^{-1} = \diag\left(\frac{1}{x}\right)$ and $X^{-1}e = \left[\dots \frac{1}{x_i} \dots\right]^\top$.
@@ -334,7 +382,7 @@ We a little algebraic manipulation, we can restate the optimality conditions in 
 \end{equation}
 ```
 
-As before, we assume that we are given a point $x^k$ and we would like to move to a point $x^k + \\Delta x$ that satisfy the KKT conditions {eq}`KKT_barrier`., which we can obtain by solving the Newton system
+As before, we assume that we are given a point $x^k$ and we would like to move to a point $x^k + \Delta x$ that satisfy the KKT conditions {eq}`KKT_barrier`., which we can obtain by solving the Newton system
 
 ```{math}
 :label: infNS_barrier
@@ -386,7 +434,8 @@ Z^k & 0 & X^k
 \end{equation}
 ```
 
-Let us consider a numerical example. Consider the problem 
+Let us consider a numerical example. Consider the problem
+
 $$
 \mini \braces{f(x) = x_1 + x_2 : 2x_1 + x_2 \geq 8, \ x_1 + 2x_2 \geq 10, \ x_1, x_2 \geq 0}.
 $$
