@@ -154,11 +154,13 @@ fig
 :class: note 
 The bulk of the computational effort in the method is associated with calculating the inverse of the Jacobian in $d = -\nabla f(x^k)^{-1}f(x^k)$. 
 
-If the resulting system of equations is **linear**, it is more efficient to use a suitable linear algebra method which can avoid the need for calculating inverse matrices. These are often encoded in the so-called backslash operator. In `Julia`, this would be done using 
+If $f$ is **linear**, our problem simplifies to solving the linear system of equations $Ax=b$.
+This is a very common task in linear algebra and it can often be achieved more efficiently than first inverting the matrix $f(x^k)=A$, then multiplying with $b$.
+These are often encoded in the so-called `solve` functions or `\` (backslash) operators.
+In `Julia`, this would be done using 
 
-%TODO: This needs fixing. Maybe connect with the example
 ```{code} julia
-d = -\nabla f(x^k) \ f(x^k)
+d = -∇f(x^k) \ f(x^k)
 ```
 
 ````
