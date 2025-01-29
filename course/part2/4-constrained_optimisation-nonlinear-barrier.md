@@ -313,7 +313,7 @@ fig
 
 ### The barrier problem
 
-The barrier function can be used to recast an optimisation problem in a format that can be solved using the constrained Newton method. First, notice that, in general, our optimsation problem can be cast in the form of
+The barrier function can be used to recast an optimisation problem in a format that can be solved using the constrained Newton method. First, notice that, in general, our optimisation problem can be cast in the form of
 
 ```{math}
 \begin{align*}
@@ -330,7 +330,7 @@ It is precisely the nonnegativity conditions that prevent us from being able to 
 
 \begin{equation}
 \begin{aligned}
-\mini \ & c^\top x - \rho\sum_{i=1}^n\ln(x_i) \\
+\mini \ & f(x) - \rho\sum_{i=1}^n\ln(x_i) \\
 \st & Ax = b 
 \end{aligned}
 \end{equation}
@@ -355,17 +355,23 @@ $$
 
 and $e$ be a vector of one's of adequate size. Thus $X^{-1} = \diag\left(\frac{1}{x}\right)$ and $X^{-1}e = \left[\dots \frac{1}{x_i} \dots\right]^\top$.
 
-Let us analyse the KKT conditions of the barrier problem. First, we start by posing the Lagrangian function
+Let us analyse the KKT conditions of the barrier problem. First, we must recall that we utilise the second order approximation of $f$ at $x^k$
+
+$$
+f(x^k + \Delta x) = f(x^k) + \nabla f(x^k)^\top \Delta x + \frac{1}{2}\Delta x H(x^k) \Delta x,
+$$
+
+where, as before, $H(x^k)$ is the Hessian of $f$ at $x^k$ and $\Delta x = x - x^k$. We can then pose the Lagrangian function
 
 $$ 
-L(x,\mu) = c^\top x - \rho\sum_{i=1}^n\ln(x_i) - \mu^\top(b - Ax)
+L(x,\mu) = f(x) - \rho\sum_{i=1}^n\ln(x_i) - \mu^\top(b - Ax),
 $$
 
 which leads to the following KKT (optimality) conditions
 
 ```{math}
 \begin{align*}
-&\frac{\partial L(x, \mu)}{\partial x} = c - \rho X^{-1}e - A^\top\mu = 0 \\
+&\frac{\partial L(x, \mu)}{\partial x} = \nabla f(x) + H(x^k)x - \rho X^{-1}e - A^\top\mu = 0 \\
 &\frac{\partial L(x, \mu)}{\partial \mu} = b - Ax = 0.
 \end{align*}
 ```
@@ -377,7 +383,7 @@ We a little algebraic manipulation, we can restate the optimality conditions in 
 
 \begin{equation}
 \begin{aligned}
-& A^\top\mu + z = c  \\
+& A^\top\mu + z = \nabla f(x) + H(x^k)x  \\
 & Ax = b  \\
 & XZe = \rho e. 
 \end{aligned}
@@ -391,7 +397,7 @@ As before, we assume that we are given a point $x^k$ and we would like to move t
 
 \begin{equation}
 \begin{bmatrix}
-0 & A^\top & I \\
+-H(x^k) & A^\top & I \\
 A & 0 & 0 \\
 Z^k & 0 & X^k      
 \end{bmatrix}
@@ -403,21 +409,21 @@ Z^k & 0 & X^k
 \end{bmatrix} 
 = -
 \begin{bmatrix}
-A^\top\mu^k + z^k - c \\
+A^\top\mu^k + z^k - \nabla f(x^k) - H(x^k)x^k \\
 Ax^k - b \\
 X^kZ^ke - \rho e.
 \end{bmatrix}
 \end{equation}
 ````
 
-Notice that from the optimality conditions {eq}`KKT_barrier` we know that $A^\top\mu^k + z^k = c$ and $Ax^k = b$, which allows us to simplify the Newton system to
+Notice that from the optimality conditions {eq}`KKT_barrier` we know that $A^\top\mu^k + z^k = \nabla f(x)$ and $Ax^k = b$, which allows us to simplify the Newton system to
 
 ```{math}
 :label: NS_barrier
 
 \begin{equation}
 \begin{bmatrix}
-0 & A^\top & I \\
+-H(x^k) & A^\top & I \\
 A & 0 & 0 \\
 Z^k & 0 & X^k      
 \end{bmatrix}
@@ -442,7 +448,13 @@ $$
 \mini \braces{f(x) = x_1 + x_2 : 2x_1 + x_2 \geq 8, \ x_1 + 2x_2 \geq 10, \ x_1, x_2 \geq 0}.
 $$
 
-After converting the inequalities to equalities, we obtain, $A = \begin{bmatrix} 2 & 1 & -1 & 0 \\ 1 & 2 & 0 & -1 \end{bmatrix}$. Then, given an initial point $(xˆk, z^k)$ our Newton system is given by
+First, we must convert the inequalities to equalities by adding slack variables $x_3$ and $x_4$ with negative coefficients (since these are greater-or-equal then constraints). The problem than becomes
+
+$$
+\mini \braces{f(x) = x_1 + x_2 : 2x_1 + x_2 - x_3 = 8, \ x_1 + 2x_2 - x_4 = 10, \ x_1, x_2, x_3, x4 \geq 0}.
+$$
+
+The matrix $A$ is given by $A = \begin{bmatrix} 2 & 1 & -1 & 0 \\ 1 & 2 & 0 & -1 \end{bmatrix}$. Since $f$ is linear, we do not need to consider its second order approximation and, inf fact, its Hessian is zero. Then, given an initial point $(xˆk, z^k)$ our Newton system is given by
 
 ```{math}
 \begin{bmatrix}
@@ -513,4 +525,3 @@ One interesting point to notice is that the barrier method does not solve the KK
 
 It turns out that barrier method works very well for linear problems as well. Indeed, the barrier method has become another standard method used for solving linear problems, and has become the algorithm of choice for solving truly large linear optimisation problems.
 ```
-
