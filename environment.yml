@@ -8,6 +8,7 @@ dependencies:
   - pydata-sphinx-theme==0.15.2
 
   - manim
+  - matplotlib
 
   - pip
   - pip:
