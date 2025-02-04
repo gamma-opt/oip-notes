@@ -183,12 +183,12 @@ To make our notation a little easier to follow, we are explicitly assuming that 
 First, we must consider the second-order approximation of $f$ at $x^k$, with $Ax^k = b$.
 
 $$
-f(x^k + \Delta x) = f(x^k) + \nabla f(x^k)^\top \Delta x + \frac{1}{2}\Delta x H(x^k) \Delta x,
+f(x) \approx f(x^k) + \nabla f(x^k)^\top (x-x^k) + \frac{1}{2}(x-x^k)^\top H(x^k) (x-x^k),
 $$
 
-where $H(x^k)$ is the Hessian of $f$ at $x^k$ and $\Delta x = x - x^k$.  
+where $H(x^k)$ is the Hessian of $f$ at $x^k$.  
 
-The KKT conditions for the second-order approximation problem state that $x^k + \Delta x$ is optimal if exists $\mu$ such that
+The KKT conditions for the second-order approximation problem state that $x=x^k + \Delta x$ is optimal if exists $\mu$ such that
 
 ```{math}
 :label: eq:Newton-system
