@@ -358,20 +358,26 @@ and $e$ be a vector of one's of adequate size. Thus $X^{-1} = \diag\left(\frac{1
 Let us analyse the KKT conditions of the barrier problem. First, we must recall that we utilise the second order approximation of $f$ at $x^k$
 
 $$
-f(x^k + \Delta x) = f(x^k) + \nabla f(x^k)^\top \Delta x + \frac{1}{2}\Delta x H(x^k) \Delta x,
+f(x) \approx f(x^k) + \nabla f(x^k)^\top (x-x^k) + \frac{1}{2}^\top H(x^k) (x-x^k),
 $$
 
-where, as before, $H(x^k)$ is the Hessian of $f$ at $x^k$ and $\Delta x = x - x^k$. We can then pose the Lagrangian function
+where, as before, $H(x^k)$ is the Hessian of $f$ at $x^k$. We can then pose the Lagrangian function
 
 $$ 
 L(x,\mu) = f(x) - \rho\sum_{i=1}^n\ln(x_i) - \mu^\top(b - Ax),
 $$
 
-which leads to the following KKT (optimality) conditions
+which when substituted with the approximation becomes
+
+$$ 
+L(x,\mu) = \nabla f(x^k)^\top (x-x^k) + \frac{1}{2}^\top H(x^k) (x-x^k) - \rho\sum_{i=1}^n\ln(x_i) - \mu^\top(b - Ax).
+$$
+
+This leads to the following KKT (optimality) conditions
 
 ```{math}
 \begin{align*}
-&\frac{\partial L(x, \mu)}{\partial x} = \nabla f(x) + H(x^k)x - \rho X^{-1}e - A^\top\mu = 0 \\
+&\frac{\partial L(x, \mu)}{\partial x} = \nabla f(x^k) + H(x^k)(x-x^k) - \rho X^{-1}e - A^\top\mu = 0 \\
 &\frac{\partial L(x, \mu)}{\partial \mu} = b - Ax = 0.
 \end{align*}
 ```
@@ -383,14 +389,14 @@ We a little algebraic manipulation, we can restate the optimality conditions in 
 
 \begin{equation}
 \begin{aligned}
-& A^\top\mu + z = \nabla f(x) + H(x^k)x  \\
+& A^\top\mu + z = \nabla f(x^k) + H(x^k)(x-x^k)  \\
 & Ax = b  \\
 & XZe = \rho e. 
 \end{aligned}
 \end{equation}
 ```
 
-As before, we assume that we are given a point $x^k$ and we would like to move to a point $x^k + \Delta x$ that satisfy the KKT conditions {eq}`KKT_barrier`., which we can obtain by solving the Newton system
+As before, we assume that we are given a point $x^k$ and we would like to move to a point $x=x^k + \Delta x$ that satisfy the KKT conditions {eq}`KKT_barrier`., which we can obtain by solving the Newton system
 
 ```{math}
 :label: infNS_barrier
@@ -409,14 +415,14 @@ Z^k & 0 & X^k
 \end{bmatrix} 
 = -
 \begin{bmatrix}
-A^\top\mu^k + z^k - \nabla f(x^k) - H(x^k)x^k \\
+A^\top\mu^k + z^k - \nabla f(x^k) \\
 Ax^k - b \\
 X^kZ^ke - \rho e.
 \end{bmatrix}
 \end{equation}
 ````
 
-Notice that from the optimality conditions {eq}`KKT_barrier` we know that $A^\top\mu^k + z^k = \nabla f(x)$ and $Ax^k = b$, which allows us to simplify the Newton system to
+Notice that from the optimality conditions {eq}`KKT_barrier` we know that $A^\top\mu^k + z^k = \nabla f(x^k)$ and $Ax^k = b$, which allows us to simplify the Newton system to
 
 ```{math}
 :label: NS_barrier
