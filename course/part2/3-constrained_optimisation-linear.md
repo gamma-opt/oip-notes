@@ -177,7 +177,7 @@ If there are multiple constraints prescribing the same value for the non-basic v
     <source src="../_static/SimplexGiapetto.mp4" type="video/mp4">
 </video>
 
-## Branch-and-cut
+## Branch-and-bound
 
 As great and effective the simplex method is, it cannot directly be used on (mixed-)integer problems. 
 Consider the problem
@@ -200,7 +200,7 @@ mystnb:
   figure:
     name: fig:ip
     caption: |
-      The integer problem {eq}`bnc_ip`. The blue points represent the integer solutions, the dashed lines are constraints added during the branch-and-cut algorithm. The orange star is the optimal solution to the linear relaxation.
+      The integer problem {eq}`bnc_ip`. The blue points represent the integer solutions, the dashed lines are constraints added during the branch-and-bound algorithm. The orange star is the optimal solution to the linear relaxation.
 tags: [remove-input]
 ---
 
@@ -225,7 +225,7 @@ fig
 
 Making a problem more general by ignoring or relaxing constraints is called a _relaxation_. 
 In this example, the relaxation did not give us a feasible solution with respect to integrality, but we can use it to guide further searches.
-The branch-and-cut algorithm does exactly this.
+The branch-and-bound algorithm does exactly this.
 
 Since $x_1$ is not an integer, we can add a constraint to disallow this solution and rerun the simplex algorithm.
 Simply adding $x_1\neq \frac{20}{7}$ however is not ideal, since it is easily imaginable this may give rise to a practically identical optimum $(\frac{20}{7}+\delta, 3)$ where $\delta$ is very small.
@@ -235,7 +235,7 @@ More generally, upon encountering a non-integer solution, we devise cuts, which 
 ```{figure} ../figures/bnc.drawio.svg
 :name: bnc_tree
 
-Illustration of the branch-and-cut algorithm on {eq}`bnc_ip`, represented by $P_0$. $P_1$ does not need to be solved because the relaxation has an infeasible set of constraints and $P_4$ is pruned as its objective value is smaller than a known feasible solution in $P_3$.
+Illustration of the branch-and-bound algorithm on {eq}`bnc_ip`, represented by $P_0$. $P_1$ does not need to be solved because the relaxation has an infeasible set of constraints and $P_4$ is pruned as its objective value is smaller than a known feasible solution in $P_3$.
 ```
 
 A nice feature of this algorithm is that not every subproblem needs to be solved.
@@ -251,5 +251,5 @@ This is exactly why solving (mixed)-integer problems are often more difficult th
 ```
 
 <video width="800" controls muted>
-    <source src="../_static/BNC.mp4" type="video/mp4">
+    <source src="../_static/BNB.mp4" type="video/mp4">
 </video>
