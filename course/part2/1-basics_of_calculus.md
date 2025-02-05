@@ -121,11 +121,9 @@ Before we move on, let us finish with a incredibly useful concept that allows us
 Let $f$ be $n$-times differentiable on an open interval containing $x$ and $a$. Then, the Taylor series expansion of $f$ is
 
 ```{math}
-\begin{align}
   f(x) = & f(a) + f'(a)(x - a) + \frac{1}{2}f''(a)(x - a)^2 + ... \\
          & + \frac{1}{n!}f^{(n)}(x - a)^n + R_{n+1}(x) \\
        = & \sum_{i=0}^n \frac{1}{i!}f^{(i)}(a)(x-a)^i + R_{n+1}(x), 
-\end{align}
 ```
 where $R_{n+1}(x)$ represents the residual associated with the $n+1$-order and subsequent terms.
 ````
@@ -331,10 +329,8 @@ We must thus consider an alternative framework for optimality conditions. In tha
 Let us develop the analysis ourselves. We start with equality constraint problems of the form
 
 ```{math}
-\begin{align*}
-  \mini z = & f(x) \\
-  \st h_i(x) = 0, i \in [l],
-\end{align*}
+\mini & z = f(x) \\
+\st & h_i(x) = 0, i \in [l],
 ```
 
 where $f: \reals^n \rightarrow \reals$ and $h:\reals^n \rightarrow \reals^l$, all differentiable.
@@ -350,10 +346,8 @@ With that at hand, we can analyse it under the frame of unconstrainted optimisat
 First-order optimality conditions require that $\nabla L(x,\mu) = 0$, which, in turn, leads to
 
 ```{math}
-\begin{align*}
 & \frac{\partial L(x, \mu)}{\partial x} = 0 \Rightarrow \nabla f(x) + \sum_{i=1}^l \mu_i \nabla h_i(x)  = 0\\
 & \frac{\partial L(x, \mu)}{\partial \mu_i} = 0 \Rightarrow h_i(x) = 0, i =1,\dots, l.
-\end{align*}
 ```
 
 These conditions tells us the following: that we are looking for a point that satisfy the constraints $h_i(x) = 0$, $\forall i \in [l]$ and that is such that the gradient of the objective function ($\nabla f(x)$) is the opposite of a scaled combination of the gradients of the constraints ($\nabla f(x) = - \sum_{i=1}^l \mu_i \nabla h_i(x)$). Notice that they yield $n + m$ equations with $n + m$ unknowns. Thus, if we can find a solution $(x,\mu)$ to these equations, we have also found a point that satisfy the optimality conditions! Theorem {prf:ref}`thm-eq_const` formally state optimality conditions for constrained problems with equality constraints only.
@@ -364,10 +358,8 @@ These conditions tells us the following: that we are looking for a point that sa
 Let $P$ be $\mini \braces{f(x) : h(x) = 0}$ with differentiable $f: \reals^n \rightarrow \reals$ and $h:\reals^n \rightarrow \reals^l$. If $\overline{x}$ is optimal for $P$, then $(\overline{x}, \overline{\mu})$ satisfies 
 
 ```{math}
-\begin{align}
 & \frac{\partial L(x, \mu)}{\partial x} = 0 \Rightarrow \nabla f(x) + \sum_{i=1}^l \mu_i \nabla h_i(x) = 0 \\
 & \frac{\partial L(x, \mu)}{\partial \mu} = 0 \Rightarrow h(x) = 0.
-\end{align}
 ```
 
 Moreover, if $f$ is convex and $h$ is affine, then these conditions are not only necessary, but also sufficient for optimality of $\overline{x}$.
@@ -393,11 +385,9 @@ $$
 The optimality conditions are given by the following set of equations:
 
 ```{math}
-\begin{align*}
 &\partial \frac{L(x_1,x_2,\mu)}{\partial x_1} = -4x_1 + x_2 + 8 + 3\mu = 0 \\
 &\partial \frac{L(x_1,x_2,\mu)}{\partial x_2} = -2x_2 + x_1 + 3 + \mu = 0 \\
 &\partial \frac{L(x_1,x_2,\mu)}{\partial \mu} = 3x_1 + x_2 - 10 = 0
-\end{align*}
 ```
 
 Solving this system of equations we obtain the solution $\overline{x} = (2.46, 2.60)$ and $\overline{\mu} = -0.25$. 
@@ -443,10 +433,8 @@ These optimality conditions are a constrained equivalent to first-order conditio
 Let us now consider inequalities as constraints. That is, our problem now takes the form of 
 
 ```{math}
-\begin{align*}
-(P) : \mini z = & \ f(x) \\
+(P) : \mini & z = \ f(x) \\
 \st & g_i(x) \leq 0, \ i = 1,\dots,m.
-\end{align*}
 ```
 
 We proceed in the same manner as before, adding multipliers $\lambda_i$, $\forall i \in [m]$ to each of the constraints and form the Lagrangian function  
@@ -504,7 +492,6 @@ $$
 
 As such, the KKT conditions are:
 ```{math}
-\begin{align*}
 &\begin{bmatrix}2x_1 -6 \\ 2x_2 -6
 \end{bmatrix} + \lambda_1 \begin{bmatrix} -1 \\ 1
 \end{bmatrix} + \lambda_2\begin{bmatrix} 2 \\ 3\end{bmatrix}
@@ -514,7 +501,6 @@ As such, the KKT conditions are:
 &\lambda_1(x_1 + x_2 - 2) = 0 \\
 &\lambda_2(2x_1 + 3x_2 - 11) = 0 \\
 &\lambda_1, \lambda_2 \geq 0
-\end{align*}
 ```
 
 Notice that in this case, to solve the KKT conditions, we need to make an assumption on how the complementarity conditions $\lambda_i g_i(x) = 0$, $i \in [m]$, are satisfied. In this case, they imply that one of the following cases must hold:

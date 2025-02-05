@@ -40,13 +40,11 @@ To exemplify this process, consider the following LP
 ```{math}
 :label: lp_example
 
-\begin{align*}
 \maxi &40x_1+60x_2 \\
 \stf &2x_1+x_2\leq 7 \\
 &x_1+x_2\leq 4 \\
 &x_1+3x_2\leq 9 \\
 &x_1,x_2\geq 0.
-\end{align*}
 ```
 
 
@@ -81,13 +79,11 @@ Converting {eq}`lp_example` into canonical form yields
 
 ```{math}
 :label: lp_canonical
-\begin{align*}
 \maxi &40x_1+60x_2 \\
 \stf &s_1=7-2x_1-x_2 \\
 &s_2=4-x_1-x_2 \\
 &s_3=9-x_1-3x_2 \\
 &x_1,x_2,s_1,s_2,s_3\geq 0.
-\end{align*}
 ```
 
 In this form, the variables remaining on the left side of the linear constraints are called _basic variables_ and the remaining ones are called _non-basic variables_.
@@ -102,24 +98,20 @@ The constraint associated with the former for $x_1$ is $s_1=7-2x_1-x_2$ and solv
 We substitute this in all occurences of $x_1$ to obtain
 
 ```{math}
-\begin{align*}
 \maxi &40(3.5-0.5x_2-0.5s_1)+60x_2 \\
 \stf &x_1=3.5-0.5x_2-0.5s_1\\
 &s_2=4-(3.5-0.5x_2-0.5s_1)-x_2 \\
 &s_3=9-(3.5-0.5x_2-0.5s_1)-3x_2 \\
 &x_1,x_2,s_1,s_2,s_3\geq 0
-\end{align*}
 ```
 
 ```{math}
 :label: lp_it1
-\begin{align*}
 \maxi &140+40x_2-20s_1 \\
 \stf &x_1=3.5-0.5x_2-0.5s_1\\
 &s_2=0.5-0.5x_2 +0.5s_1\\
 &s_3=5.5-2.5x_2+0.5s_1 \\
 &x_1,x_2,s_1,s_2,s_3\geq 0.
-\end{align*}
 ```
 
 Now, $x_1, s_2$ and $s_3$ are the basic variables.

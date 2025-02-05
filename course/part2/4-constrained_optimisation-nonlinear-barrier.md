@@ -170,10 +170,8 @@ d = -∇f(x^k) \ f(x^k)
 One interesting insight is that we can employ {prf:ref}`alg:NR` to find solutions to the systems of equations representing the KKT conditions of (equality) constrained optimisation problems. Assume our problem to be stated in the following form
 
 ```{math}
-\begin{align*}
 \mini \ &f(x) \\
 \st   &Ax = b.
-\end{align*}
 ```
 
 ```{note}
@@ -192,10 +190,8 @@ The KKT conditions for the second-order approximation problem state that $x=x^k 
 
 ```{math}
 :label: eq:Newton-system
-\begin{align}
 &\nabla f(x^k) + H(x^k)\Delta x + A^\top\mu = 0 \\
 &A(x^k + \Delta x) = b \Rightarrow A\Delta x = 0.
-\end{align}
 ```
 
 For convenience, {eq}`eq:Newton-system` are typically stated in a matrix form known as the Newton system, given by
@@ -248,30 +244,24 @@ When making calculations with matrices and vectors, it is important to pay atten
 The element missing in our development is a mechanism to deal with inequality constraints. For that, interior point methods rely on **barrier** functions, which are responsible for representing feasibility conditions. In particular, they act as a proxy of an indicator function for the feasibility. For example, let our problem be of the form
 
 ```{math}
-\begin{align*}
 \mini \ &f(x) \\
 \st &g_i(x) \leq 0, \ i \in [m] \\
 & Ax = b. 
-\end{align*}
 ```
 
 We would like our indicator function to behave such that whenever the inequality is violated by $x$ (i.e., $g(x)>0$), than it would "shoot to infinity" (remember we are minimising). Otherwise, we would like it to not play any role in the optimisation. Thus, we could reformulate our problem as
 
 ```{math}
-\begin{align*}
 \mini \ & f(x) + \sum_{i=1}^m I(g_i(x)) \\
 \st &Ax = b, 
-\end{align*}
 ```
 
 where
 
 ```{math}
-\begin{equation*}
 I(u) = \begin{cases} 0, &\text{if } u \leq 0 \\
                      \infty, &\text{if } u > 0  
        \end{cases}
-\end{equation*}.
 ```
 
 
@@ -279,9 +269,7 @@ I(u) = \begin{cases} 0, &\text{if } u \leq 0 \\
 From a numerical standpoint, the indicator function creates problem since it is non-differentiable. As such, many proposals for functions that can act as surrogates have been considered in this setting. The most widely accepted as providing a great trade-off betwee computational suitability while imposing the "barring" effect we seek are **logarithmic barriers**, defined as
 
 $$
-\begin{equation*}
 \Phi_\rho(u) = -\rho \ln(-u),
-\end{equation*}
 $$
 
 where $\rho > 0$ sets the accuracy (as referenced against the original indicator function) of the barrier term $\Phi_\rho(u)$. {numref}`fig:log_barrier` illustrates the logarithmic barrier applied to a constraint $u \le 0$. Notice how, as one decreases the value of the parameter $\rho$ from 1, the more closely the logarithmic barrier resembles the indicator function.
@@ -316,11 +304,9 @@ fig
 The barrier function can be used to recast an optimisation problem in a format that can be solved using the constrained Newton method. First, notice that, in general, our optimisation problem can be cast in the form of
 
 ```{math}
-\begin{align*}
 \mini \ &f(x) \\
 \st   &Ax = b \\
 &x \ge 0.
-\end{align*}
 ```
 
 It is precisely the nonnegativity conditions that prevent us from being able to use Newton's method to solve it. This can be circumvented posing the equivalent **barrier problem**
@@ -328,12 +314,8 @@ It is precisely the nonnegativity conditions that prevent us from being able to 
 ```{math}
 :label: barrier_problem
 
-\begin{equation}
-\begin{aligned}
 \mini \ & f(x) - \rho\sum_{i=1}^n\ln(x_i) \\
 \st & Ax = b 
-\end{aligned}
-\end{equation}
 ```
 
 which remove the inequality constraints $x \ge 0$ and yields a form that is tractable by Newton's method.
@@ -376,10 +358,8 @@ $$
 This leads to the following KKT (optimality) conditions
 
 ```{math}
-\begin{align*}
 &\frac{\partial L(x, \mu)}{\partial x} = \nabla f(x^k) + H(x^k)(x-x^k) - \rho X^{-1}e - A^\top\mu = 0 \\
 &\frac{\partial L(x, \mu)}{\partial \mu} = b - Ax = 0.
-\end{align*}
 ```
 
 We a little algebraic manipulation, we can restate the optimality conditions in a more convenient form. For that, let $z = \rho X^{-1}e$. Then $Xz = \rho e$ or $XZe = \rho e$, with $Z = \diag(z)$. With these, the KKT optimality conditions can be rewritten as
@@ -387,13 +367,9 @@ We a little algebraic manipulation, we can restate the optimality conditions in 
 ```{math} 
 :label: KKT_barrier
 
-\begin{equation}
-\begin{aligned}
 & A^\top\mu + z = \nabla f(x^k) + H(x^k)(x-x^k)  \\
 & Ax = b  \\
 & XZe = \rho e. 
-\end{aligned}
-\end{equation}
 ```
 
 As before, we assume that we are given a point $x^k$ and we would like to move to a point $x=x^k + \Delta x$ that satisfy the KKT conditions {eq}`KKT_barrier`., which we can obtain by solving the Newton system
@@ -401,7 +377,6 @@ As before, we assume that we are given a point $x^k$ and we would like to move t
 ```{math}
 :label: infNS_barrier
 
-\begin{equation}
 \begin{bmatrix}
 -H(x^k) & A^\top & I \\
 A & 0 & 0 \\
@@ -419,7 +394,6 @@ A^\top\mu^k + z^k - \nabla f(x^k) \\
 Ax^k - b \\
 X^kZ^ke - \rho e.
 \end{bmatrix}
-\end{equation}
 ````
 
 Notice that from the optimality conditions {eq}`KKT_barrier` we know that $A^\top\mu^k + z^k = \nabla f(x^k)$ and $Ax^k = b$, which allows us to simplify the Newton system to
@@ -427,7 +401,6 @@ Notice that from the optimality conditions {eq}`KKT_barrier` we know that $A^\to
 ```{math}
 :label: NS_barrier
 
-\begin{equation}
 \begin{bmatrix}
 -H(x^k) & A^\top & I \\
 A & 0 & 0 \\
@@ -445,7 +418,6 @@ Z^k & 0 & X^k
 0 \\
 -X^kZ^ke + \rho e
 \end{bmatrix}.
-\end{equation}
 ```
 
 Let us consider a numerical example. Consider the problem
