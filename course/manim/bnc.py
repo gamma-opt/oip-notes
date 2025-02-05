@@ -392,5 +392,45 @@ class BNC(Scene):
         self.replace_text(text, "By comparing the objective values, we can observe that $x=(6,6)$ is the optimal solution to our MILP.")
         self.play(Circumscribe(node7))
 
+        ###
+        # Alternative branching
+        ###
+        self.replace_text(text, "What happens if we branched differently?")
+        self.replace_text(text, "We started by branching on $x_1$ for $P_0$, but $x_2$ is an equally valid option.")
+        self.replace_text(text, "Let's see what happens if we chose that.")
+
+        self.play(FadeOut(Group(
+            node1, node2, node3, node4, node5, node6, node7,
+            a_01, a_02, a_23, a_24, a_45, a_56, a_57,
+            l_01, l_02, l_23, l_24, l_45, l_56, l_57
+            )))
+        
+        reuse = Group(node4, node5, node6, node7, a_45, l_45, a_56, l_56, a_57, l_57)
+        Group(reuse, a_24, l_24).shift(p0.get_right()-a_24.get_left()+[0.25,0,0])
+
+        self.replace_text(text, "If we were to start with $x_2\geq 5$, ...")
+        self.play(FadeIn(Group(a_24,l_24)))
+        self.replace_text(text, "... we would immediately find ourselves in the section containing the optimum.")
+        self.play(FadeIn(reuse))
+
+        self.replace_text(text, "We also need to explore the direction of $x_2\leq 4$.")
+        p8 = circleWithTex("P_8")
+        p8_p = MathTex("x=(8.5,4)", font_size=LABEL_FONT_SIZE).next_to(p8, UP)
+        p8_o = MathTex("obj=149.5", font_size=LABEL_FONT_SIZE).next_to(p8, DOWN)
+        node8 = VGroup(p8_p, p8, p8_o).arrange(DOWN).next_to(node0, 4*DOWN)
+        a_08 = Arrow(start=p0_o.get_center(), end=p8_p)
+        l_08 = MathTex(r"x_2\leq 4", font_size=LABEL_FONT_SIZE).next_to(a_08, RIGHT)
+        self.play(Write(VGroup(a_08, l_08)), FadeIn(node8))
+
+        self.replace_text(text, "Since the objective value is smaller than that of $P_7$, we are done.")
+        self.replace_text(text, "Overall, our search tree is smaller than before.")
+
+        ###
+        # Ending note
+        ###
+        self.replace_text(text, "This highlights the difficulty of MIPs.")
+        self.replace_text(text, "In larger problems with many variables, it is often unclear which variable to branch on and in which direction.")
+        self.replace_text(text, "Consequently, the search trees often end up being very large, thus problems can take long times to be solved.")
+
 
         self.wait(5)
