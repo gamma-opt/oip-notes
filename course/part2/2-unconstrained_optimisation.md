@@ -649,13 +649,55 @@ function golden_ls(f, a, b, l) {
     return (a+b)/2
 }
 
+// Adapted from https://themadcreator.github.io/luqr/
+function decomposeLDL(A) {
+    const n = A.length
+    let L = [[0,0],[0,0]]
+    let d = [0,0]
+    let a
+
+    for (let j=0; j<n; j++) {
+        L[j][j] = 1;
+        a = A[j][j]
+        for (let k=0; k<j; k++) {
+            a -= d[k] * L[j][k] * L[j][k]
+        }
+        d[j] = a
+
+        for (let i=j+1; i<n; i++) {
+            L[j][i] = 0
+            a = A[i][j]
+            for (let k=0; k<j; k++) {
+                a -= d[k] * L[i][k] * L[j][k]
+            }
+            L[i][j] = a / d[j]
+        }
+    }
+
+    for (let j=0; j<n; j++) {
+        if (d[j] < 0) {
+            d[j] = 1
+        }
+    }
+    return {L, d}
+}
+
+function LDLsolve(hess, grad) {
+    const {L, d} = decomposeLDL(hess)
+    let sol = math.lsolve(L, grad)
+    sol = math.lsolve(math.diag(d), sol)
+    sol = math.usolve(math.transpose(L), sol)
+    sol = math.reshape(sol,[2])
+    return math.chain(sol).divide(math.norm(sol)).multiply(-1).done()
+}
+
 function get_newton_path(f, x0, y0, scale_x, scale_y) {
     let newton_history = [{"x": scale_x.invert(x0), "y": scale_y.invert(y0)}];
     let x1, y1, hessian, lr, gradient = [1,1];  // dummy gradient
     while (newton_history.length <= max_iters && math.norm(gradient) > convergence_tol) {
         gradient = grad_f(f, x0, y0);
         hessian = hess_f(f, x0, y0);
-        dir = math.chain(hessian).inv().multiply(gradient, -1).done()
+        dir = LDLsolve(hessian, gradient) // https://www.rose-hulman.edu/~bryan/lottamath/newton2.pdf
         const foo = (l) => f(x0 + l*dir[0], y0 + l*dir[1])
         lr = golden_ls(foo, 0, 10, 1e-7)
         x1 = x0 + lr * dir[0]
