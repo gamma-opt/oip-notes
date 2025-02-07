@@ -7,6 +7,9 @@ dependencies:
   # https://github.com/pydata/pydata-sphinx-theme/issues/1844
   - pydata-sphinx-theme==0.15.2
 
+  - manim
+  - matplotlib
+
   - pip
   - pip:
     #- sphinx>7,<8 # this needs to be upgraded manually with pip after the environment is created

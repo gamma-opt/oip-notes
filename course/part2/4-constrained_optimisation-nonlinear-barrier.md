@@ -503,3 +503,7 @@ One interesting point to notice is that the barrier method does not solve the KK
 
 It turns out that barrier method works very well for linear problems as well. Indeed, the barrier method has become another standard method used for solving linear problems, and has become the algorithm of choice for solving truly large linear optimisation problems.
 ```
+
+<video width="800" controls muted>
+    <source src="../_static/IPM.mp4" type="video/mp4">
+</video>

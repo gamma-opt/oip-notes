@@ -1,3 +1,6 @@
 .*
 course/_build
 *.json
+Manifest.toml
+course/manim/__pycache__
+course/manim/media
