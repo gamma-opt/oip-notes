@@ -39,7 +39,6 @@ To exemplify this process, consider the following LP
 
 ```{math}
 :label: lp_example
-
 \begin{align*}
 \maxi &3x_1+2x_2 \\
 \stf &2x_1+x_2\leq 100 \\
@@ -81,6 +80,7 @@ Converting {eq}`lp_example` into canonical form yields
 
 ```{math}
 :label: lp_canonical
+
 \begin{align*}
 \maxi &3x_1+2x_2 \\
 \stf &s_1=100-2x_1-x_2 \\
@@ -113,6 +113,7 @@ We substitute this in all occurences of $x_1$ to obtain
 
 ```{math}
 :label: lp_it1
+
 \begin{align*}
 \maxi &120+2x_2-3s_3 \\
 \stf &s_1=20-x_2+2s_3 \\
