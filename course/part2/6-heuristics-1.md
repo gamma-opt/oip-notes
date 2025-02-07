@@ -54,6 +54,7 @@ A more general strategy is random restarts where an algorithm may be run again w
 
 In this section we present two methods that don't yield exact results, but are widely used in the optimisation practice.
 
+(p2l6:linesearch)=
 ### Line search
 
 Suppose we have a univariate function $f$ and an interval $[a,c]$ that we know contains some local minimum $x^*$.

@@ -51,7 +51,8 @@ First is that it is specifically for gradient **descent**, since in line 2.1 the
 Gradient ascent is the same algorithm with the sign flipped.
 Second is that the derivative is normalized with its norm.
 This is due to the fact that we are only interested in the direction information from the derivative, and the magnitude is decided by the step size in line 2.2.
-This decision can be made dynamically at every step, using exact or inexact line search methods (TODO: Add ref to heuristics lecture), or a set learning rate may be set as an algorithm parameter.
+This decision can be made dynamically at every step, using exact or inexact line search methods (see {numref}`p2l6:linesearch`), or a set learning rate may be set as an algorithm parameter.
+
 
 Gradient descent is simple and straightforward, it be highly sensitive to the step size selection or the curvature of the objective function.
 However, it also provides a solid foundation for extensions.
