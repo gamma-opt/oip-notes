@@ -17,7 +17,7 @@ kernelspec:
 
 ## Gradient descent and variants
 
-We have seen in [Lec. 1](1-basics_of_calculus.md) that the gradient {math}`\nabla f(x_0)` describes the direction of steepest ascent at some point {math}`x_0`.
+We have seen in {numref}`p2l1` that the gradient {math}`\nabla f(x_0)` describes the direction of steepest ascent at some point {math}`x_0`.
 A consequence of this is that the negative gradient {math}`-\nabla f(x_0)` corresponds to the direction of the steepest descent at {math}`x_0`.
 
 ````{admonition} Why? Linearity of Differentiation
@@ -51,12 +51,30 @@ First is that it is specifically for gradient **descent**, since in line 2.1 the
 Gradient ascent is the same algorithm with the sign flipped.
 Second is that the derivative is normalized with its norm.
 This is due to the fact that we are only interested in the direction information from the derivative, and the magnitude is decided by the step size in line 2.2.
-This decision can be made dynamically at every step, using exact or inexact line search methods, or a set learning rate may be set as an algorithm parameter.
+This decision can be made dynamically at every step, using exact or inexact line search methods (TODO: Add ref to heuristics lecture), or a set learning rate may be set as an algorithm parameter.
 
 Gradient descent is simple and straightforward, it be highly sensitive to the step size selection or the curvature of the objective function.
 However, it also provides a solid foundation for extensions.
 One ubiquitious example is _stochastic_ gradient descent, where the gradient is approximated by a random selection of partial derivatives, reducing the computational burden significantly.
-% Differentiate between SGD vs batch GD?
+
+```{margin}
+Note the normalization by the norm in {prf:ref}`alg:sgd` line 2.2.
+Here the idea is the same as before: the normalized gradient provides the direction, and the step size provides the magnitude.
+In many implementations of SGD however, the gradient is left unnormalized, in which case step size is influenced or even fully determined by its magnitude.
+```
+
+```{prf:algorithm} Stochastic Gradient descent
+:label: alg:sgd
+**Inputs** Objective {math}`f`, initial point {math}`x_0`, convergence criterion `converged`.
+1. {math}`k=0`
+2. **while** not `converged()`:
+    1. Pick an observation $i$ randomly.
+    2. {math}`d=-\frac{\nabla_i f(x_k) }{ \|\nabla_i f(x_k) \| }`
+    3. Determine step size / learning rate {math}`\lambda`
+    4. {math}`x_{k+1}=x_k+\lambda d`
+    5. {math}`k=k+1`
+3. **return** {math}`x_k`.
+```
 
 Another variation is the _momentum method_, which modify the update step to incorporate information about previous iterations, imitating accelaration and deceleration caused for example by gravity on an object falling down a slope.
 If the slope remains the same, the object will gain speed, and if the slope direction changes, the object won't abandon its previous direction entirely.
@@ -75,15 +93,74 @@ If the slope remains the same, the object will gain speed, and if the slope dire
 ```
 Here, the momentum decay factor {math}`\beta` is between 0 and 1 and controls the momentum influence.
 
-Add RMSProp or directly go to Adam?
+Going back to the determination of the learning rate, line search may not work well for all complicated functions.
+An alternative idea is to determine it based on gradient information.
+For example, we can start with an aggressive learning rate, and decrease it once loss decreases significantly, such as in {numref}`fig:adaptive-lr`.
 
+```{code-cell}
+---
+mystnb:
+  figure:
+    name: fig:adaptive-lr
+    caption: |
+      The learning rate is constant in the flat region but decreases once loss starts to decrease.
+tags: [remove-input]
+---
+using CairoMakie
+
+x = range(-5, 5, 101)
+f = x -> -exp(-x^2)
+df = x -> 2x*exp(-x^2)
+fig = Figure()
+
+ax = Axis(fig[1,1])
+lines!(ax, x, f)
+
+xs = [-5, -4, -3, -2, -1.25, -1, -0.80, -0.65, -0.55, -0.47, -0.40]
+scatter!(ax, xs, f; color = Makie.wong_colors()[2])
+
+fig
+```
+
+There are multiple ways of implementing such a mechanism, one is to keep a decaying average of the previous gradients
+```{math}
+\lambda^k = \beta_\lambda \lambda^{k-1}+(1-\beta_\lambda)\nabla f(x_k)
+```
+where $0\leq \beta_\lambda\leq 1$ is some decay parameter.
+Here, with more iterations, older values of the gradient will be practically zero, thus only the more recent figures will affect the final result.
+Consequently, if a flat region is encountered after a rapid descent, the learning rate will go up again as needed.
+```{margin}
+Using the decaying average of gradients without momentum leads to an algorithm called _RMSProp_.
+```
+Combining this idea of the "adaptive gradient" with momentum gives a commonly used optimizer called _Adam_ (from "adaptive moments").
+
+```{prf:algorithm} Adam
+:label: alg:adam
+**Inputs** Objective {math}`f`, initial point {math}`x_0`, convergence criterion `converged`, momentum decay {math}`\beta`, base learning rate $\lambda$, learning rate decay {math}`\beta_\lambda`.
+1. {math}`k=0, m_0=0`
+2. **while** not `converged()`:
+    1. {math}`d=-\frac{\nabla f(x_k) }{ \|\nabla f(x_k) \| }`
+    2. {math}`\lambda^k = \lambda (\delta+\beta_\lambda \lambda^{k-1}+(1-\beta_\lambda) \nabla f(x_k)^2)^{-1/2}`
+    3. {math}`m_{k+1} = \beta m_k + \lambda d`
+    4. {math}`x_{k+1}=x_k+m_{k+1}`
+    5. {math}`k=k+1`
+3. **return** {math}`x_k`.
+```
+Here, $\delta$ is a small scalar used to ensure we don't divide by 0.
+
+```{margin}
 Adapted from [Emilien Dupont's code](https://emiliendupont.github.io/2018/01/24/optimization-visualization/).
+```
 
 % This requires `d3.v4.js `, which is currently provided via _config.yml.
+% TODO: Add number of steps
+% TODO: Add marker to final point to show where it converged
+% TODO: Add multiple functions to choose from?
 ```{raw} html
-<body>
+
 <div id="d3-gd"></div>
-</body>
+<select name="gd-func"></select>
+
 <style>
 .sgd {
     stroke: black;
@@ -121,7 +198,7 @@ circle:hover {
   fill-opacity: .3;
 }
 </style>
-<body>
+
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script src="https://d3js.org/d3-contour.v1.min.js"></script>
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
@@ -134,36 +211,38 @@ const width = 800,
     height = 500,
     nx = parseInt(width / 5), // grid sizes
     ny = parseInt(height / 5),
-    h = 1e-7, // step used when approximating gradients
-    drawing_time = 30; // max time to run optimization
+    h = 1e-2, // step used when approximating gradients
+    drawing_time = 30, // max time to run optimization
+    contour_step = 0.5, // Step size of contour plot
+    convergence_tol = 1e-4,
+    max_iters = 500;
 
-// Parameters describing where function is defined
-const domain_x = [-2, 2],
-    domain_y = [-2, 2],
-    domain_f = [-2, 8],
-    contour_step = 0.5; // Step size of contour plot
-
-const scale_x = d3.scaleLinear()
-                .domain([0, width])
-                .range(domain_x);
-
-const scale_y = d3.scaleLinear()
-                .domain([0, height])
-                .range(domain_y);
-
-const thresholds = d3.range(domain_f[0], domain_f[1], contour_step);
-
-const contours = d3.contours()
-    .size([nx, ny])
-    .thresholds(thresholds);
-
-const color_scale = d3.scaleLinear()
-    .domain(d3.extent(thresholds))
-    .interpolate(function() { return d3.interpolateYlGnBu; });
-
-/* Value of f at (x, y) */
-function f(x, y) {
-    return -2 * Math.exp(-((x - 1) * (x - 1) + y * y) / .2) + -3 * Math.exp(-((x + 1) * (x + 1) + y * y) / .2) + x * x + y * y;
+// Function, scale_x, scale_y, contour_thresholds
+const funcs = {
+    "Two Gaussians": [
+        function f(x,y) {
+            return -2 * Math.exp(-((x - 1) * (x - 1) + y * y) / .2) + -3 * Math.exp(-((x + 1) * (x + 1) + y * y) / .2) + x * x + y * y;
+        },
+        d3.scaleLinear().domain([0, width]).range([-2,2]),
+        d3.scaleLinear().domain([0, height]).range([-2,2]),
+        d3.range(-2, 8, contour_step)
+    ],
+    "Rosenbrock": [
+        function f(x,y) {
+            return (1-x)*(1-x) + 2*(y-x*x)*(y-x*x);
+        },
+        d3.scaleLinear().domain([0, width]).range([-1.5,1.5]),
+        d3.scaleLinear().domain([0, height]).range([-1,3]),
+        d3.range(0, 15, contour_step)
+    ],
+    "Himmelblau": [
+        function f(x,y) {
+            return (x*x+y-11)*(x*x+y-11) + (x+y*y-7)*(x+y*y-7);
+        },
+        d3.scaleLinear().domain([0, width]).range([-6,6]),
+        d3.scaleLinear().domain([0, height]).range([-4,4]),
+        d3.range(0, 100, 5)
+    ]
 }
 
 /* Returns gradient of f at (x, y) */
@@ -174,36 +253,58 @@ function grad_f(f,x,y) {
 }
 
 function hess_f(f,x,y) {
-    const xx = (f(x + h, y) - 2*f(x, y) + f(x - h, y)) / (h * h),
+    const xx = (f(x + 2*h, y) - 2*f(x + h, y) + f(x, y)) / (h * h),
           xy = (f(x + h, y + h) - f(x, y + h) - f(x + h, y) + f(x, y)) / (h * h),
-          yy = (f(x, y + h) - 2*f(x, y) + f(x, y - h)) / (h * h);
+          yy = (f(x, y + 2*h) - 2*f(x, y + h) + f(x, y)) / (h * h);
     return [[xx, xy], [xy, yy]];
 }
 
 
-/* Returns values of f(x,y) at each point on grid as 1 dim array. */
-function get_values(fun, nx, ny) {
-    let grid = new Array(nx * ny);
-    for (i = 0; i < nx; i++) {
-        for (j = 0; j < ny; j++) {
-            let x = scale_x( parseFloat(i) / nx * width ),
-                y = scale_y( parseFloat(j) / ny * height );
-            // Set value at ordering expected by d3.contour
-            grid[i + j * nx] = fun(x, y);
-        }
-    }
-    return grid;
-}
+d3.select('select[name="gd-func"]')
+    .on('change', function() {
+        const func = d3.select(this).property('value');
+        d3.select("#d3-gd").selectChild().remove();  // remove previous plot
+        create_interactive_plot("#d3-gd", gradient_container, func);
+        })
+    .selectAll('option')
+    .data(Object.keys(funcs))
+    .enter()
+    .append('option')
+    .attr('value', d=>d)
+    .text(d => d);
 
-let f_values = get_values(f, nx, ny);
 
-function draw_contour(selector, mousedown_fn) {
+
+function draw_contour(selector, mousedown_fn, func) {
     const svg = d3.select(selector)
                   .append("svg")
                   .attr("width", width)
                   .attr("height", height);
 
     const function_g = svg.append("g").on("mousedown", mousedown_fn);
+
+    const [obj_f, scale_x, scale_y, thresholds] = funcs[func]
+
+
+
+    //let f_values = get_values(obj_f, nx, ny);
+    let f_values = new Array(nx * ny);
+    for (i = 0; i < nx; i++) {
+        for (j = 0; j < ny; j++) {
+            let x = scale_x( parseFloat(i) / nx * width ),
+                y = scale_y( parseFloat(j) / ny * height );
+            // Set value at ordering expected by d3.contour
+            f_values[i + j * nx] = obj_f(x, y);
+        }
+    }
+
+    const contours = d3.contours()
+        .size([nx, ny])
+        .thresholds(thresholds);
+
+    const color_scale = d3.scaleLinear()
+        .domain(d3.extent(thresholds))
+        .interpolate(function() { return d3.interpolateYlGnBu; });
 
     function_g.selectAll("path")
             .data(contours(f_values))
@@ -271,14 +372,15 @@ function create_menu(svg, labels) {
 
 // these functions should accept x0, y0, plus anything more specified here
 const gradient_container = {
-    "SGD": [get_sgd_path, 2e-2, 500],
-    "Momentum": [get_momentum_path, 1e-2, 200, 0.8],
-    "RMSProp": [get_rmsprop_path, 1e-2, 300, 0.99, 1e-6],
-    "Adam": [get_adam_path, 1e-2, 100, 0.7, 0.999, 1e-6]
+    "SGD": [get_sgd_path, 2e-2],
+    "Momentum": [get_momentum_path, 1e-2, 0.8],
+    "RMSProp": [get_rmsprop_path, 1e-2, 0.99, 1e-6],
+    "Adam": [get_adam_path, 1e-2, 0.7, 0.999, 1e-6]
 }
 
-function create_interactive_plot(selector, method_container, obj_f) {
-    const svg = draw_contour(selector, mouse_fn);
+function create_interactive_plot(selector, method_container, func) {
+    const [obj_f, scale_x, scale_y, thresholds] = funcs[func]
+    const svg = draw_contour(selector, mouse_fn, func);
     let draw_state = create_menu(svg, Object.keys(method_container));
     const path_g = svg.append("g");
 
@@ -291,14 +393,14 @@ function create_interactive_plot(selector, method_container, obj_f) {
         path_g.selectAll("path").remove();
         for (const [name, [f, ...rest]] of Object.entries(method_container)){
             if (draw_state[name]) {
-                let data = f(obj_f, x0, y0, ...rest);
+                let data = f(obj_f, x0, y0, scale_x, scale_y, ...rest);
                 draw_path(data, name.toLowerCase(), path_g)
             }
         }
     }
 }
 
-create_interactive_plot("#d3-gd", gradient_container, f);
+create_interactive_plot("#d3-gd", gradient_container, "Two Gaussians");
 
 
 /*
@@ -306,10 +408,10 @@ create_interactive_plot("#d3-gd", gradient_container, f);
  * SGD, Momentum, RMSProp, Adam.
  */
 
-function get_sgd_path(f, x0, y0, learning_rate, num_steps) {
+function get_sgd_path(f, x0, y0, scale_x, scale_y, learning_rate, num_steps) {
     let sgd_history = [{"x": scale_x.invert(x0), "y": scale_y.invert(y0)}];
-    let x1, y1, gradient;
-    for (i = 0; i < num_steps; i++) {
+    let x1, y1, gradient = [1,1];  // dummy gradient
+    while (sgd_history.length <= max_iters && math.norm(gradient) > convergence_tol) {
         gradient = grad_f(f, x0, y0);
         x1 = x0 - learning_rate * gradient[0]
         y1 = y0 - learning_rate * gradient[1]
@@ -320,12 +422,12 @@ function get_sgd_path(f, x0, y0, learning_rate, num_steps) {
     return sgd_history;
 }
 
-function get_momentum_path(f, x0, y0, learning_rate, num_steps, momentum) {
+function get_momentum_path(f, x0, y0, scale_x, scale_y, learning_rate, momentum) {
     let v_x = 0,
         v_y = 0;
     let momentum_history = [{"x": scale_x.invert(x0), "y": scale_y.invert(y0)}];
-    let x1, y1, gradient;
-    for (i=0; i < num_steps; i++) {
+    let x1, y1, gradient = [1,1];  // dummy gradient
+    while (momentum_history.length <= max_iters && math.norm(gradient) > convergence_tol) {
         gradient = grad_f(f, x0, y0)
         v_x = momentum * v_x - learning_rate * gradient[0]
         v_y = momentum * v_y - learning_rate * gradient[1]
@@ -338,12 +440,12 @@ function get_momentum_path(f, x0, y0, learning_rate, num_steps, momentum) {
     return momentum_history
 }
 
-function get_rmsprop_path(f, x0, y0, learning_rate, num_steps, decay_rate, eps) {
+function get_rmsprop_path(f, x0, y0, scale_x, scale_y, learning_rate, decay_rate, eps) {
     let cache_x = 0,
         cache_y = 0;
     let rmsprop_history = [{"x": scale_x.invert(x0), "y": scale_y.invert(y0)}];
-    let x1, y1, gradient;
-    for (i = 0; i < num_steps; i++) {
+    let x1, y1, gradient = [1,1];  // dummy gradient
+    while (rmsprop_history.length <= max_iters && math.norm(gradient) > convergence_tol) {
         gradient = grad_f(f, x0, y0)
         cache_x = decay_rate * cache_x + (1 - decay_rate) * gradient[0] * gradient[0]
         cache_y = decay_rate * cache_y + (1 - decay_rate) * gradient[1] * gradient[1]
@@ -356,14 +458,14 @@ function get_rmsprop_path(f, x0, y0, learning_rate, num_steps, decay_rate, eps) 
     return rmsprop_history;
 }
 
-function get_adam_path(f, x0, y0, learning_rate, num_steps, beta_1, beta_2, eps) {
+function get_adam_path(f, x0, y0, scale_x, scale_y, learning_rate, beta_1, beta_2, eps) {
     let m_x = 0,
         m_y = 0,
         v_x = 0,
         v_y = 0;
     let adam_history = [{"x": scale_x.invert(x0), "y": scale_y.invert(y0)}];
-    let x1, y1, gradient;
-    for (i = 0; i < num_steps; i++) {
+    let x1, y1, gradient = [1,1];  // dummy gradient
+    while (adam_history.length <= max_iters && math.norm(gradient) > convergence_tol) {
         gradient = grad_f(f, x0, y0)
         m_x = beta_1 * m_x + (1 - beta_1) * gradient[0]
         m_y = beta_1 * m_y + (1 - beta_1) * gradient[1]
@@ -415,12 +517,6 @@ function draw_path(path_data, type, path_g) {
                    .attr("stroke-opacity", 0.5);
 }
 
-/*
- * Start minimization from click on contour map
- */
-
-
-
 </script>
 ```
 
@@ -465,12 +561,32 @@ Notice that the "pure" Newton's method has embedded in the direction of the step
 3. **return** {math}`x_k`.
 ```
 
-Should we talk about DFP first before BFGS?
+While Newton's method can be very effective, computing the Hessian and its inversion may be prohibitively expensive for large problems.
+Quasi-Newton methods circumvent this problem by approximating the Hessian instead of calculating it directly, making them a lot more efficient.
+Instead of the Newton way of obtaining the direction by solving $d= -H^{-1}(x_k)\nabla f(x_k)$,
+BFGS approximates $H^{-1}(x_k)$ with $B_k$ complemented with an update rule.
+
+```{prf:algorithm} BFGS algorithm
+:label: alg:bfgs
+**Inputs:** Objective {math}`f`, initial point {math}`x_0`, initial inverse Hessian approximation {math}`B_0`, convergence criterion `converged`.
+1. {math}`k = 0`
+2. **while** not `converged()`:
+    1. Compute direction {math}`d_k = -B_k \nabla f(x_k)`
+    2. Determine step size / learning rate {math}`\lambda`
+    3. Compute {math}`s_k = \lambda d_k`
+    4. Update {math}`x_{k+1} = x_k + s_k`
+    5. Compute {math}`y_k = \nabla f(x_{k+1}) - \nabla f(x_k)`
+    6. Update inverse Hessian approximation:
+       ```{math}
+       B_{k+1} = B_k + \left(1 + \frac{y_k^\top B_k y_k}{y_k^\top s_k}\right) \frac{s_k s_k^\top}{s_k^\top y_k} - \frac{B_k y_k s_k^\top + s_k y_k^\top B_k}{s_k^\top y_k}
+       ```
+    7. {math}`k = k + 1`
+3. **return** {math}`x_k`.
+```
 
 ```{raw} html
-<body>
 <div id="d3-newton"></div>
-</body>
+<select name="newton-func"></select>
 <style>
 .newton {
     stroke: black;
@@ -488,10 +604,24 @@ Should we talk about DFP first before BFGS?
 <script>
 
 const newton_container = {
-    "Newton": [get_newton_path, 300, 1e-4],
-    "BFGS": [get_bfgs_path, 100, 1e-4]
+    "Newton": [get_newton_path],
+    "BFGS": [get_bfgs_path]
 }
-create_interactive_plot("#d3-newton", newton_container, f);
+d3.select('select[name="newton-func"]')
+    .on('change', function() {
+        const func = d3.select(this).property('value');
+        d3.select("#d3-newton").selectChild().remove();  // remove previous plot
+        create_interactive_plot("#d3-newton", newton_container, func);
+        })
+    .selectAll('option')
+    .data(Object.keys(funcs))
+    .enter()
+    .append('option')
+    .attr('value', d=>d)
+    .text(d => d);
+
+
+create_interactive_plot("#d3-newton", newton_container, "Two Gaussians");
 
 function golden_ls(f, a, b, l) {
     const alpha = 0.618 // 1/golden_ratio
@@ -519,14 +649,55 @@ function golden_ls(f, a, b, l) {
     return (a+b)/2
 }
 
-function get_newton_path(f, x0, y0, num_steps, tol) {
+// Adapted from https://themadcreator.github.io/luqr/
+function decomposeLDL(A) {
+    const n = A.length
+    let L = [[0,0],[0,0]]
+    let d = [0,0]
+    let a
+
+    for (let j=0; j<n; j++) {
+        L[j][j] = 1;
+        a = A[j][j]
+        for (let k=0; k<j; k++) {
+            a -= d[k] * L[j][k] * L[j][k]
+        }
+        d[j] = a
+
+        for (let i=j+1; i<n; i++) {
+            L[j][i] = 0
+            a = A[i][j]
+            for (let k=0; k<j; k++) {
+                a -= d[k] * L[i][k] * L[j][k]
+            }
+            L[i][j] = a / d[j]
+        }
+    }
+
+    for (let j=0; j<n; j++) {
+        if (d[j] < 0) {
+            d[j] = 1
+        }
+    }
+    return {L, d}
+}
+
+function LDLsolve(hess, grad) {
+    const {L, d} = decomposeLDL(hess)
+    let sol = math.lsolve(L, grad)
+    sol = math.lsolve(math.diag(d), sol)
+    sol = math.usolve(math.transpose(L), sol)
+    sol = math.reshape(sol,[2])
+    return math.chain(sol).divide(math.norm(sol)).multiply(-1).done()
+}
+
+function get_newton_path(f, x0, y0, scale_x, scale_y) {
     let newton_history = [{"x": scale_x.invert(x0), "y": scale_y.invert(y0)}];
-    let x1, y1, gradient, hessian, lr;
-    for (i = 0; i < num_steps; i++) {
+    let x1, y1, hessian, lr, gradient = [1,1];  // dummy gradient
+    while (newton_history.length <= max_iters && math.norm(gradient) > convergence_tol) {
         gradient = grad_f(f, x0, y0);
-        if (math.norm(gradient) < tol) return newton_history;
         hessian = hess_f(f, x0, y0);
-        dir = math.chain(hessian).inv().multiply(gradient, -1).done()
+        dir = LDLsolve(hessian, gradient) // https://www.rose-hulman.edu/~bryan/lottamath/newton2.pdf
         const foo = (l) => f(x0 + l*dir[0], y0 + l*dir[1])
         lr = golden_ls(foo, 0, 10, 1e-7)
         x1 = x0 + lr * dir[0]
@@ -538,15 +709,14 @@ function get_newton_path(f, x0, y0, num_steps, tol) {
     return newton_history;
 }
 
-function get_bfgs_path(f, x0, y0, num_steps, tol) {
+function get_bfgs_path(f, x0, y0, scale_x, scale_y) {
     let bfgs_history = [{"x": scale_x.invert(x0), "y": scale_y.invert(y0)}];
-    let x1, y1, gradient, s, g, rho;
+    let x1, y1, s, g, rho, gradient = [1,1];  // dummy gradient
     const id_matrix = math.matrix([[1.,0.],[0.,1.]]);
     let H = id_matrix;
     let next_grad = grad_f(f, x0, y0);
-    for (i = 0; i < num_steps; i++) {
+    while (bfgs_history.length <= max_iters && math.norm(gradient) > convergence_tol) {
         gradient = next_grad;
-        if (math.norm(gradient) < tol) return bfgs_history;
         dir = math.chain(H).multiply(gradient, -1).done();
         const foo = (l) => f(x0 + l*dir.get([0]), y0 + l*dir.get([1]));
         lr = golden_ls(foo, 0, 10, 1e-7);
@@ -569,31 +739,6 @@ function get_bfgs_path(f, x0, y0, num_steps, tol) {
         y0 = y1;
     }
     return bfgs_history;
-}
-</script>
-```
-
-## Playground
-
-WIP
-
-Considerations:
-- security: This is all client-side so I expect it should be fine to evaluate arbitrary input from users. The only concern I can imagine is that if the expression is for some reason very complicated, it could take up too much CPU and freeze. This may be prevented with something like [this](https://github.com/josdejong/workerpool).
-- domain: The function domain is right now hardcoded to `[-2,2]**2`. I think it may be annoying to make it
-
-```{raw} html
-Enter a math expression: <input type="text" id="eq-box"/> <button onclick="onClick()">Draw</button>
-<div id="d3-custom"></div>
-
-<script>
-function onClick() {
-    const inputBox = document.getElementById("eq-box");
-    const val = inputBox.value;
-    const f = math.evaluate("f(x,y)=" + val);
-    f_values = get_values(f, nx, ny);
-    console.log(f_values.slice(0,5));
-    d3.select("#d3-custom").selectAll("*").remove() 
-    create_interactive_plot("#d3-custom", gradient_container, f);
 }
 </script>
 ```

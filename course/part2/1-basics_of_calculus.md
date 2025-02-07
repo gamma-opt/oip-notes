@@ -13,6 +13,7 @@ kernelspec:
   name: julia-1.10
 ---
 
+(p2l1)=
 # Basics of calculus for optimisation
 
 Before we proceed further, we will need to revisit (or visit for the first time) some key concepts form calculus. Essentially, we are interested in understanding how we can pose the conditions that a given solution must satisfy such that we can guarantee that the solution can called optimal. There several particular aspects to be considered, the most crucial is whether we are dealing with unconstrained or constrained optimisation problems. We will first consider the case without constraints.
