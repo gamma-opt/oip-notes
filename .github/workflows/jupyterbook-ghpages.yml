@@ -3,7 +3,7 @@ name: GitHub Pages with jupyter-book
 on:
   # Runs on pushes that change content
   push:
-    branches: ["main"]
+    branches: ["deploy"]
     paths: ["course/**"]
   # Allow manual triggering
   workflow_dispatch:
@@ -34,7 +34,7 @@ jobs:
       - name: Install Julia
         uses: julia-actions/setup-julia@v2
         with:
-          version: '1.10'  # Should be the same as what MyST-md expects
+          version: '1.11'  # Should be the same as what MyST-md expects
       
       - name: Julia environment cache
         uses: julia-actions/cache@v1
