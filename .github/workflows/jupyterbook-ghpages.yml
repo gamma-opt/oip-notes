@@ -34,7 +34,7 @@ jobs:
       - name: Install Julia
         uses: julia-actions/setup-julia@v2
         with:
-          version: '1.11'  # Should be the same as what MyST-md expects
+          version: '1.10'  # Should be the same as what MyST-md expects
       
       - name: Julia environment cache
         uses: julia-actions/cache@v1
@@ -47,6 +47,10 @@ jobs:
           Pkg.instantiate()
           Pkg.build("IJulia")
         shell: julia --color=yes {0}
+
+      - name: Update Sphinx
+        shell: bash -leo pipefail {0}  # Needed for mamba profile
+        run: pip install "sphinx>7,<8"
 
       - name: Build HTML
         shell: bash -leo pipefail {0}  # Needed for mamba profile
