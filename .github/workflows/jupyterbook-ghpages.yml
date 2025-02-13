@@ -3,7 +3,7 @@ name: GitHub Pages with jupyter-book
 on:
   # Runs on pushes that change content
   push:
-    branches: ["main"]
+    branches: ["deploy"]
     paths: ["course/**"]
   # Allow manual triggering
   workflow_dispatch:
