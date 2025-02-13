@@ -19,7 +19,7 @@ class SimplexGiapetto(MovingCameraScene):
         self.play(Write(text))
         return text
 
-    def replace_text(self, text_mobj, str, *, wait=1, t2c=None):
+    def replace_text(self, text_mobj, str, *, wait=1.5, t2c=None):
         """
         Transforms text_mobj to one with str, with some hardcoded settings
         """
@@ -67,7 +67,7 @@ class SimplexGiapetto(MovingCameraScene):
         self.wait()
 
         self.play(
-            dummy_plane.animate.next_to(title, DOWN).shift(1.8*RIGHT)
+            dummy_plane.animate.next_to(title, DOWN).shift(2*RIGHT)
         )
 
         ###
@@ -79,14 +79,14 @@ class SimplexGiapetto(MovingCameraScene):
                        &x_1+x_2\leq 80 \\
                        &x_1\leq 40 \\
                        &x_1, x_2\geq 0
-                       """).next_to(dummy_plane, RIGHT)
+                       """).to_edge(RIGHT)
         text_opt.save_state()  # save colors etc
         self.play(Write(text_opt))
 
         ###
         ###
         self.replace_text(text, "What is the feasible region for this problem?")
-        self.replace_text(text, "We can start by considering the nonnegativity constraints.", wait=0)
+        self.replace_text(text, "We can start by considering the nonnegativity constraints.")
 
         ###
         # Highlight nonnegativity constraints
@@ -116,7 +116,7 @@ class SimplexGiapetto(MovingCameraScene):
         )
 
         height = (title.get_bottom() - text.get_top())[1]
-        plane = VGroup(ax, labs).scale_to_fit_height(height).scale(0.95).to_edge(LEFT).shift(0.2*UP)
+        plane = VGroup(ax, labs).scale_to_fit_height(height).scale(0.95).to_edge(LEFT).shift(0.15*UP)
         self.play(
             ReplacementTransform(
                 dummy_plane,
@@ -234,6 +234,7 @@ class SimplexGiapetto(MovingCameraScene):
         self.remove(text)
         self.wait()
         text = self.create_text("There are 5 vertices that are possibly the optimum.")
+        self.wait()
 
 
         ###
@@ -257,7 +258,7 @@ class SimplexGiapetto(MovingCameraScene):
         self.replace_text(text, "With only 5 points, one could try bruteforcing.")
         self.replace_text(text, "But that is not feasible in larger problems.")
         self.replace_text(text, "We need a smarter solution.")
-        self.replace_text(text, "The simplex algorithm offers a smart way of iterating through the vertices.", wait=1.5)
+        self.replace_text(text, "The simplex algorithm offers a smart way of iterating through the vertices.")
 
         ###
         # Save before Simplex explanation
@@ -278,10 +279,10 @@ class SimplexGiapetto(MovingCameraScene):
 
         text_opt2 = MathTex(r"""
                        \max~&3x_1+2x_2 \\
-                       \mathop{\text{s.t.~}}&2x_1+x_2+x_3= 100 \\
-                       &x_1+x_2 + x_4 = 80 \\
-                       &x_1 + x_5 = 40 \\
-                       &x_1,\dots,x_5\geq 0
+                       \mathop{\text{s.t.~}}&2x_1+x_2+s_1= 100 \\
+                       &x_1+x_2 + s_2 = 80 \\
+                       &x_1 + s_3 = 40 \\
+                       &x_1,\dots,s_3\geq 0
                        """)
         arrow = Arrow(start=LEFT, end=RIGHT)
         tmp = VGroup(text_opt.copy(), arrow, text_opt2).arrange()
@@ -320,10 +321,10 @@ class SimplexGiapetto(MovingCameraScene):
         self.replace_text(text, "We will also rewrite the constraints so that the slack variables are left alone.")
         text_opt3 = MathTex(
                        r"\max~&3x_1+2x_2 \\",
-                       r"\mathop{\text{s.t.~}}",r"&x_3= 100-2x_1-x_2 \\",
-                       r"&x_4 = 80-x_1-x_2 \\",
-                       r"&x_5 = 40-x_1 \\",
-                       r"&x_1,\dots,x_5\geq 0"
+                       r"\mathop{\text{s.t.~}}",r"&s_1= 100-2x_1-x_2 \\",
+                       r"&s_2 = 80-x_1-x_2 \\",
+                       r"&s_3 = 40-x_1 \\",
+                       r"&x_1,\dots,s_3\geq 0"
                        )
         text_opt3.save_state()
         tmp = VGroup(text_opt2, arrow, text_opt3).arrange().save_state()
@@ -367,8 +368,8 @@ class SimplexGiapetto(MovingCameraScene):
         self.play(
             text_opt.animate.restore(),
         )
-        self.replace_text(text, "In doing so, we will make all variables in the objective function have a negative sign.", wait=1.5)
-        self.replace_text(text, "Since these variables have negative signs and are nonegative, maximisation is achieved when they are zero.", wait=1.5)
+        self.replace_text(text, "In doing so, we will make all variables in the objective function have a negative sign.")
+        self.replace_text(text, "Since these variables have negative signs and are nonegative, maximisation is achieved when they are zero.")
         self.play(FadeOut(text))
         self.remove(text)
 
@@ -381,9 +382,10 @@ class SimplexGiapetto(MovingCameraScene):
         )
 
         ###
-        # Pick x_1 to rewrite with x_5
+        # Pick x_1 to rewrite with s_3
         ###
         text = self.create_text("We need to pick which variable to rewrite.")
+        self.wait(2)
         self.replace_text(text, "And also which constraint to rewrite with.")
         self.replace_text(text, "Suppose we pick this pair.", wait=0.5)
         self.play(
@@ -395,14 +397,15 @@ class SimplexGiapetto(MovingCameraScene):
         # rewrite constraint
         tmp = MathTex(r"\max~&3{{x_1}}+2x_2 \\",
                       r"\mathop{\text{s.t.~}}",
-                      r"&x_3= 100-2x_1-x_2 \\",
-                      r"&x_4 = 80-x_1-x_2 \\",
-                      r"&x_1 = 40-x_5 \\",
-                      r"&x_1,\dots,x_5\geq 0"
+                      r"&s_1= 100-2x_1-x_2 \\",
+                      r"&s_2 = 80-x_1-x_2 \\",
+                      r"&x_1 = 40-s_3 \\",
+                      r"&x_1,\dots,s_3\geq 0"
                        ).move_to(text_opt)
         self.play(TransformMatchingShapes(text_opt, tmp))
         self.remove(text_opt)
         text_opt = tmp
+        self.wait()
 
         # Swap constraints
         height = text_opt[4].get_y() - text_opt[5].get_y()
@@ -411,27 +414,28 @@ class SimplexGiapetto(MovingCameraScene):
             text_opt[5].animate.shift(height*DOWN),
             text_opt[6].animate.shift(2*height*UP)
         )
+        self.wait()
 
         # Substitute
-        target = MathTex(r"\max~&", r"3{{(40-x_5)}}+2x_2 \\",
+        target = MathTex(r"\max~&", r"3{{(40-s_3)}}+2x_2 \\",
                          r"\mathop{\text{s.t.~}}",
-                         r"&x_1 = 40-x_5 \\",
-                         r"&x_3= 100-2{{x_1}}-x_2 \\",
-                         r"&x_4 = 80-{{x_1}}-x_2 \\",
-                         r"&x_1,\dots,x_5\geq 0").move_to(text_opt)
-        moving = MathTex("{{(40-x_5)}}").move_to(text_opt[6], RIGHT)
+                         r"&x_1 = 40-s_3 \\",
+                         r"&s_1= 100-2{{x_1}}-x_2 \\",
+                         r"&s_2 = 80-{{x_1}}-x_2 \\",
+                         r"&x_1,\dots,s_3\geq 0").move_to(text_opt)
+        moving = MathTex("{{(40-s_3)}}").move_to(text_opt[6], RIGHT)
         self.play(TransformMatchingTex(VGroup(text_opt, moving), target))
         self.remove(text_opt, moving)
         text_opt = target
         self.wait(1)
 
         # Expand
-        tmp = MathTex(r"120+2x_2-3x_5 \\").move_to(text_opt[3], UR)
+        tmp = MathTex(r"120+2x_2-3s_3 \\").move_to(text_opt[3], UR)
         self.play(Transform(Group(*text_opt[1:4]), tmp))
         self.remove(tmp)
 
         self.replace_text(text, "Since the new variable has a negative sign, we want to set it to zero.")
-        self.replace_text(text, "Doing so means that $x_1$ is equal to 40.")
+        self.replace_text(text, "Doing so means, by the first constraint, that $x_1$ is equal to 40.")
         self.replace_text(text, "So we have moved from this point ...")
         self.play(Flash(dots[0]))
         self.replace_text(text, "... to this point.")
@@ -440,22 +444,22 @@ class SimplexGiapetto(MovingCameraScene):
         # Substitute
         ## Awkward animation here
         self.replace_text(text, "We substitute the remaining $x_1$s here...")
-        target = MathTex(r"\max~&120+2x_2-3x_5 \\",
+        target = MathTex(r"\max~&120+2x_2-3s_3 \\",
                          r"\mathop{\text{s.t.~}}",
-                         r"&x_1 = 40-x_5 \\",
-                         r"&x_3 =", r"100-2{{(40-x_5)}}-x_2 \\",
-                         r"&x_4 =", r"80-{{(40-x_5)}}-x_2 \\",
-                         r"&x_1,\dots,x_5\geq 0").to_edge(RIGHT)
+                         r"&x_1 = 40-s_3 \\",
+                         r"&s_1 =", r"100-2{{(40-s_3)}}-x_2 \\",
+                         r"&s_2 =", r"80-{{(40-s_3)}}-x_2 \\",
+                         r"&x_1,\dots,s_3\geq 0").to_edge(RIGHT)
         self.play(text_opt.animate.align_to(target, UL))
-        moving = MathTex("{{(40-x_5)}}").move_to(text_opt[5], RIGHT)
+        moving = MathTex("{{(40-s_3)}}").move_to(text_opt[5], RIGHT)
         self.play(TransformMatchingTex(VGroup(text_opt, moving), target))
         self.remove(text_opt, moving)
         text_opt = target
         self.wait()
 
         # Expand
-        tmp1 = MathTex(r"20-x_2+2x_5 \\").align_to(text_opt[4], UL)
-        tmp2 = MathTex(r"40-x_2+x_5 \\").align_to(text_opt[8], UL)
+        tmp1 = MathTex(r"20-x_2+2s_3 \\").align_to(text_opt[4], UL)
+        tmp2 = MathTex(r"40-x_2+s_3 \\").align_to(text_opt[8], UL)
         self.play(
             Transform(Group(*text_opt[4:7]), tmp1),
             Transform(Group(*text_opt[8:11]), tmp2)
@@ -473,28 +477,29 @@ class SimplexGiapetto(MovingCameraScene):
             FadeToColor(text_opt[0][8:10], color=YELLOW),
             FadeToColor(text_opt[3][0:2], color=RED)
             )
+        self.wait()
         
         # Rewrite constraint
         ## Awkward
-        tmp = MathTex(r"&x_2 = 20-x_3+2x_5 \\").move_to(text_opt[3], LEFT)
+        tmp = MathTex(r"&x_2 = 20-s_1+2s_3 \\").move_to(text_opt[3], LEFT)
         self.play(Transform(Group(*text_opt[3:7]), tmp))
         self.wait()
 
         # Substitute
-        target = MathTex(r"\max~&", "120+2", "{{(20-x_3+2x_5)}}", r"-3x_5 \\",
+        target = MathTex(r"\max~&", "120+2", "{{(20-s_1+2s_3)}}", r"-3s_3 \\",
                          r"\mathop{\text{s.t.~}}",
-                         r"&x_1 = 40-x_5 \\",
-                         r"&x_2 = 20-x_3+2x_5 \\",
-                         r"&x_4 = 40-{{x_2}}+x_5 \\",
-                         r"&x_1,\dots,x_5\geq 0").to_edge(RIGHT)
+                         r"&x_1 = 40-s_3 \\",
+                         r"&x_2 = 20-s_1+2s_3 \\",
+                         r"&s_2 = 40-{{x_2}}+s_3 \\",
+                         r"&x_1,\dots,s_3\geq 0").to_edge(RIGHT)
         self.play(text_opt.animate.align_to(target, UL))
-        moving = MathTex("{{(20-x_3+2x_5)}}").move_to(text_opt[5], RIGHT)
+        moving = MathTex("{{(20-s_1+2s_3)}}").move_to(text_opt[5], RIGHT)
         self.play(TransformMatchingTex(VGroup(text_opt, moving), target))
         text_opt = target
         self.wait()
 
         # Expand
-        tmp = MathTex(r"160-2x_3+x_5 \\").move_to(text_opt[1], UL)
+        tmp = MathTex(r"160-2s_1+s_3 \\").move_to(text_opt[1], UL)
         self.play(Transform(Group(*text_opt[1:4]), tmp))
         self.play(text_opt.animate.to_edge(RIGHT))
 
@@ -506,25 +511,25 @@ class SimplexGiapetto(MovingCameraScene):
         # Substitute
         ## Awkward animation here
         self.replace_text(text, "We substitute the remaining $x_2$ ...")
-        target = MathTex(r"\max~&160-2x_3+{{x_5}} \\",
+        target = MathTex(r"\max~&160-2s_1+{{s_3}} \\",
                          r"\mathop{\text{s.t.~}}",
-                         r"&x_1 = 40-x_5 \\",
-                         r"&x_2 = 20-x_3+2x_5 \\",
-                         r"&x_4 =", r"40-{{(20-x_3+2x_5)}}+x_5 \\",
-                         r"&x_1,\dots,x_5\geq 0").to_edge(RIGHT)
+                         r"&x_1 = 40-s_3 \\",
+                         r"&x_2 = 20-s_1+2s_3 \\",
+                         r"&s_2 =", r"40-{{(20-s_1+2s_3)}}+s_3 \\",
+                         r"&x_1,\dots,s_3\geq 0").to_edge(RIGHT)
         self.play(text_opt.animate.align_to(target, UL))
-        moving = MathTex("{{(20-x_3+2x_5)}}").move_to(text_opt[6], RIGHT)
+        moving = MathTex("{{(20-s_1+2s_3)}}").move_to(text_opt[6], RIGHT)
         self.play(TransformMatchingTex(VGroup(text_opt, moving), target))
         text_opt = target
         self.wait()
 
         # Expand
-        tmp = MathTex(r"20+x_3-x_5 \\").align_to(text_opt[7], UL)
+        tmp = MathTex(r"20+s_1-s_3 \\").align_to(text_opt[7], UL)
         self.play(Transform(Group(*text_opt[7:10]), tmp))
         self.play(text_opt.animate.to_edge(RIGHT))
 
         ###
-        # Pick x_5 to rewrite with x_4
+        # Pick s_3 to rewrite with s_2
         ###
         self.replace_text(text, "Now, these two.")
         self.play(
@@ -534,44 +539,44 @@ class SimplexGiapetto(MovingCameraScene):
         
         # Rewrite constraint
         ## Awkward
-        tmp = MathTex(r"&x_5 = 20+x_3-x_4 \\").move_to(text_opt[6], LEFT)
+        tmp = MathTex(r"&s_3 = 20+s_1-s_2 \\").move_to(text_opt[6], LEFT)
         self.play(Transform(VGroup(*text_opt[6:10]), tmp))
         self.wait()
 
         # Substitute
-        target = MathTex(r"\max~&{{160-2x_3+}}{{(20+x_3-x_4)}} \\",
+        target = MathTex(r"\max~&{{160-2s_1+}}{{(20+s_1-s_2)}} \\",
                          r"\mathop{\text{s.t.~}}",
-                         r"&x_1 = 40-x_5 \\",
-                         r"&x_2 = 20-x_3+2{{x_5}} \\",
-                         r"&x_5 = 20+x_3-x_4 \\",
-                         r"&x_1,\dots,x_5\geq 0").to_edge(RIGHT)
+                         r"&x_1 = 40-s_3 \\",
+                         r"&x_2 = 20-s_1+2{{s_3}} \\",
+                         r"&s_3 = 20+s_1-s_2 \\",
+                         r"&x_1,\dots,s_3\geq 0").to_edge(RIGHT)
         self.play(text_opt.animate.align_to(target, UL))
-        moving = MathTex("{{(20+x_3-x_4)}}").move_to(text_opt[7], RIGHT)
+        moving = MathTex("{{(20+s_1-s_2)}}").move_to(text_opt[7], RIGHT)
         self.play(TransformMatchingTex(VGroup(text_opt, moving), target))
         text_opt = target
         self.wait()
 
         # Expand
-        tmp = MathTex(r"180-x_3-x_4 \\").move_to(text_opt[1], UL)
+        tmp = MathTex(r"180-s_1-s_2 \\").move_to(text_opt[1], UL)
         self.play(Transform(Group(*text_opt[1:4]), tmp))
         self.play(text_opt.animate.to_edge(RIGHT))
 
         # Substitute
-        self.replace_text(text, "Substitute the remaining $x_5$ ...")
-        target = MathTex(r"\max~&180-x_3-x_4 \\",
+        self.replace_text(text, "Substitute the remaining $s_3$ ...")
+        target = MathTex(r"\max~&180-s_1-s_2 \\",
                          r"\mathop{\text{s.t.~}}",
-                         r"&x_1 = 40-x_5 \\",
-                         r"&x_2 = {{20-x_3+2}}{{(20+x_3-x_4)}} \\",
-                         r"&x_5 = 20+x_3-x_4 \\",
-                         r"&x_1,\dots,x_5\geq 0").to_edge(RIGHT)
+                         r"&x_1 = 40-s_3 \\",
+                         r"&x_2 = {{20-s_1+2}}{{(20+s_1-s_2)}} \\",
+                         r"&s_3 = 20+s_1-s_2 \\",
+                         r"&x_1,\dots,s_3\geq 0").to_edge(RIGHT)
         self.play(text_opt.animate.align_to(target, UL))
-        moving = MathTex("{{(20+x_3-x_4)}}").move_to(text_opt[5], RIGHT)
+        moving = MathTex("{{(20+s_1-s_2)}}").move_to(text_opt[5], RIGHT)
         self.play(TransformMatchingTex(VGroup(text_opt, moving), target))
         text_opt = target
         self.wait()
 
         # Expand
-        tmp = MathTex(r"60+x_3-2x_4 \\").align_to(text_opt[4], UL)
+        tmp = MathTex(r"60+s_1-2s_2 \\").align_to(text_opt[4], UL)
         self.play(Transform(Group(*text_opt[4:7]), tmp))
         self.play(text_opt.animate.to_edge(RIGHT))
 
