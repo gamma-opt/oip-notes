@@ -22,7 +22,7 @@ class BNB(Scene):
         self.play(Write(text))
         return text
 
-    def replace_text(self, text_mobj, str, *, wait=1):
+    def replace_text(self, text_mobj, str, *, wait=1.5):
         """
         Transforms text_mobj to one with str, with some hardcoded settings
         """
@@ -60,7 +60,7 @@ class BNB(Scene):
         ###
         # Highlight MILP nature
         ###
-        self.replace_text(text, "This is like any linear problem we have seen before, with one key difference.", wait=2)
+        self.replace_text(text, "This is like any linear problem we have seen before, with one key difference.")
         self.replace_text(text, "There is a constraint that forces variables to be integers.")
         self.play(Circumscribe(integrality))
 
@@ -185,7 +185,8 @@ class BNB(Scene):
         label = MathTex("(8.5,4.5)").next_to(dots[2], UP+RIGHT)
         self.play(
             FadeOut(VGroup(*[d for i,d in enumerate(dots) if i!=2])),
-            FadeIn(label)
+            FadeIn(label),
+            Flash(dots[2])
             )
         ##
 
@@ -194,9 +195,9 @@ class BNB(Scene):
         ###
         integrality.next_to(lp, DOWN)
         self.replace_text(text, "However, this solution is infeasible for our original problem.")
-        self.play(Write(integrality))
-        self.replace_text(text, "Here, both $x_1$ and $x_2$ are not integers.", wait=2)
-        self.replace_text(text, "How do we deal with this?", wait=2)
+        self.play(Write(integrality), Circumscribe(integrality))
+        self.replace_text(text, "Here, both $x_1$ and $x_2$ are not integers.")
+        self.replace_text(text, "How do we deal with this?")
 
         ###
         # Branch on x_1, x_1 \geq 9
@@ -204,8 +205,8 @@ class BNB(Scene):
         self.replace_text(text, "One idea is the following:", wait=2)
         self.replace_text(text, "First, we pick a variable that violates the integrality constraint, say $x_1$.", wait=3)
         self.replace_text(text, "Since we don't want $x_1=8.5$, we can add additional constraints to exclude it.", wait=3)
-        self.replace_text(text, r"There are two options: $x_1\leq 8$ or $x_1\geq 9$.", wait=2)
-        self.replace_text(text, r"Let's start with $x_1\geq 9$.", wait=2)
+        self.replace_text(text, r"There are two options: $x_1\leq 8$ or $x_1\geq 9$.")
+        self.replace_text(text, r"Let's start with $x_1\geq 9$.")
         self.replace_text(text,  "We add it to our problem and use the simplex again.")
 
         branch = MathTex(r"x_1\geq 9").next_to(integrality, DOWN).align_to(integrality, LEFT).set_color_by_tex("9", ORANGE)
@@ -231,9 +232,9 @@ class BNB(Scene):
         branch_optim = VGroup(dot_branch, label_branch)
         self.play(FadeIn(branch_optim))
 
-        self.replace_text(text, "This new solution satisfies the integrality constraint!", wait=2)
+        self.replace_text(text, "This new solution satisfies the integrality constraint!")
         self.replace_text(text, "Does this mean we are done and this is the best we can get?", wait=3)
-        self.replace_text(text, "Not quite. Let's take a step back.", wait=2)
+        self.replace_text(text, "Not quite. Let's take a step back.")
 
         ###
         # Clear everything but the opt problem
@@ -245,7 +246,7 @@ class BNB(Scene):
         ###
         # Draw tree root
         ###
-        text = self.create_text("Suppose we name this optimisation problem $P_0$, ignoring the integrality constraint.")
+        text = self.create_text("Suppose we name the optimisation problem $P_0$, ignoring the integrality constraint.")
         p0 = circleWithTex("P_0")
         p0_p = MathTex("x=(8.5,4.5)", font_size=LABEL_FONT_SIZE).next_to(p0, UP)
         p0_o = MathTex("obj=156.5", font_size=LABEL_FONT_SIZE).next_to(p0, DOWN)
@@ -254,7 +255,7 @@ class BNB(Scene):
         self.wait(3)
         self.replace_text(text, "We know that the optimum of this problem is $(8.5,4,5)$.")
         self.play(FadeIn(p0_p))
-        self.replace_text(text, "And we can calculate its objective value as 156.5.", wait=2)
+        self.replace_text(text, "And we can calculate its objective value as 156.5.")
         self.play(FadeIn(p0_o))
 
         ###
@@ -292,10 +293,10 @@ class BNB(Scene):
         l_02 = MathTex(r"x_1\leq 8", font_size=LABEL_FONT_SIZE).next_to(a_02, UP)
         self.play(Write(VGroup(a_02, l_02)), FadeIn(p2))
 
-        self.replace_text(text, "The solution for this problem turns out to be $(8,4.8)$.", wait=2)
+        self.replace_text(text, "The solution for this problem turns out to be $(8,4.8)$.")
         self.play(FadeIn(p2_p), FadeIn(p2_o))
         self.replace_text(text, "This is not a feasible solution for the original problem either, $x_2$ is not an integer.", wait=3)
-        self.replace_text(text, "So we branch again.", wait=2 )
+        self.replace_text(text, "So we branch again.")
 
         ###
         # Branch on x_2, x_2 \leq 4
@@ -310,7 +311,7 @@ class BNB(Scene):
         self.play(Write(VGroup(a_23, l_23)), FadeIn(p3))
 
         self.play(FadeIn(p3_p), FadeIn(p3_o))
-        self.replace_text(text, "This solution is also feasible, but there is another side to investigate.", wait=2)
+        self.replace_text(text, "This solution is also feasible, but there is another side to investigate.")
         
         ###
         # Branch on x_2, x_2 \geq 5
@@ -330,11 +331,11 @@ class BNB(Scene):
         ###
         # Branch on x_1, x_1 \geq 8 is infeasible
         ###
-        self.replace_text(text, r"We could try branching here with $x_1\geq 8$.", wait=2)
+        self.replace_text(text, r"We could try branching here with $x_1\geq 8$.")
         self.replace_text(text, r"But notice the constraints we added to get here: $x_1\leq 8$ and $x_2\geq 5$.")
         self.play(FadeToColor(VGroup(l_02, l_24), color=YELLOW))
         self.wait()
-        self.replace_text(text, "They imply that $x_1=8$.", wait=2 )
+        self.replace_text(text, r"Adding $x_1\geq 8$ implies that $x_1=8$.")
         self.replace_text(text, "However, $x_1=8$ means that by the third constraint ...")
         opt.save_state()
         self.play(FadeToColor(lp[3], color=YELLOW))
@@ -387,7 +388,7 @@ class BNB(Scene):
         ###
         # Pick the optimum
         ###
-        self.replace_text(text, "We have reached a point where we cannot branch anymore.", wait=2)
+        self.replace_text(text, "We have reached a point where we cannot branch anymore.")
         self.replace_text(text, "All the leaf nodes are solutions to our original problem.", wait=3)
         self.replace_text(text, "By comparing the objective values, we can observe that $x=(6,6)$ is the optimal solution to our MILP.")
         self.play(Circumscribe(node7))
@@ -428,7 +429,7 @@ class BNB(Scene):
         ###
         # Ending note
         ###
-        self.replace_text(text, "This highlights the difficulty of MIPs.")
+        self.replace_text(text, "This highlights the difficulty of MILPs.")
         self.replace_text(text, "In larger problems with many variables, it is often unclear which variable to branch on and in which direction.")
         self.replace_text(text, "Consequently, the search trees often end up being very large, thus problems can take long times to be solved.")
 
