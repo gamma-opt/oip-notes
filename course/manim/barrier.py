@@ -118,7 +118,7 @@ class IPM(Scene):
         self.play(Write(text))
         return text
     
-    def replace_text(self, text_mobj, str, *, wait=1):
+    def replace_text(self, text_mobj, str, *, wait=1.5):
         """
         Transforms text_mobj to one with str, with some hardcoded settings
         """
@@ -380,9 +380,11 @@ class IPM(Scene):
             opt.animate.to_edge(LEFT),
             FadeIn(grad, hess)
             )
+        self.wait(3)
 
         self.replace_text(text, "Then, the equality constraints and their Jacobian.")
         self.play(FadeIn(g, jac))
+        self.wait(2)
 
         self.replace_text(text, "In this example, we only have a single equality constraint, so it is simple.")
         self.replace_text(text, "When there are more constraints, $g$ can be a vector-valued function.")
@@ -440,7 +442,7 @@ class IPM(Scene):
         self.replace_text(text, "For example, $x^0=(0.5,1)$.")
 
         d1 = Dot(point=ax.c2p([[0.5, 1]]), color=RED)
-        l1 = MathTex("(0.5,1)").next_to(d1, 0.8*(UP+0.25*LEFT)).scale(0.8)
+        l1 = MathTex("(0.5,1)").next_to(d1, 0.8*UP).scale(0.8)
         self.play(Create(d1), Flash(d1), Create(l1))
 
         self.replace_text(text, r"We won't worry about initializing $\mu$ and $z$ in this video.")
@@ -452,14 +454,12 @@ class IPM(Scene):
         ###
         # Iterating
         ###
-        self.replace_text(text, "We can finally plug in these values and solve the system to obtain the next point.")
+        self.replace_text(text, "We can finally plug in these values and solve the system to obtain the next point...")
 
         self.play(
             l1.animate.next_to(newton_full, 2*UP)
             )
         
-        self.replace_text(text, "We can finally plug in these values and solve the system to obtain the next point...")
-
         l2 = MathTex(f"({points[1,0]:.2f},{points[1,1]:.2f})").scale(0.8).next_to(newton_full, 2*DOWN)
 
         self.play(FadeIn(l2))
@@ -475,4 +475,4 @@ class IPM(Scene):
             self.play(Create(d), Flash(d))
             self.wait(0.5)
 
-        self.wait(5)
+        self.wait(4)
