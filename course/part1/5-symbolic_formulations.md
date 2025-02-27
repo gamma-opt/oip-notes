@@ -30,7 +30,7 @@ The input data, or model data, is represented by **indices** and their **sets** 
 - **Indices and sets**: represent entities in the problem that are discrete and can be grouped by what they represent in the model.
 - **Parameters**: are numerical values representing quantities that are associated with indices or combinations of indices.
 
-We have come across these before. For example, in the {ref}`p1l5:distribution` problem, we defined the factories as $i = 1:Helsinki, 2:Jyväskylä$. If we define the set $I = \braces{1,2}$, then we can say that the cities are defined as $i \in I$. Now, we can represent the monthly supply capacity of each plant as $C_i$ for all $i \in I$, or equivalently $\forall i \in I$.
+We have come across these before. For example, in the {ref}`p1l5:distribution` problem, we defined the factories as $i = 1:\text{Helsinki}, 2:\text{Jyväskylä}$. If we define the set $I = \braces{1,2}$, then we can say that the cities are defined as $i \in I$. Now, we can represent the monthly supply capacity of each plant as $C_i$ for all $i \in I$, or equivalently $\forall i \in I$.
 
 ```{note}
 It is a convention to represent sets with capital letters and indices with lower case letters (often the same).

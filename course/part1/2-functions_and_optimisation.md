@@ -234,6 +234,10 @@ fig
 ``` 
 -->
 
+```{raw} latex
+% HTML_ONLY_START
+```
+
 The figure below shows the sine function, along with the tangent line at a given point. Notice how the orange line is a good approximation of the blue line close to the green dot. Also, notice how we can, by looking at the inclination of the tangent line tell whether the function is going up or down in value. Make sure you move the slider to see the tangent line at different points.
 
 ```{code-cell}
@@ -301,6 +305,10 @@ app = App() do session
 end
 ```
 
+```{raw} latex
+% HTML_ONLY_END
+```
+
 So far, we have been talking about functions of a single variable, but similar ideas extend to multivariate functions (that is, function with more than one (dimension) variable as their input (in their domain)).
 In fact, {prf:ref}`continuity_def` for continuity applies as written, assuming now {math}`X=\reals^n` for {math}`n\in\mathbb{N}^+`.
 
@@ -326,6 +334,10 @@ J(x) = f(a) + \nabla f(a)^\top (x - a),
 ```
 
 where $x$ is now an $n$-dimensional vector and $\nabla f(a)$ is the *gradient* of $f$ at $(a)$.
+
+```{raw} latex
+% HTML_ONLY_START
+```
 
 Here is how it looks like for a function $f(x,y) = -x^2 - y^2$. As before, notice how the inclination the plane has, generally governed by the gradient vector of the function, can be used to infer how the function behaves around the point (in orange).
 
@@ -409,6 +421,10 @@ end
 :tags: [remove-cell]
 # we are done with WGLMakie so return to Cairo for scrolling
 CairoMakie.activate!()
+```
+
+```{raw} latex
+% HTML_ONLY_END
 ```
 
 Differentiability in the multidimensional case is similar to the univariate case, but has a few technicalities that goes beyond our needs. As a general guideline, if a function $f: \reals^n \to \reals$ is differentiable, then it has **unique** gradients everywhere, which is reassuring if we are planning to use gradients to guide our search for optimal solutions.

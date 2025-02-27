@@ -56,9 +56,16 @@ jobs:
             latexmk                   \
             xindy
         
-      - name: Build PDF from LaTeX
+      - name: Build LaTeX
         shell: bash -leo pipefail {0}  # Needed for mamba profile
-        run: jupyter-book build course --builder pdflatex -n
+        run: |
+          jupyter-book build course --builder latex -n
+          python clean_latex.py
+
+      - name: Build PDF
+        shell: bash -leo pipefail {0}
+        working-directory: ./course/_build/latex
+        run: xelatex book.tex
 
       - name: Push PDF to repo
         run: |

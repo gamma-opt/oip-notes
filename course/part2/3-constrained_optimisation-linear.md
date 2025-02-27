@@ -18,11 +18,13 @@ kernelspec:
 
 The simplex algorithm solves linear problems using a very simple idea.
 Suppose that in a linear optimisation problem, we want to maximise an objective function of the form
+
 ```{math}
 :label: lp_obj_form
 
 a-c_1x_1-\dots-c_nx_n.
 ```
+
 If we know that all {math}`x_i\geq 0`, then the maximum is achieved by setting all variables to $0$, giving us the optimal value as {math}`a`.
 Thus the matter of optimizing becomes a matter of rewriting the linear program in the form of {eq}`lp_obj_form`.
 
@@ -39,13 +41,12 @@ To exemplify this process, consider the following LP
 
 ```{math}
 :label: lp_example
-\begin{align*}
+
 \maxi &3x_1+2x_2 \\
 \stf &2x_1+x_2\leq 100 \\
 &x_1+x_2\leq 80 \\
 &x_1\leq 40 \\
 &x_1,x_2\geq 0.
-\end{align*}
 ```
 
 
@@ -81,13 +82,11 @@ Converting {eq}`lp_example` into canonical form yields
 ```{math}
 :label: lp_canonical
 
-\begin{align*}
 \maxi &3x_1+2x_2 \\
 \stf &s_1=100-2x_1-x_2 \\
 &s_2=80-x_1-x_2 \\
 &s_3=40-x_1 \\
 &x_1,x_2,s_1,s_2,s_3\geq 0.
-\end{align*}
 ```
 
 In this form, the variables remaining on the left side of the linear constraints are called _basic variables_ and the remaining ones are called _non-basic variables_.
@@ -102,25 +101,21 @@ The constraint associated with the former is $s_3=40-x_1$ and solving it for $x_
 We substitute this in all occurences of $x_1$ to obtain
 
 ```{math}
-\begin{align*}
 \maxi &3(40-s_3)+2x_2 \\
 \stf &s_1=100-2(40-s_3)-x_2 \\
 &s_2=80-(40-s_3)-x_2 \\
 &x_1=40-s_3 \\
 &x_1,x_2,s_1,s_2,s_3\geq 0.
-\end{align*}
 ```
 
 ```{math}
 :label: lp_it1
 
-\begin{align*}
 \maxi &120+2x_2-3s_3 \\
 \stf &s_1=20-x_2+2s_3 \\
 &s_2=40-x_2+s_3 \\
 &x_1=40-s_3 \\
 &x_1,x_2,s_1,s_2,s_3\geq 0.
-\end{align*}
 ```
 
 Now, $x_1, s_1$ and $s_2$ are the basic variables.

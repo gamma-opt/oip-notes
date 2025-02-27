@@ -149,6 +149,10 @@ Combining this idea of the "adaptive gradient" with momentum gives a commonly us
 ```
 Here, $\delta$ is a small scalar used to ensure we don't divide by 0.
 
+```{raw} latex
+% HTML_ONLY_START
+```
+
 ```{margin}
 Adapted from [Emilien Dupont's code](https://emiliendupont.github.io/2018/01/24/optimization-visualization/).
 ```
@@ -519,6 +523,10 @@ function draw_path(path_data, type, path_g) {
 }
 
 </script>
+```
+
+```{raw} latex
+% HTML_ONLY_END
 ```
 
 ## Second-order methods: Newton and variants
