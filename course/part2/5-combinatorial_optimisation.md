@@ -148,6 +148,7 @@ A _weighted graph_ is a graph $G=(V,E,w)$ where every edge has an associated wei
 For example, the cities and roads of Finland could be considered as a weighted graph, where the cities are nodes, edges are present in between directly-connected cities, and edge-weights could be the distance in between the two cities.
 
 ```{code-cell}
+:tags: [remove-input]
 using Graphs, GraphMakie
 
 g = barabasi_albert(8, 2, seed=42)
