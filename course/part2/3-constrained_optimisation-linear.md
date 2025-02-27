@@ -178,7 +178,7 @@ If there are multiple constraints prescribing the same value for the non-basic v
 As great and effective the simplex method is, it cannot directly be used on (mixed-)integer problems. 
 Consider the problem
 ```{math}
-:label: bnc_ip
+:label: bnb_ip
 \maxi & 4x_1-x_2 \\
 \st & 7x_1-2x_2\leq 14 \\
 & x_2 \leq 3 \\
@@ -196,7 +196,7 @@ mystnb:
   figure:
     name: fig:ip
     caption: |
-      The integer problem {eq}`bnc_ip`. The blue points represent the integer solutions, the dashed lines are constraints added during the branch-and-bound algorithm. The orange star is the optimal solution to the linear relaxation.
+      The integer problem {eq}`bnb_ip`. The blue points represent the integer solutions, the dashed lines are constraints added during the branch-and-bound algorithm. The orange star is the optimal solution to the linear relaxation.
 tags: [remove-input]
 ---
 
@@ -228,21 +228,21 @@ Simply adding $x_1\neq \frac{20}{7}$ however is not ideal, since it is easily im
 Instead, we can eliminate the entire neighborhood of non-integer solutions, and end up with two _subproblems_: one with the constraint $x_1\leq 2$ and another with $x_1\geq 3$.
 More generally, upon encountering a non-integer solution, we devise cuts, which allows branching into subproblems that can repeat the same process until an integer solution is found.
 
-```{figure} ../figures/bnc.drawio.svg
-:name: bnc_tree
+```{figure} ../figures/bnb.drawio.*
+:name: bnb_tree
 
-Illustration of the branch-and-bound algorithm on {eq}`bnc_ip`, represented by $P_0$. $P_1$ does not need to be solved because the relaxation has an infeasible set of constraints and $P_4$ is pruned as its objective value is smaller than a known feasible solution in $P_3$.
+Illustration of the branch-and-bound algorithm on {eq}`bnb_ip`, represented by $P_0$. $P_1$ does not need to be solved because the relaxation has an infeasible set of constraints and $P_4$ is pruned as its objective value is smaller than a known feasible solution in $P_3$.
 ```
 
 A nice feature of this algorithm is that not every subproblem needs to be solved.
-For example, as illustrated in {numref}`bnc_tree`, subproblem $P_1$ can be detected to be infeasible before the optimisation process by inspecting the constraints.
+For example, as illustrated in {numref}`bnb_tree`, subproblem $P_1$ can be detected to be infeasible before the optimisation process by inspecting the constraints.
 Alternatively, it can be inferred that we don't need to inspect subproblems of $P_4$, since its objective value is smaller than that of $P_3$, which already provides a feasible solution to the integer problem.
 
 ```{warning}
 While in this example, an integer solution was found quickly, real-world problems can quickly get very complicated.
 For example, in a problem with a much larger number of variables, the relaxation may have an optimum with a large number of non-integer variables.
 In this scenario, there may be no more efficient way of continuing the search than adding constraints for one variable at a time.
-Consequently, the _search tree_ for the problem, as exemplified in {numref}`bnc_tree` will be both very wide and deep.
+Consequently, the _search tree_ for the problem, as exemplified in {numref}`bnb_tree` will be both very wide and deep.
 This is exactly why solving (mixed)-integer problems are often more difficult than linear problems.
 ```
 

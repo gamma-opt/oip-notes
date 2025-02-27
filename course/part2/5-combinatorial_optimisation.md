@@ -147,9 +147,21 @@ Graphs are a very flexible mathematical structure that can be used in a variety 
 A _weighted graph_ is a graph $G=(V,E,w)$ where every edge has an associated weight given by some function $w$.
 For example, the cities and roads of Finland could be considered as a weighted graph, where the cities are nodes, edges are present in between directly-connected cities, and edge-weights could be the distance in between the two cities.
 
-```{figure} ../figures/graph.svg
-:name: graphs
-A non-connected graph on the left and a connected, weighted graph on the right.
+```{code-cell}
+using Graphs, GraphMakie
+
+g = barabasi_albert(8, 2, seed=42)
+labels = repr.(1:ne(g))
+fig = Figure()
+ax = Axis(fig[1,2])
+p = graphplot!(ax, g, elabels=labels)
+hidedecorations!(ax); hidespines!(ax); ax.aspect = DataAspect()
+
+g2 = erdos_renyi(10, 0.1, seed=43)
+ax2 = Axis(fig[1,1])
+p = graphplot!(ax2, g2)
+hidedecorations!(ax2); hidespines!(ax2);
+fig
 ```
 
 Given a weighted graph $G=(V,E,w)$, the shortest path between $u\in V$ and $v\in V$ is the path $P=(e_1, \dots, e_n)$ between them that minimizes $\sum_{i=1}^n w(e_i)$.
@@ -175,7 +187,7 @@ In Julia, implementations of {prf:ref}`dijkstra` that solves the single-source a
 
 ```{code-cell}
 :tags: [remove-cell]
-using Random, StatsBase, Graphs, GraphMakie
+using Random, StatsBase#, Graphs, GraphMakie
 
 function generate_distance_matrix(n; random_seed = 1)
     rng = Random.MersenneTwister(random_seed)

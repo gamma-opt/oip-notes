@@ -588,7 +588,7 @@ In this problem, we are searching for a minimum cost distribution routing from t
 More specifically, there are four depots where we can store our product: in Turku, Tampere, Kuopio and Oulu.
 In addition, we sell the product to six customers C1 to C6, who can be supplied from either a factory or a depot.
 
-```{figure} ../figures/distribution.drawio.svg
+```{figure} ../figures/distribution.drawio.*
 :name: fig:distribution
 Illustration of the distribution problem.
 ```

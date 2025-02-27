@@ -87,7 +87,7 @@ In the below code, this is achieved by obtaining a range of the candidate costs 
 If $a=0$, then `cutoff = c_min` and thus solution construction will be purely greedy.
 If $a=1$, then `rcl` will contain every candidate, thus solution construction will be entirely random.
 
-```{figure} ../figures/grasp_first.drawio.svg
+```{figure} ../figures/grasp_first.drawio.*
 Illustration of the RCL in the first phase of the GRASP algorithm.
 ```
 
