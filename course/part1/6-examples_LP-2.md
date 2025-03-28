@@ -38,7 +38,7 @@ Now, we revisit the example in {numref}`p1l5:production`. Our goal is to make a 
 |    $N_k$   |                    Number of machines of type $k$ available                   |    `n_machines[k]`   |
 | $M_{jk}$   | Number of machines of type $k$ that is scheduled for maintenance in month $j$ | `maintenance[j,k]`   |
 | $C^H$      | Cost of holding a product                                                     | `holding_cost`       |
-| $L_{j,i}$  | Market limits of selling product $i$ in month $j$                             | `market_limits[j,i]` |
+| $L_{ji}$  | Market limits of selling product $i$ in month $j$                             | `market_limits[j,i]` |
 | $L^H$      | Holding limit per product                                                     | `holding_limit`      |
 | $T^H$      | Holding target per product at the end of June                                 | `holding_target`     |
 ```
@@ -55,7 +55,7 @@ Given the definitions in {numref}`production_variables`, the statement of the sy
 
 ```{math}
 \maxi & \sum_{i,j} P_i s_{ij} - \sum_{i,j} C^H h_{ij} \\
-\st & s_{i,j} \leq L_{j,i}, \forall i\in I, j \in J \\
+\st & s_{ij} \leq L_{ji}, \forall i\in I, j \in J \\
 & \sum_i U_{ki} m_{ij} \leq 384*(N_k - M_{jk}), \forall k\in K, j\in J \\
 & m_{i1} - s_{i1} - h_{i1} = 0, \forall i\in I \\
 & h_{i(j-1)} + m_{ij} - s_{ij} - h_{ij} = 0, \forall i \in I, j \in J\setminus\{1\} \\
