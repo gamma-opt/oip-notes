@@ -233,10 +233,10 @@ y_t^{10} + y_t^{01} + y_t^{00} = 1
 Then we need to make sure resource utilisation works as expected:
 
 ```{math}
-&3x_t + 5x_c \leq 40 + M(1 - y_t^{01} - y_t^{00})\\
-&7x_t + 4x_c \leq 60 + M(1 - y_t^{01} - y_t^{00})\\
-&2x_t + 5x_c \leq 40 + M(1 - y_t^{10} - y_t^{00})\\
-&5x_t + 4x_c \leq 60 + M(1 - y_t^{10} - y_t^{00}).
+&3x_t + 5x_c \leq 40 + M(1 - y_t^{10} - y_t^{00})\\
+&7x_t + 4x_c \leq 60 + M(1 - y_t^{10} - y_t^{00})\\
+&2x_t + 5x_c \leq 40 + M(1 - y_t^{01} - y_t^{00})\\
+&5x_t + 4x_c \leq 60 + M(1 - y_t^{01} - y_t^{00}).
 ```
 
 Here, the addition of $-y_t^{00}$ ensures that if no table tools are purchased, the big M is still nullified, so that all constraints are active.
@@ -253,17 +253,17 @@ As the aphorism goes: All models are wrong (or in this case incomplete), but som
 The updated and corrected carpenter's model can be stated as
 
 ```{math}
-\text{maximise}_{x_t,x_c} \ &1000x_t + 500x_c - 5000y_t^{01} - 8700y_t^{10} - 600y_c\\
+\text{maximise}_{x_t,x_c} \ &1000x_t + 500x_c - 5000y_t^{10} - 8700y_t^{01} - 600y_c\\
 \text{subject to: } 
-&3x_t + 5x_c \leq 40 + M(1 - y_t^{01} - y_t^{00})\\
-&7x_t + 4x_c \leq 60 + M(1 - y_t^{01} - y_t^{00})\\
-&2x_t + 5x_c \leq 40 + M(1 - y_t^{10} - y_t^{00})\\
-&5x_t + 4x_c \leq 60 + M(1 - y_t^{10} - y_t^{00})\\
+&3x_t + 5x_c \leq 40 + M(1 - y_t^{10} - y_t^{00})\\
+&7x_t + 4x_c \leq 60 + M(1 - y_t^{10} - y_t^{00})\\
+&2x_t + 5x_c \leq 40 + M(1 - y_t^{01} - y_t^{00})\\
+&5x_t + 4x_c \leq 60 + M(1 - y_t^{01} - y_t^{00})\\
 &y_t^{01} + y_t^{10} + y_t^{00} = 1 \\
-& x_t \le M(y_t^{01} + y_t^{10})\\
-& x_c \le My_c \\
+&x_t \le M(y_t^{10} + y_t^{01})\\
+&x_c \le My_c \\
 &x_t, x_c \geq 0 \\
-&y_t^{01}, y_t^{10}, y_t^{00}, y_c \in \{0,1\}.
+&y_t^{10}, y_t^{01}, y_t^{00}, y_c \in \{0,1\}.
 ```
 
 and the solution we obtain is
@@ -275,20 +275,20 @@ M = 100
 
 @variable(m, x_t >= 0, Int)
 @variable(m, x_c >= 0, Int)
-@variable(m, y_t01, Bin)
 @variable(m, y_t10, Bin)
+@variable(m, y_t01, Bin)
 @variable(m, y_t00, Bin)
 @variable(m, y_c, Bin)
 
-@objective(m, Max, 1000*x_t + 500*x_c - 5000*y_t01 - 8700*y_t10 - 600*y_c)
+@objective(m, Max, 1000*x_t + 500*x_c - 5000*y_t10 - 8700*y_t01 - 600*y_c)
 
-@constraint(m, 3*x_t + 5*x_c <= 40 + M*(1-y_t01 - y_t00))
-@constraint(m, 7*x_t + 4*x_c <= 60 + M*(1-y_t01 - y_t00))
-@constraint(m, 2*x_t + 5*x_c <= 40 + M*(1-y_t10 - y_t00))
-@constraint(m, 5*x_t + 4*x_c <= 60 + M*(1-y_t10 - y_t00))
-@constraint(m, x_t <= M*(y_t01+y_t10))
+@constraint(m, 3*x_t + 5*x_c <= 40 + M*(1-y_t10 - y_t00))
+@constraint(m, 7*x_t + 4*x_c <= 60 + M*(1-y_t10 - y_t00))
+@constraint(m, 2*x_t + 5*x_c <= 40 + M*(1-y_t01 - y_t00))
+@constraint(m, 5*x_t + 4*x_c <= 60 + M*(1-y_t01 - y_t00))
+@constraint(m, x_t <= M*(y_t10 + y_t01))
 @constraint(m, x_c <= M*y_c)
-@constraint(m, y_t01 + y_t10 + y_t00 == 1)
+@constraint(m, y_t10 + y_t01 + y_t00 == 1)
 
 optimize!(m)
 
@@ -299,7 +299,7 @@ Turns out the table tools are both too expensive to warrant their purchase. More
 
 ````{note}
 The above exclusive-OR and regular-OR constraints can be generalized to accept a certain number of values.
-For example, to pick $c$ states out of $N$ could be modeled with
+For example, to pick $c$ states out of $N$ could be modelled with
 ```{math}
 \sum_{i \in [N]} y_i = c.
 ```
