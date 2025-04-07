@@ -43,6 +43,10 @@ jobs:
           Pkg.instantiate()
           Pkg.build("IJulia")
         shell: julia --color=yes {0}
+      
+      - name: Update Sphinx
+        shell: bash -leo pipefail {0}  # Needed for mamba profile
+        run: pip install "sphinx>7,<8"
         
       - name: Install latex dependencies
         run: |
