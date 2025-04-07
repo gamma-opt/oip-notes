@@ -150,7 +150,7 @@ Combining this idea of the "adaptive gradient" with momentum gives a commonly us
 Here, $\delta$ is a small scalar used to ensure we don't divide by 0.
 
 ```{raw} latex
-% HTML_ONLY_START
+% HTML_ONLY_START file:///u/36/koset1/data/Documents/oip-notes/course/_build/html/part2/2-unconstrained_optimisation.html#d3-gd
 ```
 
 ```{margin}
@@ -593,6 +593,10 @@ BFGS approximates $H^{-1}(x_k)$ with $B_k$ complemented with an update rule.
 3. **return** {math}`x_k`.
 ```
 
+```{raw} latex
+% HTML_ONLY_START file:///u/36/koset1/data/Documents/oip-notes/course/_build/html/part2/2-unconstrained_optimisation.html#d3-newton
+```
+
 ```{raw} html
 <div id="d3-newton"></div>
 <select name="newton-func"></select>
@@ -750,4 +754,7 @@ function get_bfgs_path(f, x0, y0, scale_x, scale_y) {
     return bfgs_history;
 }
 </script>
+```
+```{raw} latex
+% HTML_ONLY_END
 ```

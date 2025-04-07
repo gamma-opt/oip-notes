@@ -235,7 +235,7 @@ fig
 -->
 
 ```{raw} latex
-% HTML_ONLY_START
+% HTML_ONLY_START https://gamma-opt.github.io/oip-notes/part1/2-functions_and_optimisation.html#fig-function-examples-2
 ```
 
 The figure below shows the sine function, along with the tangent line at a given point. Notice how the orange line is a good approximation of the blue line close to the green dot. Also, notice how we can, by looking at the inclination of the tangent line tell whether the function is going up or down in value. Make sure you move the slider to see the tangent line at different points.
@@ -336,7 +336,7 @@ J(x) = f(a) + \nabla f(a)^\top (x - a),
 where $x$ is now an $n$-dimensional vector and $\nabla f(a)$ is the *gradient* of $f$ at $(a)$.
 
 ```{raw} latex
-% HTML_ONLY_START
+% HTML_ONLY_START https://gamma-opt.github.io/oip-notes/part1/2-functions_and_optimisation.html
 ```
 
 Here is how it looks like for a function $f(x,y) = -x^2 - y^2$. As before, notice how the inclination the plane has, generally governed by the gradient vector of the function, can be used to infer how the function behaves around the point (in orange).

@@ -132,7 +132,7 @@ where $R_{n+1}(x)$ represents the residual associated with the $n+1$-order and s
 The Taylor expansion is exact, once an infinite number of terms are considered. Its practical use however is as an $n^\text{th}$-order  **approximation**, which corresponds to the Taylor expansion to the $n^\text{th}$ order, without the residual term.
 
 ```{raw} latex
-% HTML_ONLY_START
+% HTML_ONLY_START https://gamma-opt.github.io/oip-notes/part1/2-functions_and_optimisation.html#fig-function-examples-2
 ```
 
 {numref}`fig:taylor_approx` illustrates how the Taylor approximation can be used to approximate the function. Notice how well it approximates the function in the vicinity of the point of interest (our $a$) and how it becomes a better approximation as higher orders are considered.

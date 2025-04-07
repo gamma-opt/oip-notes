@@ -32,7 +32,7 @@ A comparison between the scientific method (on the left) and the process of deve
 Mathematical optimisation is an area of applied mathematics interested in understanding the properties of functions and how these can be exploited to find points where their values are minimal or maximal within a given region or the whole domain of the function. Once these properties are known, we can state the conditions that are required for a point to be a maximal or minimal point, and design algorithms that can search for that point.
 
 ```{raw} latex
-% HTML_ONLY_START
+% HTML_ONLY_START https://gamma-opt.github.io/oip-notes/part1/1-intro.html#optimisation-gif
 ```
 
 ```{figure} ../figures/optimisation.gif
