@@ -4,4 +4,4 @@
 
 # Lecture notes for the Optimisation in Practice course
 
-WIP
+These notes are for the course "Fundamentals of Mathematical Optimisation" offered by Aalto University Lifewide learning initiative.
